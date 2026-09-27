@@ -1,16 +1,12 @@
-# 💳 Akıllı Ödeme, Fatura & Araç Takip Asistanı (PC & Android Eşzamanlı)
+# 💳 Akıllı Ödeme, Fatura & Araç Takip Asistanı
 
-Bu uygulama; bilgisayarınızda ve Android telefonunuzda internet/ağ üzerinden **eşzamanlı (real-time)** olarak çalışan, yaklaşan ödemeleri renk kodlu sayaçlarla hatırlatan, tek tıkla *"Ödendi"* durumuna geçiren ve **aylık / yıllık maliyet analizlerinizi** çıkaran kişisel finans asistanınızdır.
+Bu uygulama; bilgisayarınızda yaklaşan ödemeleri renk kodlu sayaçlarla hatırlatan, tek tıkla *"Ödendi"* durumuna geçiren ve **aylık / yıllık maliyet analizlerinizi** çıkaran modern kişisel finans ve ödeme asistanınızdır.
 
 ---
 
 ## 🚀 Başlıca Özellikler
 
-### 1. Çift Cihaz Eşzamanlı (Real-Time) Senkronizasyon
-* Bilgisayardan bir faturayı *"Ödendi"* olarak işaretlediğinizde veya yeni bir abonelik eklediğinizde, telefonunuzdaki ekran sayfayı bile yenilemenize gerek kalmadan **saliseler içinde güncellenir**.
-* Masaüstünde ve Android telefonda tam ekran mobil uygulama (PWA) olarak çalışır.
-
-### 2. Akıllı Ödeme ve Takip Kategorileri
+### 1. Akıllı Ödeme ve Takip Kategorileri
 * ⚡ **Faturalar:** Elektrik (EnerjiSA), Su (İSKİ), Doğalgaz (İGDAŞ), Fiber İnternet, GSM operatörleri vb.
 * 📺 **Dijital Abonelikler:** Netflix, Xbox Game Pass, Amazon Prime, Spotify, iCloud vb.
 * 💳 **Kredi Kartları & Krediler:** Ekstre kesim, son ödeme günleri ve asgari/toplam tutarlar.
@@ -33,21 +29,6 @@ Bu uygulama; bilgisayarınızda ve Android telefonunuzda internet/ağ üzerinden
 * **Yıllık Araç & Garaj Masrafı:** Muayene + Sigorta + Kasko + Servis bakım toplamı.
 * **12 Aylık Tahmini Harcama Çizelgesi (Bar Chart):** Önümüzdeki 12 ayın hangi ayında ne kadar harcamanız olacağını gösteren grafik.
 * **Kategori Dağılımı (Doughnut Chart):** Harcamalarınızın yüzde kaçı araç, fatura veya abonelik?
-
----
-
-## 📱 Android Telefondan Nasıl Bağlanılır?
-
-1. Bilgisayarınızdaki paneli açın (`http://localhost:8000`).
-2. Sağ üstteki **"📱 Telefona Bağla"** butonuna tıklayın.
-3. Ekrana gelen **QR Kodu** Android telefonunuzun kamerasıyla okutun veya telefon tarayıcınızdan şu adrese girin:
-   ```
-   http://192.168.0.53:8000
-   ```
-4. **Telefona Uygulama Olarak Yükleme (İpucu):**
-   * Android Chrome'da sağ üstteki **3 noktaya** dokunun.
-   * **"Ana Ekrana Ekle"** veya **"Uygulamayı Yükle"** seçeneğini seçin.
-   * Uygulama telefonunuzda tıpkı Play Store'dan indirilmiş yerel bir uygulama gibi tam ekran açılacaktır.
 
 ---
 

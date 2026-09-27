@@ -14,7 +14,6 @@ from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import qrcode
 
 from auth import (
     register_user,
@@ -331,29 +330,6 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_text("pong")
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-
-@app.get("/api/network-info")
-def get_network_info():
-    ip = get_local_ip()
-    port = 8000
-    url = f"http://{ip}:{port}"
-    
-    # Generate QR Code for Phone Access
-    qr = qrcode.QRCode(version=1, box_size=8, border=2)
-    qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="#1e293b", back_color="#ffffff")
-    
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    qr_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-    
-    return {
-        "local_ip": ip,
-        "port": port,
-        "url": url,
-        "qr_base64": f"data:image/png;base64,{qr_b64}"
-    }
 
 @app.get("/api/payments")
 def list_payments(

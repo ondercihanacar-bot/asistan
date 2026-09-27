@@ -206,19 +206,6 @@ body {
   box-shadow: 0 0 14px rgba(52, 211, 153, 0.35);
 }
 
-.top-nav-btn-phone {
-  background: rgba(129, 140, 248, 0.08);
-  border-color: rgba(129, 140, 248, 0.3);
-  color: #a5b4fc;
-}
-
-.top-nav-btn-phone:hover {
-  background: rgba(129, 140, 248, 0.18);
-  border-color: #818cf8;
-  color: #ffffff;
-  box-shadow: 0 0 14px rgba(129, 140, 248, 0.35);
-}
-
 .top-nav-btn-add {
   background: linear-gradient(135deg, #0ea5e9, #6366f1);
   border-color: rgba(255, 255, 255, 0.2);
@@ -230,35 +217,6 @@ body {
 .top-nav-btn-add:hover {
   background: linear-gradient(135deg, #0284c7, #4f46e5);
   box-shadow: 0 6px 18px rgba(14, 165, 233, 0.55);
-}
-
-.live-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 38px;
-  padding: 0 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 12px;
-  background: rgba(16, 185, 129, 0.1);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.25);
-}
-
-.live-dot {
-  width: 7px;
-  height: 7px;
-  background-color: #10b981;
-  border-radius: 50%;
-  box-shadow: 0 0 8px #10b981;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
 }
 
 /* Buttons */
@@ -1088,34 +1046,6 @@ body {
   stroke-linejoin: round;
 }
 
-/* QR Modal Specific */
-.qr-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 16px;
-}
-
-.qr-image {
-  width: 210px;
-  height: 210px;
-  border-radius: 16px;
-  background: white;
-  padding: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-.qr-url-badge {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-family: monospace;
-  font-size: 0.9rem;
-  color: #60a5fa;
-  word-break: break-all;
-}
 
 /* Empty state */
 .empty-state {
@@ -1696,13 +1626,6 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
   }
   .nav-actions {
     gap: 6px !important;
-  }
-  .live-indicator {
-    padding: 0 7px !important;
-    height: 32px !important;
-  }
-  .live-status-text {
-    display: none !important;
   }
   .top-nav-btn {
     height: 34px !important;

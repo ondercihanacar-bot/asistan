@@ -965,53 +965,46 @@ function initServiceWorker() {
   }
 }
 
-// Real-Time WebSocket for Two-Way Sync between PC & Android
+// Real-Time WebSocket for Background Sync
 function initWebSocket() {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const wsUrl = `${protocol}//${window.location.host}/ws`;
 
-  ws = new WebSocket(wsUrl);
+  try {
+    ws = new WebSocket(wsUrl);
 
-  ws.onopen = () => {
-    document.getElementById('ws-status').innerHTML = `
-      <span class="live-dot"></span>
-      <span>Canlı Senkronize</span>
-    `;
-    document.getElementById('ws-status').style.borderColor = 'rgba(16, 185, 129, 0.3)';
-    document.getElementById('ws-status').style.color = '#34d399';
-  };
+    ws.onopen = () => {
+      console.log('Canlı senkronizasyon servisi aktif.');
+    };
 
-  ws.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      console.log('Canlı güncelleme alındı:', data);
-      
-      if (data.type === 'PAYMENT_PAID') {
-        showToast(`🎉 "${data.title}" ödendi olarak güncellendi! (${data.amount} TL)`);
-      } else if (data.type === 'PAYMENT_CREATED') {
-        showToast(`✨ Yeni ödeme kalemi eklendi!`);
-      } else if (data.type === 'PAYMENT_UPDATED') {
-        showToast(`✏️ Ödeme güncellendi.`);
-      } else if (data.type === 'PAYMENT_DELETED') {
-        showToast(`🗑️ Ödeme kaydı silindi.`);
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('Canlı güncelleme alındı:', data);
+        
+        if (data.type === 'PAYMENT_PAID') {
+          showToast(`🎉 "${data.title}" ödendi olarak güncellendi! (${data.amount} TL)`);
+        } else if (data.type === 'PAYMENT_CREATED') {
+          showToast(`✨ Yeni ödeme kalemi eklendi!`);
+        } else if (data.type === 'PAYMENT_UPDATED') {
+          showToast(`✏️ Ödeme güncellendi.`);
+        } else if (data.type === 'PAYMENT_DELETED') {
+          showToast(`🗑️ Ödeme kaydı silindi.`);
+        }
+        
+        // Auto-reload data across all open devices
+        loadData(false);
+      } catch (e) {
+        console.log('WS message parsing:', e);
       }
-      
-      // Auto-reload data across all open devices
-      loadData(false);
-    } catch (e) {
-      console.log('WS message parsing:', e);
-    }
-  };
+    };
 
-  ws.onclose = () => {
-    document.getElementById('ws-status').innerHTML = `
-      <span style="width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block"></span>
-      <span>Yeniden Bağlanıyor...</span>
-    `;
-    document.getElementById('ws-status').style.borderColor = 'rgba(239, 68, 68, 0.3)';
-    document.getElementById('ws-status').style.color = '#f87171';
-    setTimeout(initWebSocket, 3000);
-  };
+    ws.onclose = () => {
+      setTimeout(initWebSocket, 3000);
+    };
+  } catch (err) {
+    console.log('WebSocket bağlantı hatası:', err);
+  }
 }
 
 // Fetch all payments and analytics
@@ -1502,20 +1495,6 @@ async function loadHistory() {
     `).join('');
   } catch (err) {
     container.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#ef4444;">Geçmiş yüklenemedi.</td></tr>`;
-  }
-}
-
-// QR Code Modal for Android Phone Connection
-async function openQrModal() {
-  try {
-    const res = await fetch('/api/network-info');
-    const net = await res.json();
-    document.getElementById('qr-img').src = net.qr_base64;
-    document.getElementById('qr-url-text').textContent = net.url;
-    document.getElementById('qr-url-link').href = net.url;
-    openModal('modal-qr');
-  } catch (e) {
-    showToast('⚠️ Ağ bilgisi alınamadı.');
   }
 }
 
