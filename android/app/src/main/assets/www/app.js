@@ -1163,9 +1163,9 @@ function getLogoUrlForTitle(title, category) {
 function getLogoForTitle(title, category, fallbackIcon) {
   const url = getLogoUrlForTitle(title, category);
   if (!url) {
-    return `<span style="width:28px; height:28px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.06); font-size:1.1rem; line-height:1; vertical-align:middle;">${fallbackIcon || '💳'}</span>`;
+    return `<span style="width:22px; height:22px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.06); font-size:0.95rem; line-height:1; vertical-align:middle;">${fallbackIcon || '💳'}</span>`;
   }
-  return `<img src="${url}" style="width:28px; height:28px; border-radius:6px; object-fit:contain; vertical-align:middle; background: white; padding: 2px;" onerror="this.outerHTML='${fallbackIcon}'">`;
+  return `<img src="${url}" style="width:22px; height:22px; border-radius:5px; object-fit:contain; vertical-align:middle; background: white; padding: 1.5px;" onerror="this.outerHTML='${fallbackIcon}'">`;
 }
 
 function createPaymentCardHtml(item) {

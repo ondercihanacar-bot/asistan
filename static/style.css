@@ -499,47 +499,51 @@ body {
   }
 }
 
-/* Payment List Cards - Kompakt ve İnce Dikey Tasarım (Yukarıdan Aşağıdan Daraltılmış) */
+/* Payment List Cards - Ultra Kompakt ve İnce Dikey Tasarım (Yarı Yarıyadan da Küçük) */
 .payments-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-  gap: 10px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+  align-content: start;
+  align-items: start;
+  margin-bottom: 6px;
 }
 
 .payment-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 10px 14px;
+  border-radius: 8px;
+  padding: 6px 10px;
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 2px;
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
+  height: auto;
 }
 
 .payment-card:hover {
   border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .payment-card.critical {
-  border-left: 4px solid var(--danger);
+  border-left: 3px solid var(--danger);
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, var(--bg-card) 60%);
 }
 
 .payment-card.soon {
-  border-left: 4px solid var(--warning);
+  border-left: 3px solid var(--warning);
 }
 
 .payment-card.normal {
-  border-left: 4px solid var(--primary);
+  border-left: 3px solid var(--primary);
 }
 
 .payment-card.paid {
-  border-left: 4px solid var(--success);
+  border-left: 3px solid var(--success);
   opacity: 0.85;
 }
 
@@ -547,50 +551,57 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .card-info {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
   min-width: 0;
   flex: 1;
 }
 
 .card-category-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 13px;
   background: var(--bg-surface);
   flex-shrink: 0;
 }
 
 .card-title {
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card-subtitle {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--text-muted);
   margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .urgency-badge {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 16px;
+  padding: 2px 6px;
+  border-radius: 12px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .badge-overdue {
@@ -626,11 +637,11 @@ body {
 .card-mid {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  padding: 5px 0;
+  align-items: center;
+  padding: 2px 0;
   border-top: 1px dashed var(--border-color);
   border-bottom: 1px dashed var(--border-color);
-  margin: 5px 0;
+  margin: 2px 0;
 }
 
 .card-amount-box {
@@ -639,17 +650,17 @@ body {
 }
 
 .amount-label {
-  font-size: 0.64rem;
+  font-size: 0.58rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 .card-amount {
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--text-main);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   line-height: 1.1;
 }
 
@@ -658,34 +669,33 @@ body {
 }
 
 .due-date {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 600;
 }
 
 .repeat-badge {
-  font-size: 0.66rem;
+  font-size: 0.6rem;
   color: #94a3b8;
   display: inline-block;
-  margin-top: 1px;
 }
 
 .vehicle-meta {
   background: rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-sm);
-  padding: 3px 8px;
-  font-size: 0.7rem;
+  padding: 2px 6px;
+  font-size: 0.65rem;
   color: #cbd5e1;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .card-bottom {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .btn-pay {
@@ -693,16 +703,16 @@ body {
   background: linear-gradient(135deg, #059669, #10b981);
   color: white;
   border: none;
-  padding: 5px 12px;
-  height: 32px;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  padding: 3px 8px;
+  height: 25px;
+  border-radius: 6px;
+  font-size: 0.74rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
   transition: all 0.2s ease;
 }
 
@@ -712,9 +722,9 @@ body {
 }
 
 .btn-action-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 25px;
+  height: 25px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
@@ -722,6 +732,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  font-size: 0.72rem;
   transition: all 0.2s ease;
 }
 
@@ -1477,12 +1488,20 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     overflow: hidden;
   }
 
+  .navbar {
+    flex-shrink: 0;
+    padding: 6px 20px;
+  }
+
   main.container {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
+    padding: 6px 20px 4px 20px !important;
+    max-width: 1600px;
+    width: 100%;
   }
 
   #section-dashboard {
@@ -1491,11 +1510,12 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
+    margin-bottom: 0 !important;
   }
 
   .tabs-bar {
     flex-shrink: 0;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .payments-grid {
@@ -1503,12 +1523,15 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     padding-right: 4px;
+    align-content: start !important;
+    align-items: start !important;
+    grid-auto-rows: max-content !important;
   }
 
   .payments-grid::-webkit-scrollbar {
-    width: 5px;
+    width: 4px;
   }
   .payments-grid::-webkit-scrollbar-track {
     background: transparent;
@@ -1524,23 +1547,51 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
   #stats-robot-platform {
     flex-shrink: 0;
     margin-top: auto;
-    margin-bottom: 6px;
+    margin-bottom: 4px !important;
+    padding-top: 48px;
   }
 
   #kia-ev6-banner {
     flex-shrink: 0;
-    margin-bottom: 0;
+    margin-bottom: 0 !important;
+    padding: 5px 12px !important;
   }
 
   .bottom-nav {
-    height: 60px;
+    position: static !important;
+    flex-shrink: 0 !important;
+    height: 48px !important;
+    margin-top: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.35);
+  }
+
+  .bottom-nav-inner {
+    height: 48px !important;
+  }
+
+  .bnav-item {
+    padding: 2px 6px !important;
+  }
+
+  .bnav-icon-wrapper {
+    margin-bottom: 1px !important;
+  }
+
+  .bnav-svg {
+    width: 17px !important;
+    height: 17px !important;
+  }
+
+  .bnav-label {
+    font-size: 0.67rem !important;
   }
 
   #section-garage, #section-contracts, #section-tasks, #section-analytics, #section-history, #section-settings {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
   }
 }
 
