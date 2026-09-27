@@ -1366,3 +1366,293 @@ body {
   box-shadow: 0 0 20px rgba(56, 189, 248, 0.35) !important;
 }
 
+/* ==========================================================================
+   Android Native Mobile Optimizations (Material 3 Touch & Bottom Navigation)
+   ========================================================================== */
+
+/* Logo Container Default (Desktop) */
+.header-logo-box {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.45);
+  border: 2px solid rgba(56, 189, 248, 0.65);
+  transition: all 0.3s ease;
+}
+
+/* Responsive Navigation Utility Classes */
+.bnav-desktop-only {
+  display: flex;
+}
+.bnav-mobile-only {
+  display: none;
+}
+
+/* Android Bottom Sheet Specific Styles */
+.bottom-sheet-handle {
+  width: 44px;
+  height: 4.5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.28);
+  margin: 6px auto 14px auto;
+}
+
+.mobile-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.mobile-menu-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 10px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-menu-card:active {
+  transform: scale(0.95);
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.mmenu-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.05);
+}
+
+.mmenu-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  min-width: 0;
+}
+
+.mmenu-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mmenu-sub {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Touch feedback for Android */
+button, .btn, .bnav-item, .stat-card, .payment-card, .tab-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active, .btn:active, .bnav-item:active, .tab-btn:active {
+  transform: scale(0.95);
+}
+
+/* ==========================================================================
+   Mobile Screen Rules (Phones & Tablets <= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Hide desktop-only controls */
+  .bnav-desktop-only {
+    display: none !important;
+  }
+  .bnav-mobile-only {
+    display: flex !important;
+  }
+  .desktop-only-btn {
+    display: none !important;
+  }
+  .desktop-only-btn-label {
+    display: none !important;
+  }
+  .header-subtitle-text {
+    display: none !important;
+  }
+
+  /* Compact Android App Bar */
+  .navbar {
+    padding: 6px 12px !important;
+    min-height: 54px !important;
+  }
+  .header-logo-box {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4) !important;
+  }
+  .brand-title {
+    font-size: 1.1rem !important;
+  }
+  .nav-actions {
+    gap: 6px !important;
+  }
+  .live-indicator {
+    padding: 0 7px !important;
+    height: 32px !important;
+  }
+  .live-status-text {
+    display: none !important;
+  }
+  .top-nav-btn {
+    height: 34px !important;
+    padding: 0 9px !important;
+    border-radius: 10px !important;
+  }
+  .top-nav-btn-alarm {
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+  }
+  .user-badge-text-box {
+    display: none !important;
+  }
+
+  /* Body container safe padding for bottom nav */
+  main.container {
+    padding-top: 12px !important;
+    padding-bottom: calc(85px + env(safe-area-inset-bottom, 15px)) !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  /* Android 5-Tab Material Bottom Navigation */
+  .bottom-nav {
+    height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    background: rgba(11, 15, 25, 0.97) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgba(56, 189, 248, 0.2) !important;
+    box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.65) !important;
+  }
+  .bottom-nav-inner {
+    max-width: 100% !important;
+    gap: 2px !important;
+  }
+  .bnav-item {
+    max-width: none !important;
+    flex: 1 !important;
+    padding: 6px 2px !important;
+    border-radius: 12px !important;
+  }
+  .bnav-item:active {
+    transform: scale(0.92) !important;
+  }
+  .bnav-icon-wrapper {
+    width: 26px !important;
+    height: 26px !important;
+  }
+  .bnav-svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .bnav-label {
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
+  }
+
+  /* Elevated Android FAB "+" Button */
+  .bnav-item-center {
+    margin-top: -18px !important;
+  }
+  .bnav-add-btn {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #0284c7, #6366f1) !important;
+    box-shadow: 0 6px 18px rgba(14, 165, 233, 0.6), 0 0 14px rgba(99, 102, 241, 0.5) !important;
+    border: 2.5px solid rgba(255, 255, 255, 0.25) !important;
+  }
+  .bnav-add-btn:active {
+    transform: scale(0.9) !important;
+  }
+  .bnav-svg-add {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  /* Hide walking robot on phone to keep touch interaction clean */
+  #ai-chat-bubble.mascot-container {
+    display: none !important;
+  }
+
+  /* Android AI Chat Window Bottom Sheet */
+  #ai-chat-modal {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: calc(100vh - 120px) !important;
+    max-height: calc(100vh - 120px) !important;
+    border-radius: 24px 24px 0 0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.85) !important;
+  }
+
+  /* Android Native Bottom Sheet Modal System */
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+    z-index: 1100 !important;
+  }
+  .modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 24px 24px 0 0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    animation: androidSheetSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.75) !important;
+  }
+  @keyframes androidSheetSlide {
+    from { transform: translateY(100%); opacity: 0.8; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Touch Input Sizing (Min 44-48px) */
+  .form-control, input, select, textarea {
+    font-size: 16px !important; /* Prevents auto-zoom in Android Chrome */
+    min-height: 46px !important;
+  }
+  .btn {
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+  }
+  .stat-card {
+    padding: 12px 14px !important;
+  }
+}
+
+

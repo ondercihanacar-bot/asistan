@@ -227,6 +227,8 @@ function updateUserProfileUI(user) {
 
   if (nameEl) nameEl.textContent = user.full_name || user.email.split('@')[0];
   if (emailEl) emailEl.textContent = user.email;
+  const mobEmailEl = document.getElementById('mobile-menu-user');
+  if (mobEmailEl) mobEmailEl.textContent = user.email;
   if (avatarEl) {
     const initial = (user.full_name || user.email || 'U').charAt(0).toUpperCase();
     avatarEl.textContent = initial;
@@ -1599,8 +1601,16 @@ setInterval(() => {
 }, 60 * 1000); // Her dakika kontrol eder, 10 dakika dolunca uyarır
 
 
+// Android Haptic Vibration Helper
+function playHaptic(duration = 14) {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try { navigator.vibrate(duration); } catch(e) {}
+  }
+}
+
 // Navigation Tab Switcher
 function switchTab(tabName) {
+  playHaptic(12);
   currentTab = tabName;
 
   document.querySelectorAll('.bnav-item').forEach(el => {
@@ -1670,11 +1680,15 @@ function filterCategory(cat) {
 
 // Modal Helpers
 function openModal(id) {
-  document.getElementById(id).classList.add('active');
+  playHaptic(16);
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
 }
 
 function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
+  playHaptic(10);
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('active');
 }
 
 // Toast Alert

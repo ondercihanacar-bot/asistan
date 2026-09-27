@@ -2,13 +2,14 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Akıllı Ödeme & Hatırlatıcı Asistanı</title>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0b0f19">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="/style.css?v=8">
+  <link rel="stylesheet" href="/style.css?v=9">
   <!-- Chart.js for beautiful analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -719,26 +720,26 @@
 
   <!-- Top Navbar -->
   <header class="navbar">
-    <div class="brand" style="display: flex; align-items: center; gap: 16px; position: relative;">
+    <div class="brand" style="display: flex; align-items: center; gap: 12px; position: relative;">
       <div style="position: relative; flex-shrink: 0;">
-        <div style="width: 100px; height: 100px; border-radius: 18px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #000; box-shadow: 0 0 22px rgba(56, 189, 248, 0.55); border: 2px solid rgba(56, 189, 248, 0.75);">
+        <div class="header-logo-box">
           <video src="/logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
         </div>
       </div>
 
       <div>
-        <div class="brand-title" style="display: flex; align-items: center; gap: 8px; font-size: 1.5rem; font-weight: 900; letter-spacing: 0.5px; color: #f8fafc;">
+        <div class="brand-title" style="display: flex; align-items: center; gap: 6px; font-weight: 900; letter-spacing: 0.5px; color: #f8fafc;">
           <span>ASİSTAN</span>
-          <span style="font-size: 0.7rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 8px; border-radius: 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Pro</span>
+          <span style="font-size: 0.65rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 7px; border-radius: 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Pro</span>
         </div>
-        <div class="brand-subtitle" style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">PC & Mobil Eşzamanlı Takip</div>
+        <div class="brand-subtitle header-subtitle-text" style="font-size: 0.78rem; color: #94a3b8; font-weight: 500;">PC & Mobil Eşzamanlı Takip</div>
       </div>
     </div>
 
     <div class="nav-actions">
       <div class="live-indicator" id="ws-status" title="Çift yönlü anlık bağlantı">
         <span class="live-dot"></span>
-        <span>Bağlanıyor...</span>
+        <span class="live-status-text">Bağlanıyor...</span>
       </div>
 
       <button type="button" id="btn-toggle-alarm" class="top-nav-btn top-nav-btn-alarm" onclick="directToggleAlarm(this)" title="Sesli Alarmı Aç / Kapat">
@@ -758,10 +759,10 @@
           <line x1="12" y1="19" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/>
           <line x1="8" y1="23" x2="16" y2="23" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <span>Günün Brifingi</span>
+        <span class="desktop-only-btn-label">Günün Brifingi</span>
       </button>
 
-      <button class="top-nav-btn" id="btn-enable-notifications" onclick="requestNotificationPermission()" title="Hatırlatıcı Bildirimlerini Aç">
+      <button class="top-nav-btn desktop-only-btn" id="btn-enable-notifications" onclick="requestNotificationPermission()" title="Hatırlatıcı Bildirimlerini Aç">
         <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2" stroke-linecap="round"/>
           <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2" stroke-linecap="round"/>
@@ -769,7 +770,7 @@
         <span>Bildirim Aç</span>
       </button>
 
-      <a href="/api/export/csv" class="top-nav-btn top-nav-btn-export" title="Finans & Fatura Raporunu Excel Olarak İndir">
+      <a href="/api/export/csv" class="top-nav-btn top-nav-btn-export desktop-only-btn" title="Finans & Fatura Raporunu Excel Olarak İndir">
         <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -778,7 +779,7 @@
         <span>Rapor İndir</span>
       </a>
 
-      <button class="top-nav-btn top-nav-btn-phone" onclick="openQrModal()" title="Telefona Bağla">
+      <button class="top-nav-btn top-nav-btn-phone desktop-only-btn" onclick="openQrModal()" title="Telefona Bağla">
         <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <rect x="5" y="2" width="14" height="20" rx="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5" stroke-linecap="round"/>
@@ -786,7 +787,7 @@
         <span>Telefona Bağla</span>
       </button>
 
-      <button class="top-nav-btn top-nav-btn-add" onclick="openAddModal()" title="Yeni Ödeme / Harcama Ekle">
+      <button class="top-nav-btn top-nav-btn-add desktop-only-btn" onclick="openAddModal()" title="Yeni Ödeme / Harcama Ekle">
         <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <line x1="12" y1="5" x2="12" y2="19" stroke-width="2.5" stroke-linecap="round"/>
           <line x1="5" y1="12" x2="19" y2="12" stroke-width="2.5" stroke-linecap="round"/>
@@ -795,15 +796,15 @@
       </button>
 
       <!-- Kullanıcı Oturum Rozeti & Çıkış Yap -->
-      <div id="user-profile-badge" style="display: none; align-items: center; gap: 9px; background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 4px 10px 4px 6px; box-shadow: 0 0 14px rgba(56, 189, 248, 0.2);">
-        <span id="user-avatar-initial" style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #38bdf8); font-weight: 800; font-size: 0.85rem; color: #fff; box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);">U</span>
-        <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.15;">
-          <span id="user-display-name" style="font-size: 0.82rem; font-weight: 700; color: #f8fafc; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Kullanıcı</span>
-          <span id="user-display-email" style="font-size: 0.68rem; color: #94a3b8; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">user@gmail.com</span>
+      <div id="user-profile-badge" style="display: none; align-items: center; gap: 8px; background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 3px 8px 3px 5px; box-shadow: 0 0 14px rgba(56, 189, 248, 0.2);">
+        <span id="user-avatar-initial" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #38bdf8); font-weight: 800; font-size: 0.82rem; color: #fff; box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);">U</span>
+        <div class="user-badge-text-box" style="display: flex; flex-direction: column; text-align: left; line-height: 1.15;">
+          <span id="user-display-name" style="font-size: 0.8rem; font-weight: 700; color: #f8fafc; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Kullanıcı</span>
+          <span id="user-display-email" style="font-size: 0.65rem; color: #94a3b8; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">user@gmail.com</span>
         </div>
-        <button type="button" onclick="handleLogout()" title="Oturumu Kapat" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; cursor: pointer; padding: 5px 8px; border-radius: 12px; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 700; transition: all 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.3)';" onmouseout="this.style.background='rgba(239, 68, 68, 0.15)';">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          <span>Çıkış</span>
+        <button type="button" onclick="handleLogout()" title="Oturumu Kapat" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; cursor: pointer; padding: 4px 7px; border-radius: 10px; display: flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 700; transition: all 0.2s;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span class="desktop-only-btn-label">Çıkış</span>
         </button>
       </div>
     </div>
@@ -1455,6 +1456,7 @@
   <!-- Mobile & Desktop Bottom Navigation Bar (Centered & Evenly Distributed) -->
   <nav class="bottom-nav">
     <div class="bottom-nav-inner">
+      <!-- 1. Ödemeler (Her Cihaz) -->
       <div class="bnav-item active" data-tab="dashboard" onclick="switchTab('dashboard')" title="Ödemeler & Faturalar">
         <div class="bnav-icon-wrapper">
           <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -1467,6 +1469,7 @@
         <span class="bnav-label">Ödemeler</span>
       </div>
 
+      <!-- 2. Araç / Garaj (Her Cihaz) -->
       <div class="bnav-item" data-tab="garage" onclick="switchTab('garage')" title="Araç & Bakım Takibi">
         <div class="bnav-icon-wrapper">
           <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -1476,19 +1479,21 @@
             <circle cx="17" cy="17" r="2" stroke-width="2"/>
           </svg>
         </div>
-        <span class="bnav-label">Araç/Bakım</span>
+        <span class="bnav-label">Araç</span>
       </div>
 
-      <div class="bnav-item" data-tab="contracts" onclick="switchTab('contracts')" title="Ürün & Garanti Takibi">
+      <!-- Desktop Sadece: Garanti -->
+      <div class="bnav-item bnav-desktop-only" data-tab="contracts" onclick="switchTab('contracts')" title="Ürün & Garanti Takibi">
         <div class="bnav-icon-wrapper">
           <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="m9 12 2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <span class="bnav-label">Garanti Takip</span>
+        <span class="bnav-label">Garanti</span>
       </div>
 
+      <!-- 3. Merkez Hızlı Ekle FAB (Her Cihaz) -->
       <div class="bnav-item bnav-item-center" onclick="openAddModal()" title="Yeni Ödeme / Harcama Ekle">
         <div class="bnav-add-btn">
           <svg class="bnav-svg-add" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -1499,7 +1504,21 @@
         <span class="bnav-label">Ekle</span>
       </div>
 
-      <div class="bnav-item" data-tab="tasks" onclick="switchTab('tasks')" title="Görevler & Hatırlatıcılar">
+      <!-- Mobil Sadece: 4. Yapay Zeka Asistanı -->
+      <div class="bnav-item bnav-mobile-only" onclick="toggleAiChatModal()" title="Optimus Prime Sesli Asistan">
+        <div class="bnav-icon-wrapper" style="color: #38bdf8;">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="19" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/>
+            <line x1="8" y1="23" x2="16" y2="23" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label" style="color: #38bdf8;">Asistan</span>
+      </div>
+
+      <!-- Desktop Sadece: Görevler -->
+      <div class="bnav-item bnav-desktop-only" data-tab="tasks" onclick="switchTab('tasks')" title="Görevler & Hatırlatıcılar">
         <div class="bnav-icon-wrapper">
           <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1510,7 +1529,8 @@
         <span class="bnav-label">Görevler</span>
       </div>
 
-      <div class="bnav-item" data-tab="analytics" onclick="switchTab('analytics')" title="Maliyet & Grafikler">
+      <!-- Desktop Sadece: Maliyet & Analiz -->
+      <div class="bnav-item bnav-desktop-only" data-tab="analytics" onclick="switchTab('analytics')" title="Maliyet & Grafikler">
         <div class="bnav-icon-wrapper">
           <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <line x1="18" y1="20" x2="18" y2="10" stroke-width="2.2" stroke-linecap="round"/>
@@ -1521,7 +1541,8 @@
         <span class="bnav-label">Maliyet</span>
       </div>
 
-      <div class="bnav-item" data-tab="history" onclick="switchTab('history')" title="Geçmiş Kayıtlar">
+      <!-- Desktop Sadece: Geçmiş -->
+      <div class="bnav-item bnav-desktop-only" data-tab="history" onclick="switchTab('history')" title="Geçmiş Kayıtlar">
         <div class="bnav-icon-wrapper">
           <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <circle cx="12" cy="12" r="9" stroke-width="2"/>
@@ -1531,7 +1552,8 @@
         <span class="bnav-label">Geçmiş</span>
       </div>
 
-      <div class="bnav-item" data-tab="settings" onclick="switchTab('settings')" title="Sistem Ayarları">
+      <!-- Desktop Sadece: Ayarlar -->
+      <div class="bnav-item bnav-desktop-only" data-tab="settings" onclick="switchTab('settings')" title="Sistem Ayarları">
         <div class="bnav-icon-wrapper">
           <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <circle cx="12" cy="12" r="3" stroke-width="2"/>
@@ -1540,8 +1562,103 @@
         </div>
         <span class="bnav-label">Ayarlar</span>
       </div>
+
+      <!-- Mobil Sadece: 5. Hızlı Menü Çekmecesi -->
+      <div class="bnav-item bnav-mobile-only" onclick="openModal('modal-mobile-menu')" title="Tüm Modüller & Menü">
+        <div class="bnav-icon-wrapper">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="4" y1="7" x2="20" y2="7" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="4" y1="12" x2="20" y2="12" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="4" y1="17" x2="20" y2="17" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label">Menü</span>
+      </div>
     </div>
   </nav>
+
+  <!-- MODAL: Android Mobile Quick Menu Sheet -->
+  <div class="modal-overlay" id="modal-mobile-menu" onclick="if(event.target === this) closeModal('modal-mobile-menu')">
+    <div class="modal-box mobile-bottom-sheet" style="max-width: 480px;">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header" style="padding-bottom: 8px;">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+          <span>📱</span>
+          <span>Tüm Modüller & Menü</span>
+        </div>
+        <button class="btn-close" onclick="closeModal('modal-mobile-menu')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 10px 16px 24px 16px;">
+        <div class="mobile-menu-grid">
+          <div class="mobile-menu-card" onclick="switchTab('contracts'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8;">🛡️</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Garanti & Sözleşme</div>
+              <div class="mmenu-sub">Ürün garantileri & vadeler</div>
+            </div>
+          </div>
+          <div class="mobile-menu-card" onclick="switchTab('tasks'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">📋</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Görevler</div>
+              <div class="mmenu-sub">Hatırlatıcılar & yapılacaklar</div>
+            </div>
+          </div>
+          <div class="mobile-menu-card" onclick="switchTab('analytics'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(34, 197, 94, 0.15); color: #4ade80;">📊</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Maliyet & Analiz</div>
+              <div class="mmenu-sub">Harcama grafikleri & tahminler</div>
+            </div>
+          </div>
+          <div class="mobile-menu-card" onclick="switchTab('history'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">🕒</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Geçmiş Kayıtlar</div>
+              <div class="mmenu-sub">Ödenen faturalar arşivi</div>
+            </div>
+          </div>
+          <div class="mobile-menu-card" onclick="switchTab('settings'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">⚙️</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Sistem Ayarları</div>
+              <div class="mmenu-sub">Veritabanı yedeği & şifre</div>
+            </div>
+          </div>
+          <div class="mobile-menu-card" onclick="openEvChargeModal(); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">⚡</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">EV Şarj Ekle</div>
+              <div class="mmenu-sub">KIA EV6 şarj kaydı</div>
+            </div>
+          </div>
+          <a href="/api/export/csv" class="mobile-menu-card" style="text-decoration: none;" onclick="closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">📥</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Excel Raporu</div>
+              <div class="mmenu-sub">Tüm verileri CSV indir</div>
+            </div>
+          </a>
+          <div class="mobile-menu-card" onclick="requestNotificationPermission(); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">🔔</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Bildirimleri Aç</div>
+              <div class="mmenu-sub">Vade bildirim izinleri</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 0.78rem; color: #94a3b8;">
+            Giriş Yapan: <strong id="mobile-menu-user" style="color: #f8fafc;">onder.cihan.acar@gmail.com</strong>
+          </div>
+          <button type="button" onclick="handleLogout()" class="btn btn-outline" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171; padding: 6px 12px; font-size: 0.8rem; border-radius: 10px;">
+            🚪 Çıkış Yap
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   
   <!-- MODAL: Edit Vehicle -->
@@ -1819,7 +1936,7 @@
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="/app.js?v=335"></script>
+  <script src="/app.js?v=336"></script>
 
   <!-- Canlı Hareketli Maskot: Sayfa Boyunca Devriye Gezen Robot Asistan (Kafası, Kolları, Elleri ve Bacakları Olan Saf Robot) -->
   <div id="ai-chat-bubble" class="mascot-container" onclick="toggleAiChatModal()" title="Optimus Prime Asistan ile Konuşmak İçin Tıkla!">
