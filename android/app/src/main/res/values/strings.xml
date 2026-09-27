@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Asistan Pro</string>
+    <string name="server_url_hint">Sunucu Adresi (örn: http://10.22.250.66:8000)</string>
+    <string name="connect">Bağlan</string>
+    <string name="cancel">İptal</string>
+    <string name="retry">Yeniden Dene</string>
+    <string name="connection_error">Sunucuya Bağlanılamadı</string>
+    <string name="connection_error_desc">Lütfen bilgisayarınızda uygulamanın (baslat.bat) çalıştığından ve telefonunuzla aynı ağda olduğunuzdan emin olun.</string>
+    <string name="server_settings">Sunucu Ayarları</string>
+    <string name="mode_usb">⚡ USB Kablo Modu (localhost:8000)</string>
+    <string name="mode_wifi">📶 Ev Wi-Fi Modu (10.22.250.66:8000)</string>
+    <string name="mode_custom">🌐 Özel / Bulut Sunucu</string>
+</resources>
