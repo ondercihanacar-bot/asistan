@@ -1110,12 +1110,36 @@ function renderPayments() {
 function getLogoUrlForTitle(title, category) {
   const t = (title || '').toLowerCase();
   const logos = {
-    'kia': 'kia.png', 'xbox': 'xbox.png', 'tüvtürk': 'tuvturk.png', 'tuvturk': 'tuvturk.png',
-    'izgaz': 'izgaz.png', 'isu': 'isu.png', 'iski': 'isu.png', 'iski': 'isu.png', 'su faturası': 'isu.png',
-    'sedaş': 'sedas.png', 'sedas': 'sedas.png', 'elektrik': 'sedas.png',
-    'netflix': 'netflix.png', 'şekerbank': 'sekerbank.png', 'sekerbank': 'sekerbank.png',
-    'opet': 'opet.png', 'world': 'worldcard.png', 'hepsiburada': 'hepsiburada.png',
-    'yapı kredi': 'yapikredi.png', 'yapıkredi': 'yapikredi.png', 'akbank': 'akbank.png'
+    'spotify': 'spotify.png',
+    'amazon': 'amazon.png',
+    'prime': 'amazon.png',
+    'netflix': 'netflix.png',
+    'xbox': 'xbox.png',
+    'kia': 'kia.png',
+    'tüvtürk': 'tuvturk.png',
+    'tuvturk': 'tuvturk.png',
+    'muayene': 'tuvturk.png',
+    'izgaz': 'izgaz.png',
+    'doğalgaz': 'izgaz.png',
+    'dogalgaz': 'izgaz.png',
+    'igdaş': 'izgaz.png',
+    'igdas': 'izgaz.png',
+    'isu': 'isu.png',
+    'iski': 'isu.png',
+    'su faturası': 'isu.png',
+    'sedaş': 'sedas.png',
+    'sedas': 'sedas.png',
+    'elektrik': 'sedas.png',
+    'enerjisa': 'sedas.png',
+    'bedaş': 'sedas.png',
+    'şekerbank': 'sekerbank.png',
+    'sekerbank': 'sekerbank.png',
+    'opet': 'opet.png',
+    'world': 'worldcard.png',
+    'hepsiburada': 'hepsiburada.png',
+    'yapı kredi': 'yapikredi.png',
+    'yapıkredi': 'yapikredi.png',
+    'akbank': 'akbank.png'
   };
   
   for (const key in logos) {
@@ -1123,11 +1147,14 @@ function getLogoUrlForTitle(title, category) {
       return `/logos/${logos[key]}`;
     }
   }
-  return '/logos/isu.png';
+  return null;
 }
 
 function getLogoForTitle(title, category, fallbackIcon) {
   const url = getLogoUrlForTitle(title, category);
+  if (!url) {
+    return `<span style="width:28px; height:28px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.06); font-size:1.1rem; line-height:1; vertical-align:middle;">${fallbackIcon || '💳'}</span>`;
+  }
   return `<img src="${url}" style="width:28px; height:28px; border-radius:6px; object-fit:contain; vertical-align:middle; background: white; padding: 2px;" onerror="this.outerHTML='${fallbackIcon}'">`;
 }
 
@@ -2616,14 +2643,16 @@ function renderWeeklyCashflow(cashflow) {
     const amtColor = hasExpense ? '#fca5a5' : '#64748b';
 
     return `
-      <div title="${billDetails}" style="${bg} border-radius: 8px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; transition: transform 0.2s ease;">
-        <span style="font-size: 0.7rem; font-weight: 700; color: ${textColor}; text-transform: uppercase;">
-          ${isToday ? 'Bugün' : dayShort}
-        </span>
-        <span style="font-size: 0.72rem; color: #cbd5e1; margin: 2px 0;">
-          ${day.display}
-        </span>
-        <strong style="font-size: 0.8rem; font-weight: 800; color: ${amtColor}; white-space: nowrap;">
+      <div title="${billDetails}" style="${bg} border-radius: 6px; padding: 4px 8px; display: flex; align-items: center; justify-content: space-between; gap: 4px; min-width: 0; height: 32px; transition: transform 0.15s ease;">
+        <div style="display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap;">
+          <span style="font-size: 0.7rem; font-weight: 800; color: ${textColor}; text-transform: uppercase;">
+            ${isToday ? 'Bugün' : dayShort}
+          </span>
+          <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 500;">
+            ${day.display}
+          </span>
+        </div>
+        <strong style="font-size: 0.78rem; font-weight: 800; color: ${amtColor}; white-space: nowrap; margin-left: 2px;">
           ${hasExpense ? formatCurrency(day.amount) : '0 ₺'}
         </strong>
       </div>

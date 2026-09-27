@@ -275,12 +275,12 @@ body {
   width: 100%;
 }
 
-/* Quick Summary Cards (Stat Bar) - Yatsı, Geniş ve Zarif Tasarım */
+/* Quick Summary Cards (Stat Bar) - Tek Satır, İnce ve Zarif Tasarım */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 @media (max-width: 1024px) {
@@ -292,46 +292,51 @@ body {
 @media (max-width: 640px) {
   .stats-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 8px;
   }
 }
 
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 11px 16px;
+  border-radius: 8px;
+  padding: 6px 14px;
+  min-height: 40px;
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.15s ease, border-color 0.15s ease;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   background: var(--bg-card-hover);
   border-color: rgba(255, 255, 255, 0.15);
 }
 
 .stat-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 6px;
   color: var(--text-muted);
-  font-size: 0.74rem;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  margin-bottom: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-bottom: 0;
+  white-space: nowrap;
 }
 
 .stat-value {
-  font-size: 1.32rem;
+  font-size: 1.08rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  margin-left: 8px;
 }
 
 .stat-value.primary { color: #60a5fa; }
@@ -340,13 +345,7 @@ body {
 .stat-value.purple { color: #c084fc; }
 
 .stat-desc {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  margin-top: 3px;
-  opacity: 0.85;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: none;
 }
 
 /* Category Filter Tabs */
