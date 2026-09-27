@@ -393,17 +393,26 @@ async function deleteEvCharge(id) {
   }
 }
 
-// Clear and unregister old service worker caches
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    for (let reg of regs) {
-      reg.unregister();
-    }
-  });
-  if ('caches' in window) {
-    caches.keys().then(names => {
-      for (let name of names) caches.delete(name);
-    });
+// PWA Installation & Service Worker Integration
+let deferredPwaInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPwaInstallPrompt = e;
+  console.log('PWA kurulum bildirimi hazir');
+  const installBtn = document.getElementById('btn-pwa-install');
+  if (installBtn) installBtn.style.display = 'inline-flex';
+});
+
+async function triggerPwaInstall() {
+  if (deferredPwaInstallPrompt) {
+    deferredPwaInstallPrompt.prompt();
+    const { outcome } = await deferredPwaInstallPrompt.userChoice;
+    console.log('PWA kurulum secimi:', outcome);
+    deferredPwaInstallPrompt = null;
+    const installBtn = document.getElementById('btn-pwa-install');
+    if (installBtn) installBtn.style.display = 'none';
+  } else {
+    showToast('💡 Tarayıcı menüsünden (üç nokta) "Ana Ekrana Ekle"yi seçebilirsiniz.');
   }
 }
 
