@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "asistan_prefs";
     private static final String KEY_SERVER_URL = "server_url";
+    private static final String DEFAULT_CLOUD_URL = "https://asistan-cl3h.onrender.com";
     private static final String DEFAULT_LOCAL_URL = "file:///android_asset/www/index.html";
     private static final String DEFAULT_USB_URL = "http://localhost:8000";
     private static final String DEFAULT_WIFI_URL = "http://10.22.250.66:8000";
@@ -76,8 +77,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        // Default to local bundled standalone app (0ms load, zero white screen, no PC dependency)
-        currentServerUrl = prefs.getString(KEY_SERVER_URL, DEFAULT_LOCAL_URL);
+        // Default to live Render cloud server URL
+        String storedUrl = prefs.getString(KEY_SERVER_URL, DEFAULT_CLOUD_URL);
+        if (storedUrl.contains("10.22.250.66")) {
+            storedUrl = DEFAULT_CLOUD_URL;
+            prefs.edit().putString(KEY_SERVER_URL, DEFAULT_CLOUD_URL).apply();
+        }
+        currentServerUrl = storedUrl;
 
         initViews();
         setupLaunchers();
@@ -165,6 +171,10 @@ public class MainActivity extends AppCompatActivity {
         ws.setLoadWithOverviewMode(true);
         ws.setCacheMode(WebSettings.LOAD_DEFAULT);
         ws.setUserAgentString(ws.getUserAgentString() + " AsistanAndroidApp/1.0");
+
+        android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.setAcceptThirdPartyCookies(webView, true);
 
         // Keep swipe-to-refresh disabled when scrolled down inside web page
         webView.getViewTreeObserver().addOnScrollChangedListener(() -> {
@@ -277,11 +287,19 @@ public class MainActivity extends AppCompatActivity {
         }
 
         EditText editUrl = dialog.findViewById(R.id.editServerUrl);
+        Button btnCloud = dialog.findViewById(R.id.btnQuickCloud);
         Button btnLocal = dialog.findViewById(R.id.btnQuickLocal);
         Button btnUsb = dialog.findViewById(R.id.btnQuickUsb);
         Button btnWifi = dialog.findViewById(R.id.btnQuickWifi);
 
         editUrl.setText(currentServerUrl);
+
+        if (btnCloud != null) {
+            btnCloud.setOnClickListener(v -> {
+                dialog.dismiss();
+                loadServerUrl(DEFAULT_CLOUD_URL);
+            });
+        }
 
         if (btnLocal != null) {
             btnLocal.setOnClickListener(v -> {
