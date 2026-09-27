@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "asistan_prefs";
     private static final String KEY_SERVER_URL = "server_url";
+    private static final String DEFAULT_LOCAL_URL = "file:///android_asset/www/index.html";
     private static final String DEFAULT_USB_URL = "http://localhost:8000";
     private static final String DEFAULT_WIFI_URL = "http://10.22.250.66:8000";
 
@@ -75,8 +76,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        // Default to Wi-Fi URL, can switch to USB or Custom URL anytime
-        currentServerUrl = prefs.getString(KEY_SERVER_URL, DEFAULT_WIFI_URL);
+        // Default to local bundled standalone app (0ms load, zero white screen, no PC dependency)
+        currentServerUrl = prefs.getString(KEY_SERVER_URL, DEFAULT_LOCAL_URL);
 
         initViews();
         setupLaunchers();
@@ -150,12 +151,15 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView() {
+        webView.setBackgroundColor(ContextCompat.getColor(this, R.color.background));
         WebSettings ws = webView.getSettings();
         ws.setJavaScriptEnabled(true);
         ws.setDomStorageEnabled(true);
         ws.setDatabaseEnabled(true);
         ws.setAllowFileAccess(true);
         ws.setAllowContentAccess(true);
+        ws.setAllowFileAccessFromFileURLs(true);
+        ws.setAllowUniversalAccessFromFileURLs(true);
         ws.setMediaPlaybackRequiresUserGesture(false);
         ws.setUseWideViewPort(true);
         ws.setLoadWithOverviewMode(true);
@@ -191,7 +195,13 @@ public class MainActivity extends AppCompatActivity {
                     isPageLoadedSuccessfully = false;
                     progressBar.setVisibility(View.GONE);
                     swipeRefresh.setRefreshing(false);
-                    showConnectionError();
+                    // If remote server failed, automatically fall back to fast local offline app
+                    if (!DEFAULT_LOCAL_URL.equals(currentServerUrl)) {
+                        Toast.makeText(MainActivity.this, "Sunucuya bağlanılamadı, yerel çevrimdışı moda geçiliyor...", Toast.LENGTH_SHORT).show();
+                        loadServerUrl(DEFAULT_LOCAL_URL);
+                    } else {
+                        showConnectionError();
+                    }
                 }
             }
         });
@@ -244,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadServerUrl(String url) {
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("file://")) {
             url = "http://" + url;
         }
         currentServerUrl = url;
@@ -267,10 +277,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         EditText editUrl = dialog.findViewById(R.id.editServerUrl);
+        Button btnLocal = dialog.findViewById(R.id.btnQuickLocal);
         Button btnUsb = dialog.findViewById(R.id.btnQuickUsb);
         Button btnWifi = dialog.findViewById(R.id.btnQuickWifi);
 
         editUrl.setText(currentServerUrl);
+
+        if (btnLocal != null) {
+            btnLocal.setOnClickListener(v -> {
+                dialog.dismiss();
+                loadServerUrl(DEFAULT_LOCAL_URL);
+            });
+        }
 
         btnUsb.setOnClickListener(v -> {
             dialog.dismiss();

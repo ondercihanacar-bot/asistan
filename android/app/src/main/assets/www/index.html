@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Akıllı Ödeme & Hatırlatıcı Asistanı</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="style.css">
+  <!-- Local Chart.js for 100% offline analytics -->
+  <script src="chart.min.js"></script>
+  <style>
+    /* Normal Durum: Mavi Fütüristik Neon (Sakin ve Yavaş, 3.8s) */
+    @keyframes blueNeonSlowPulse {
+      0% {
+        filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.4)) 
+                drop-shadow(0 0 6px rgba(14, 165, 233, 0.3));
+        opacity: 0.94;
+      }
+      50% {
+        filter: drop-shadow(0 0 10px #38bdf8) 
+                drop-shadow(0 0 20px rgba(14, 165, 233, 0.85)) 
+                drop-shadow(0 0 32px rgba(2, 132, 199, 0.6));
+        opacity: 1;
+      }
+      100% {
+        filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.4)) 
+                drop-shadow(0 0 6px rgba(14, 165, 233, 0.3));
+        opacity: 0.94;
+      }
+    }
+
+    /* Kritik Durum: Son 7 Güne Giren Muayene/Kasko/Sigortada Kırmızı İkaz Neonu (1.3s Hızlı Nabız) */
+    @keyframes redNeonUrgentPulse {
+      0% {
+        filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.5)) 
+                drop-shadow(0 0 10px rgba(220, 38, 38, 0.4));
+        opacity: 0.9;
+      }
+      50% {
+        filter: drop-shadow(0 0 12px #ef4444) 
+                drop-shadow(0 0 24px rgba(239, 68, 68, 0.95)) 
+                drop-shadow(0 0 40px rgba(185, 28, 28, 0.8));
+        opacity: 1;
+      }
+      100% {
+        filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.5)) 
+                drop-shadow(0 0 10px rgba(220, 38, 38, 0.4));
+        opacity: 0.9;
+      }
+    }
+
+    .neon-car-blue {
+      animation: blueNeonSlowPulse 3.8s ease-in-out infinite;
+      transition: all 0.5s ease;
+    }
+
+    .neon-car-red {
+      animation: redNeonUrgentPulse 1.3s ease-in-out infinite;
+      transition: all 0.5s ease;
+    }
+
+    /* 🤖 Canlı Yürüyen Devriye Robot Maskot (Optimus AI) */
+    @keyframes mascotWalkPatrol {
+      0% {
+        left: 20px;
+        transform: scaleX(1);
+      }
+      48% {
+        left: calc(100vw - 110px);
+        transform: scaleX(1);
+      }
+      50% {
+        left: calc(100vw - 110px);
+        transform: scaleX(-1); /* Sağa varınca arkasını dönüp sola yürür */
+      }
+      98% {
+        left: 20px;
+        transform: scaleX(-1);
+      }
+      100% {
+        left: 20px;
+        transform: scaleX(1); /* Sola varınca tekrar sağa döner */
+      }
+    }
+
+    @keyframes robotBodyBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    @keyframes robotLeftArmWave {
+      0%, 100% { transform: rotate(-10deg); }
+      50% { transform: rotate(30deg); }
+    }
+
+    @keyframes robotRightArmSwing {
+      0%, 100% { transform: rotate(14deg); }
+      50% { transform: rotate(-14deg); }
+    }
+
+    @keyframes robotLegWalkLeft {
+      0%, 100% { transform: rotate(-15deg) translateY(0); }
+      50% { transform: rotate(15deg) translateY(-3px); }
+    }
+
+    @keyframes robotLegWalkRight {
+      0%, 100% { transform: rotate(15deg) translateY(-3px); }
+      50% { transform: rotate(-15deg) translateY(0); }
+    }
+
+    @keyframes robotEyeBlink {
+      0%, 92%, 100% { transform: scaleY(1); }
+      96% { transform: scaleY(0.12); }
+    }
+
+    @keyframes robotAntennaPulse {
+      0%, 100% {
+        fill: #ffffff;
+        filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 12px rgba(255, 255, 255, 0.9));
+        transform: scale(1);
+      }
+      50% {
+        fill: #ffffff;
+        filter: drop-shadow(0 0 14px #ffffff) drop-shadow(0 0 26px rgba(255, 255, 255, 1));
+        transform: scale(1.25);
+      }
+    }
+
+    @keyframes robotAntennaRays {
+      0%, 100% {
+        opacity: 0.35;
+        transform: rotate(0deg);
+      }
+      50% {
+        opacity: 1;
+        transform: rotate(45deg);
+        filter: drop-shadow(0 0 8px #ffffff);
+      }
+    }
+
+    @keyframes robotAntennaHalo {
+      0%, 100% {
+        opacity: 0.25;
+        transform: scale(0.85);
+      }
+      50% {
+        opacity: 0.95;
+        transform: scale(1.4);
+        filter: drop-shadow(0 0 10px #ffffff);
+      }
+    }
+
+    @keyframes robotCorePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px #38bdf8); }
+      50% { transform: scale(1.15); filter: drop-shadow(0 0 12px #00f2fe); }
+    }
+
+    .mascot-container {
+      position: fixed;
+      bottom: 74px; /* Alt navigasyon çubuğunun tam üstünde */
+      left: 20px;
+      z-index: 1000;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      animation: mascotWalkPatrol 65s linear infinite; /* Çok daha yavaş ve akıcı devriye */
+      transition: filter 0.25s ease, transform 0.25s ease;
+    }
+
+    .mascot-container:hover {
+      animation-play-state: paused; /* Üzerine gelince durur */
+      filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.95)) brightness(1.15);
+    }
+
+    .mascot-robot-svg {
+      width: 72px;
+      height: 98px;
+      display: block;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
+    }
+
+    .mascot-robot-body {
+      animation: robotBodyBob 1.2s ease-in-out infinite;
+    }
+
+    .robot-arm-left {
+      transform-origin: 24px 71px;
+      animation: robotLeftArmWave 1.8s ease-in-out infinite;
+    }
+
+    .robot-arm-right {
+      transform-origin: 76px 71px;
+      animation: robotRightArmSwing 1.2s ease-in-out infinite;
+    }
+
+    .robot-leg-left {
+      transform-origin: 38px 98px;
+      animation: robotLegWalkLeft 1.2s ease-in-out infinite;
+    }
+
+    .robot-leg-right {
+      transform-origin: 62px 98px;
+      animation: robotLegWalkRight 1.2s ease-in-out infinite;
+    }
+
+    .robot-eye {
+      transform-origin: center;
+      animation: robotEyeBlink 3.6s ease-in-out infinite;
+    }
+
+    .robot-antenna-orb {
+      transform-origin: 50px 7px;
+      animation: robotAntennaPulse 1.6s ease-in-out infinite;
+    }
+
+    .robot-antenna-rays {
+      transform-origin: 50px 7px;
+      animation: robotAntennaRays 3.2s linear infinite;
+    }
+
+    .robot-antenna-halo {
+      transform-origin: 50px 7px;
+      animation: robotAntennaHalo 1.6s ease-in-out infinite;
+    }
+
+    .robot-core-pulse {
+      transform-origin: 50px 85px;
+      animation: robotCorePulse 1.8s ease-in-out infinite;
+    }
+  </style>
+  <script>
+    var isRhythmicAlarmActive = false;
+    var rhythmicAlarmInterval = null;
+    var alarmAudioCtx = null;
+
+    function getDirectAudioContext() {
+      if (!alarmAudioCtx) {
+        alarmAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (alarmAudioCtx.state === 'suspended') {
+        alarmAudioCtx.resume();
+      }
+      return alarmAudioCtx;
+    }
+
+    function playDirectChime() {
+      try {
+        var ctx = getDirectAudioContext();
+        var now = ctx.currentTime;
+        
+        var selectedTone = localStorage.getItem('app_alarm_tone') || '1';
+        if (typeof playToneSound === 'function') {
+          playToneSound(selectedTone);
+          return;
+        }
+
+        var freqs = [1046.50, 1567.98];
+        freqs.forEach(function(freq, idx) {
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.6);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + 0.6);
+        });
+      } catch(e) {
+        console.error('Audio error:', e);
+      }
+    }
+
+    function directToggleAlarm(btn) {
+      isRhythmicAlarmActive = !isRhythmicAlarmActive;
+      getDirectAudioContext();
+
+      var bellActiveSvg = '<svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2" stroke-linecap="round"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2" stroke-linecap="round"/></svg>';
+      var bellMuteSvg = '<svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2" stroke-linecap="round"/><path d="M18.63 13A17.89 17.89 0 0 1 18 8" stroke-width="2" stroke-linecap="round"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14" stroke-width="2" stroke-linecap="round"/><path d="M18 8a6 6 0 0 0-9.33-5" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="1" x2="23" y2="23" stroke-width="2" stroke-linecap="round"/></svg>';
+
+      if (isRhythmicAlarmActive) {
+        btn.classList.add('active');
+        btn.innerHTML = bellActiveSvg;
+        btn.title = 'Sesli Alarm: AÇIK';
+        
+        playDirectChime();
+
+        if (rhythmicAlarmInterval) clearInterval(rhythmicAlarmInterval);
+        rhythmicAlarmInterval = setInterval(function() {
+          if (!isRhythmicAlarmActive) {
+            clearInterval(rhythmicAlarmInterval);
+            return;
+          }
+          var hasCritical = Array.isArray(window.paymentsData) && window.paymentsData.some(function(p) {
+            return p.status !== 'paid' && p.days_remaining < 4;
+          });
+          if (hasCritical) {
+            playDirectChime();
+          }
+        }, 2000);
+
+        if (typeof showToast === 'function') showToast('🚨 Kırmızı neon ritimli zil alarmı AÇILDI!');
+      } else {
+        btn.classList.remove('active');
+        btn.innerHTML = bellMuteSvg;
+        btn.title = 'Sesli Alarm: KAPALI';
+
+        if (rhythmicAlarmInterval) {
+          clearInterval(rhythmicAlarmInterval);
+          rhythmicAlarmInterval = null;
+        }
+        if (typeof showToast === 'function') showToast('🔕 Sesli alarm kapatıldı.');
+      }
+    }
+  </script>
+
+
+    <script>
+      function speakWelcomeMessage(force = false) {
+        // Otomatik karşılama kaldırıldı.
+        return;
+      }
+
+      // Mazlum Kiper tarzı: Tok, bariton, vakur ve derin erkek sesini seçen yardımcı fonksiyon
+      function getBestTurkishVoice() {
+        if (!('speechSynthesis' in window)) return null;
+        const voices = window.speechSynthesis.getVoices();
+        if (!voices || voices.length === 0) return null;
+        
+        const turkishVoices = voices.filter(v => (v.lang && (v.lang.toLowerCase().includes('tr') || v.lang.toLowerCase().replace('_', '-').startsWith('tr'))));
+        if (turkishVoices.length === 0) return null;
+
+        // Mazlum Kiper gibi tok ve derin erkek sesleri önceliği:
+        // 1. Microsoft Tolga (Windows'un derin ve berrak Türkçe erkek sesi)
+        // 2. Google Türkçe Erkek / Yandex / Ahmet / Cem
+        const maleVoice = turkishVoices.find(v => {
+          const n = v.name.toLowerCase();
+          return n.includes('tolga') || n.includes('male') || n.includes('erkek') || n.includes('ahmet') || n.includes('cem');
+        });
+        if (maleVoice) return maleVoice;
+
+        // 3. Microsoft Natural / Online TR
+        const naturalVoice = turkishVoices.find(v => v.name.includes('Microsoft') || v.name.includes('Natural'));
+        if (naturalVoice) return naturalVoice;
+
+        // 4. Google Türkçe
+        const googleVoice = turkishVoices.find(v => v.name.includes('Google'));
+        if (googleVoice) return googleVoice;
+
+        return turkishVoices[0];
+      }
+
+      // Mazlum Kiper Stüdyo Nöral Ses Motoru (Gerçek, Tok, Tane Tane ve Eksiksiz)
+      window._currentAudioPlayer = null;
+      window._activeSpeechUtterances = [];
+
+      async function speakAssistantText(fullText) {
+        if (!fullText) return;
+        
+        // 1. Önceki konuşmaları anında durdur
+        if (window._currentAudioPlayer) {
+          try {
+            window._currentAudioPlayer.pause();
+            window._currentAudioPlayer.currentTime = 0;
+          } catch(e) {}
+        }
+        if ('speechSynthesis' in window) {
+          try { window.speechSynthesis.cancel(); } catch(e) {}
+        }
+
+        // 2. Metni seslendirmeye hazırla (tarihleri ve parantezleri temizle)
+        const monthsMap = {
+          '01': 'Ocak', '02': 'Şubat', '03': 'Mart', '04': 'Nisan',
+          '05': 'Mayıs', '06': 'Haziran', '07': 'Temmuz', '08': 'Ağustos',
+          '09': 'Eylül', '10': 'Ekim', '11': 'Kasım', '12': 'Aralık',
+          '1': 'Ocak', '2': 'Şubat', '3': 'Mart', '4': 'Nisan',
+          '5': 'Mayıs', '6': 'Haziran', '7': 'Temmuz', '8': 'Ağustos',
+          '9': 'Eylül'
+        };
+        let cleanedText = fullText.replace(/(\d{1,2})\.(\d{1,2})\.(\d{4})/g, (match, d, m, y) => {
+          const monthName = monthsMap[m] || m;
+          return `${d} ${monthName} ${y}`;
+        });
+        cleanedText = cleanedText.replace(/[()\[\]{}]/g, ' ').replace(/\s+/g, ' ').trim();
+
+        // 3. Gerçek Nöral Stüdyo Mazlum Kiper Sesini Çağır (/api/tts/mazlum-kiper)
+        try {
+          const res = await fetch('/api/tts/mazlum-kiper', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: cleanedText })
+          });
+
+          if (res.ok) {
+            const blob = await res.blob();
+            const audioUrl = URL.createObjectURL(blob);
+            const audio = new Audio(audioUrl);
+            window._currentAudioPlayer = audio;
+            
+            // Web Audio API ile Optimus Prime Robotik / Derin Bas ve Rezonans Efekti
+            try {
+              const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+              if (AudioContextClass) {
+                const audioCtx = new AudioContextClass();
+                if (audioCtx.state === 'suspended') {
+                  audioCtx.resume();
+                }
+                const source = audioCtx.createMediaElementSource(audio);
+                
+                // 1. Derin Bas Güçlendirici (Sub-bass booster)
+                const bassFilter = audioCtx.createBiquadFilter();
+                bassFilter.type = 'lowshelf';
+                bassFilter.frequency.value = 220;
+                bassFilter.gain.value = 6.0;
+
+                // 2. Netlik ve Metalik Tını Filtresi (Presence EQ)
+                const midFilter = audioCtx.createBiquadFilter();
+                midFilter.type = 'peaking';
+                midFilter.frequency.value = 2800;
+                midFilter.Q.value = 1.2;
+                midFilter.gain.value = 2.0;
+
+                source.connect(bassFilter);
+                bassFilter.connect(midFilter);
+                midFilter.connect(audioCtx.destination);
+              }
+            } catch(fxErr) {
+              console.log('Filtre pas geçildi:', fxErr);
+            }
+
+            audio.onended = () => {
+              URL.revokeObjectURL(audioUrl);
+              window._currentAudioPlayer = null;
+            };
+            audio.play().catch(e => console.log('Ses çalma uyarısı:', e));
+            return;
+          }
+        } catch(e) {
+          console.warn('Nöral ses sunucusu yanıt vermedi, yerel ses motoru devreye alınıyor:', e);
+        }
+
+        // 4. Yedek (Fallback): Web Speech API ile Mazlum Kiper profilini seslendir
+        if ('speechSynthesis' in window) {
+          try {
+            const sentences = cleanedText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 0);
+            if (sentences.length === 0) sentences.push(cleanedText);
+
+            const bestVoice = getBestTurkishVoice();
+            sentences.forEach((sentence, idx) => {
+              const utter = new SpeechSynthesisUtterance(sentence);
+              utter.lang = 'tr-TR';
+              utter.rate = 0.88;
+              utter.pitch = 0.80;
+              if (bestVoice) utter.voice = bestVoice;
+              window._activeSpeechUtterances.push(utter);
+              if (idx === sentences.length - 1) {
+                utter.onend = () => { window._activeSpeechUtterances = []; };
+              }
+              window.speechSynthesis.speak(utter);
+            });
+          } catch(err) {
+            console.error('Konuşma sentezleme hatası:', err);
+          }
+        }
+      }
+
+      // Optimus Prime Günün Brifingi Oynatıcı
+      async function playDailyBriefing() {
+        const btn = document.getElementById('btn-daily-briefing');
+        const micSvg = '<svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="19" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke-width="2" stroke-linecap="round"/></svg>';
+        const loadingSvg = '<svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke-width="2"/></svg>';
+        if (btn) {
+          btn.style.opacity = '0.6';
+          btn.innerHTML = loadingSvg + ' <span>Hazırlanıyor...</span>';
+        }
+        try {
+          const res = await fetch('/api/briefing/today');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.briefing) {
+              if (typeof showToast === 'function') showToast('🎙️ Optimus Prime brifing veriyor...');
+              await speakAssistantText(data.briefing);
+            }
+          }
+        } catch(e) {
+          console.error('Brifing hatası:', e);
+        } finally {
+          if (btn) {
+            btn.style.opacity = '1';
+            btn.innerHTML = micSvg + ' <span>Günün Brifingi</span>';
+          }
+        }
+      }
+    </script>
+
+
+    <script>
+      function toggleAiChatModal() {
+        const modal = document.getElementById('ai-chat-modal');
+        if (modal) {
+          const isOpen = modal.style.display === 'flex';
+          modal.style.display = isOpen ? 'none' : 'flex';
+          if (!isOpen) {
+            setTimeout(() => document.getElementById('ai-chat-input').focus(), 150);
+          }
+        }
+      }
+
+      async function handleAiChatSubmit(e) {
+        e.preventDefault();
+        const input = document.getElementById('ai-chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const container = document.getElementById('ai-chat-messages');
+        
+        // Kullanıcı mesajı
+        const userMsg = document.createElement('div');
+        userMsg.style.cssText = 'align-self: flex-end; background: #2563eb; color: #fff; padding: 10px 14px; border-radius: 14px 14px 2px 14px; max-width: 85%;';
+        userMsg.textContent = text;
+        container.appendChild(userMsg);
+        input.value = '';
+        container.scrollTop = container.scrollHeight;
+
+        // Düşünüyor balonu
+        const thinkingMsg = document.createElement('div');
+        thinkingMsg.id = 'ai-thinking';
+        thinkingMsg.style.cssText = 'align-self: flex-start; background: #1e293b; color: #94a3b8; padding: 10px 14px; border-radius: 14px 14px 14px 2px; max-width: 85%; border: 1px dashed #38bdf8; font-style: italic;';
+        thinkingMsg.textContent = 'Düşünüyorum... 💭';
+        container.appendChild(thinkingMsg);
+        container.scrollTop = container.scrollHeight;
+
+        try {
+          const res = await fetch('/api/gemini/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+          });
+          const data = await res.json();
+          thinkingMsg.remove();
+
+          const botMsg = document.createElement('div');
+          botMsg.style.cssText = 'align-self: flex-start; background: #1e293b; color: #f8fafc; padding: 10px 14px; border-radius: 14px 14px 14px 2px; max-width: 85%; border: 1px solid #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);';
+          botMsg.textContent = data.reply;
+          container.appendChild(botMsg);
+          container.scrollTop = container.scrollHeight;
+
+          // Maskot sesli olarak cevabın tamamını akıcı ve en kaliteli sesle okusun
+          speakAssistantText(data.reply);
+        } catch(err) {
+          thinkingMsg.remove();
+          showToast('❌ Asistan yanıt veremedi.');
+        }
+      }
+
+      async function saveGeminiApiKey() {
+        const key = document.getElementById('gemini-api-key-input').value.trim();
+        if (!key) {
+          showToast('⚠️ Lütfen bir API anahtarı girin.');
+          return;
+        }
+        try {
+          const res = await fetch('/api/gemini/set-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: key })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            showToast('🧠 ' + data.message);
+            document.getElementById('gemini-api-key-input').value = '********';
+          }
+        } catch(e) {
+          showToast('❌ Bağlantı hatası.');
+        }
+      }
+
+      async function saveElevenLabsConfig() {
+        const apiKey = document.getElementById('eleven-api-key-input').value.trim();
+        const voiceId = document.getElementById('eleven-voice-id-input').value.trim();
+        if (!apiKey || !voiceId) {
+          showToast('⚠️ Lütfen hem ElevenLabs API anahtarını hem de Voice ID girin.');
+          return;
+        }
+        try {
+          const res = await fetch('/api/elevenlabs/set-config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: apiKey, voice_id: voiceId })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            showToast('🎙️ ' + data.message);
+            document.getElementById('eleven-api-key-input').value = '********';
+          }
+        } catch(e) {
+          showToast('❌ Bağlantı hatası.');
+        }
+      }
+
+      async function loadElevenLabsStatus() {
+        try {
+          const res = await fetch('/api/elevenlabs/status');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.configured) {
+              const elKey = document.getElementById('eleven-api-key-input');
+              const elVoice = document.getElementById('eleven-voice-id-input');
+              if (elKey) elKey.value = '********';
+              if (elVoice && data.voice_id) elVoice.value = data.voice_id;
+            }
+          }
+        } catch(e) {}
+      }
+      window.addEventListener('DOMContentLoaded', loadElevenLabsStatus);
+    </script>
+
+
+    <script>
+    let recognition = null;
+    let isRecording = false;
+    let silenceTimer = null;
+    let fullTranscript = '';
+
+    function toggleVoiceRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Tarayıcınız ses tanıma özelliğini desteklemiyor. Lütfen Google Chrome veya Edge kullanın.');
+        return;
+      }
+
+      const micBtn = document.getElementById('ai-mic-btn');
+      const input = document.getElementById('ai-chat-input');
+
+      if (!recognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'tr-TR';
+        recognition.continuous = true; // Konuşma arasında erken kesilmesin
+        recognition.interimResults = true; // Anlık konuştukça ekrana yazsın
+
+        recognition.onstart = function() {
+          isRecording = true;
+          fullTranscript = '';
+          if (micBtn) {
+            micBtn.style.background = '#ef4444';
+            micBtn.style.borderColor = '#ef4444';
+            micBtn.style.color = '#ffffff';
+            micBtn.innerHTML = '🔴 Dinliyor...';
+          }
+          if (input) input.placeholder = 'Konuşun, dinliyorum...';
+        };
+
+        recognition.onresult = function(event) {
+          let currentText = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            currentText += event.results[i][0].transcript;
+          }
+          
+          if (input && currentText.trim()) {
+            input.value = currentText;
+          }
+
+          // Cümlen bittiğinde 1.2 saniye sessizlik bekle, sonra otomatik gönder
+          if (silenceTimer) clearTimeout(silenceTimer);
+          silenceTimer = setTimeout(() => {
+            if (isRecording && input.value.trim().length > 2) {
+              recognition.stop();
+            }
+          }, 1400); // 1.4 saniye tam nefes alma ve düşünme payı
+        };
+
+        recognition.onerror = function(event) {
+          console.warn('Mikrofon:', event.error);
+          if (event.error === 'not-allowed') {
+            alert('Tarayıcı mikrofon izni kapalı! Lütfen adres çubuğundaki kilit simgesinden mikrofon iznini açın.');
+          }
+        };
+
+        recognition.onend = function() {
+          isRecording = false;
+          if (silenceTimer) clearTimeout(silenceTimer);
+          if (micBtn) {
+            micBtn.style.background = 'rgba(56, 189, 248, 0.15)';
+            micBtn.style.borderColor = '#38bdf8';
+            micBtn.style.color = '#38bdf8';
+            micBtn.innerHTML = '🎙️';
+          }
+          if (input) {
+            input.placeholder = 'Asistanına bir soru sor...';
+            // Eğer konuşma kaydedildiyse beklemeden hemen gönder
+            if (input.value.trim().length > 1) {
+              handleAiChatSubmit(new Event('submit'));
+            }
+          }
+        };
+      }
+
+      if (isRecording) {
+        if (silenceTimer) clearTimeout(silenceTimer);
+        recognition.stop();
+      } else {
+        try {
+          recognition.start();
+        } catch(e) {
+          console.error(e);
+        }
+      }
+    }
+  </script>
+
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="brand" style="display: flex; align-items: center; gap: 12px; position: relative;">
+      <div style="position: relative; flex-shrink: 0;">
+        <div class="header-logo-box">
+          <video src="logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
+        </div>
+      </div>
+
+      <div>
+        <div class="brand-title" style="display: flex; align-items: center; gap: 6px; font-weight: 900; letter-spacing: 0.5px; color: #f8fafc;">
+          <span>ASİSTAN</span>
+          <span style="font-size: 0.65rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 7px; border-radius: 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Pro</span>
+        </div>
+        <div class="brand-subtitle header-subtitle-text" style="font-size: 0.78rem; color: #94a3b8; font-weight: 500;">Akıllı Finans & Ödeme Asistanı</div>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <button type="button" id="btn-toggle-alarm" class="top-nav-btn top-nav-btn-alarm" onclick="directToggleAlarm(this)" title="Sesli Alarmı Aç / Kapat">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2" stroke-linecap="round"/>
+          <path d="M18.63 13A17.89 17.89 0 0 1 18 8" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14" stroke-width="2" stroke-linecap="round"/>
+          <path d="M18 8a6 6 0 0 0-9.33-5" stroke-width="2" stroke-linecap="round"/>
+          <line x1="1" y1="1" x2="23" y2="23" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <button class="top-nav-btn top-nav-btn-briefing" id="btn-daily-briefing" onclick="playDailyBriefing()" title="Optimus Prime Günün Sesli Brifingi">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="19" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/>
+          <line x1="8" y1="23" x2="16" y2="23" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="desktop-only-btn-label">Günün Brifingi</span>
+      </button>
+
+      <button class="top-nav-btn" id="btn-pwa-install" onclick="triggerPwaInstall()" style="display: none; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;" title="Uygulamayı Telefona Yükle">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <rect x="5" y="2" width="14" height="20" rx="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span>Telefona Yükle</span>
+      </button>
+
+      <button class="top-nav-btn desktop-only-btn" id="btn-enable-notifications" onclick="requestNotificationPermission()" title="Hatırlatıcı Bildirimlerini Aç">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="2" stroke-linecap="round"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Bildirim Aç</span>
+      </button>
+
+      <a href="/api/export/csv" class="top-nav-btn top-nav-btn-export desktop-only-btn" title="Finans & Fatura Raporunu Excel Olarak İndir">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="15" x2="12" y2="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Rapor İndir</span>
+      </a>
+
+      <button class="top-nav-btn top-nav-btn-add desktop-only-btn" onclick="openAddModal()" title="Yeni Ödeme / Harcama Ekle">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <line x1="12" y1="5" x2="12" y2="19" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="5" y1="12" x2="19" y2="12" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span>Yeni Ekle</span>
+      </button>
+
+      <!-- Kullanıcı Oturum Rozeti & Çıkış Yap -->
+      <div id="user-profile-badge" style="display: none; align-items: center; gap: 8px; background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 3px 8px 3px 5px; box-shadow: 0 0 14px rgba(56, 189, 248, 0.2);">
+        <span id="user-avatar-initial" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #38bdf8); font-weight: 800; font-size: 0.82rem; color: #fff; box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);">U</span>
+        <div class="user-badge-text-box" style="display: flex; flex-direction: column; text-align: left; line-height: 1.15;">
+          <span id="user-display-name" style="font-size: 0.8rem; font-weight: 700; color: #f8fafc; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Kullanıcı</span>
+          <span id="user-display-email" style="font-size: 0.65rem; color: #94a3b8; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">user@gmail.com</span>
+        </div>
+        <button type="button" onclick="handleLogout()" title="Oturumu Kapat" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; cursor: pointer; padding: 4px 7px; border-radius: 10px; display: flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 700; transition: all 0.2s;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span class="desktop-only-btn-label">Çıkış</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="container">
+
+    <!-- Top Financial Overview / Stat Cards (Desktop) -->
+    <section class="stats-grid desktop-only-stats">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>BU AY KALAN BORÇ</span>
+          <span>⏳</span>
+        </div>
+        <div class="stat-value danger" id="stat-month-pending">0 ₺</div>
+        <div class="stat-desc">Bu ay ödenmesi gereken tutar</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>BU AY ÖDENEN</span>
+          <span>✓</span>
+        </div>
+        <div class="stat-value success" id="stat-month-paid">0 ₺</div>
+        <div class="stat-desc">Bu ay kapatılan ödemeler</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>BU AY TOPLAM MALİYET</span>
+          <span>📅</span>
+        </div>
+        <div class="stat-value primary" id="stat-month-total">0 ₺</div>
+        <div class="stat-desc">Bu ayın toplam gider bütçesi</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>YILLIK TAHMİNİ GİDER</span>
+          <span>📊</span>
+        </div>
+        <div class="stat-value purple" id="stat-annual-proj">0 ₺</div>
+        <div class="stat-desc">12 aylık projeksiyon + Araç & Vergiler</div>
+      </div>
+    </section>
+
+    <!-- Mobile Ultra-Compact Financial Bar (Phones Only - Super Clean & Slim) -->
+    <div class="mobile-stat-bar mobile-only-feature">
+      <div class="mob-stat-item mob-stat-pending">
+        <span class="mob-stat-lbl">Kalan Borç</span>
+        <span class="mob-stat-val text-danger" id="mob-stat-pending">0 ₺</span>
+      </div>
+      <div class="mob-stat-divider"></div>
+      <div class="mob-stat-item">
+        <span class="mob-stat-lbl">Ödenen</span>
+        <span class="mob-stat-val text-success" id="mob-stat-paid">0 ₺</span>
+      </div>
+      <div class="mob-stat-divider"></div>
+      <div class="mob-stat-item">
+        <span class="mob-stat-lbl">Toplam</span>
+        <span class="mob-stat-val text-primary" id="mob-stat-total">0 ₺</span>
+      </div>
+    </div>
+
+    <!-- SECTION: Dashboard & Reminders -->
+    <section id="section-dashboard">
+
+      <!-- 1. HAFTALIK NAKİT AKIŞI ZAMAN ÇİZELGESİ (Desktop Only - Mobilde Menüden Açılır) -->
+      <div id="weekly-cashflow-banner" class="desktop-only-feature" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.1rem;">📅</span>
+            <span style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">Önümüzdeki 7 Günün Nakit Çıkış Planı</span>
+            <span style="font-size: 0.75rem; color: #94a3b8;">(Banka hesabında hazır bulundurulması gereken)</span>
+          </div>
+          <div style="font-size: 0.95rem; font-weight: 800; color: #38bdf8; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); padding: 3px 12px; border-radius: 20px;" id="weekly-cashflow-total">
+            Toplam: 0 ₺
+          </div>
+        </div>
+        <div id="weekly-cashflow-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+          <!-- app.js tarafından doldurulacak -->
+        </div>
+      </div>
+
+      <!-- 2. KIA EV6 ELEKTRİKLİ ARAÇ HIZLI TASARRUF & ŞARJ KARTI (Desktop Only - Mobilde Altta 'Araç' Sekmesi Var) -->
+      <div class="desktop-only-feature" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.08)); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 12px; padding: 10px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="kia_ev6.png" class="neon-car-blue" style="height: 38px; width: auto; object-fit: contain;">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
+              <span>KIA EV6</span>
+              <span style="background: #2563eb; color: white; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 800;">41 ACR 610</span>
+            </div>
+            <div style="font-size: 0.76rem; color: #cbd5e1; margin-top: 2px;" id="home-ev-savings-text">
+              🌱 Elektrikli sürüşle benzine kıyasla <strong style="color: #34d399;" id="home-ev-savings-amount">~4.200 ₺</strong> yakıt tasarrufu sağladınız.
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="top-nav-btn top-nav-btn-briefing" onclick="openEvChargeModal()" style="height: 34px; padding: 0 12px; font-size: 0.78rem;">
+            <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Şarj Ekle</span>
+          </button>
+          <button class="top-nav-btn" onclick="switchTab('garage')" style="height: 34px; padding: 0 12px; font-size: 0.78rem;">
+            <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="7" cy="17" r="2" stroke-width="2"/>
+              <path d="M9 17h6" stroke-width="2"/>
+              <circle cx="17" cy="17" r="2" stroke-width="2"/>
+            </svg>
+            <span>Garaj Detayı &rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs (Yatay Kaydırılabilir Şık Hap Butonlar) -->
+      <div class="tabs-bar">
+        <button class="tab-btn active" data-category="all" onclick="filterCategory('all')">
+          <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Yaklaşanlar</span>
+        </button>
+        <button class="tab-btn" data-category="fatura" onclick="filterCategory('fatura')">
+          <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="14 2 14 8 20 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="16" y1="13" x2="8" y2="13" stroke-width="2" stroke-linecap="round"/>
+            <line x1="16" y1="17" x2="8" y2="17" stroke-width="2" stroke-linecap="round"/>
+            <line x1="10" y1="9" x2="8" y2="9" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Faturalar</span>
+        </button>
+        <button class="tab-btn" data-category="abonelik" onclick="filterCategory('abonelik')">
+          <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="2" y="7" width="20" height="15" rx="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="17 2 12 7 7 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Abonelik</span>
+        </button>
+        <button class="tab-btn" data-category="kredi_karti" onclick="filterCategory('kredi_karti')">
+          <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="2" y="5" width="20" height="14" rx="3" stroke-width="2"/>
+            <line x1="2" y1="10" x2="22" y2="10" stroke-width="2"/>
+            <line x1="6" y1="15" x2="10" y2="15" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Kartlar</span>
+        </button>
+        <button class="tab-btn" data-category="arac" onclick="filterCategory('arac')">
+          <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="7" cy="17" r="2" stroke-width="2"/>
+            <path d="M9 17h6" stroke-width="2"/>
+            <circle cx="17" cy="17" r="2" stroke-width="2"/>
+          </svg>
+          <span>Araç</span>
+        </button>
+        <button class="tab-btn" data-category="vergi" onclick="filterCategory('vergi')">
+          <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="2" y1="22" x2="22" y2="22" stroke-width="2" stroke-linecap="round"/>
+            <line x1="12" y1="2" x2="2" y2="7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="2" x2="22" y2="7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="2" y1="7" x2="22" y2="7" stroke-width="2" stroke-linecap="round"/>
+            <line x1="5" y1="7" x2="5" y2="18" stroke-width="2" stroke-linecap="round"/>
+            <line x1="9" y1="7" x2="9" y2="18" stroke-width="2" stroke-linecap="round"/>
+            <line x1="15" y1="7" x2="15" y2="18" stroke-width="2" stroke-linecap="round"/>
+            <line x1="19" y1="7" x2="19" y2="18" stroke-width="2" stroke-linecap="round"/>
+            <line x1="3" y1="18" x2="21" y2="18" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Vergiler</span>
+        </button>
+      </div>
+
+      <!-- Payment Cards Grid -->
+      <div class="payments-grid" id="payments-container">
+        <!-- Rendered by app.js -->
+      </div>
+    </section>
+
+    
+    <!-- SECTION: ARACIM -->
+    <section id="section-garage" style="display: none; padding-bottom: 80px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="font-size: 1.3rem; font-weight: 800; margin: 0;">🚗 Araç & Garaj Profili</h2>
+        <button class="btn btn-primary" onclick="openAddVehicleModal()" style="font-size: 0.82rem; padding: 6px 14px; gap: 6px;">
+          <span>+</span> <span>Yeni Araç Ekle</span>
+        </button>
+      </div>
+
+      <!-- Çoklu Araç Seçici Sekmeler (Multi-Vehicle Tabs) -->
+      <div id="garage-vehicle-tabs" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 8px;">
+        <!-- app.js tarafından render edilecek: [ 🚗 KIA EV6 (41 ACR 610) ] [ + Yeni Araç ] -->
+      </div>
+      
+      <div class="stat-card" style="margin-bottom: 20px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155;">
+        <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px; gap: 15px;">
+            <div style="font-size: 1.2rem; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+              <span id="veh-title">KIA EV6</span>
+              <button onclick="openEditCurrentVehicleModal()" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem;" title="Aracı Düzenle">✏️</button>
+              <button id="btn-delete-veh" onclick="deleteCurrentVehicle()" style="background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; display: none;" title="Aracı Garajdan Sil">🗑️</button>
+            </div>
+            <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+              <img id="veh-img" src="kia_ev6.png" alt="Araç" class="neon-car-blue" style="height: 54px; width: auto; object-fit: contain;">
+            </div>
+            <div style="background: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: bold; letter-spacing: 1px; color: white;" id="veh-plate">--</div>
+        </div>
+        
+        <div class="charts-grid" style="grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid #38bdf8;">
+                <div style="font-size: 0.75rem; color: #94a3b8;">🚦 Trafik Sigortası</div>
+                <div style="font-size: 0.95rem; font-weight: 600; color: #fff; margin-top: 4px;" id="veh-trafik">Belirtilmedi</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid #818cf8;">
+                <div style="font-size: 0.75rem; color: #94a3b8;">🛡️ Kasko Poliçesi</div>
+                <div style="font-size: 0.95rem; font-weight: 600; color: #fff; margin-top: 4px;" id="veh-kasko">Belirtilmedi</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                <div style="font-size: 0.75rem; color: #94a3b8;">🏢 TÜVTÜRK Muayenesi</div>
+                <div style="font-size: 0.95rem; font-weight: 600; color: #fff; margin-top: 4px;" id="veh-tuv">Belirtilmedi</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border-left: 3px solid #34d399;">
+                <div style="font-size: 0.75rem; color: #94a3b8;">🛠️ Servis Periyodik Bakımı</div>
+                <div style="font-size: 0.95rem; font-weight: 600; color: #fff; margin-top: 4px;" id="veh-bakim">Belirtilmedi</div>
+            </div>
+        </div>
+        
+        <!-- Detaylı Bakım / KM Takip Paneli -->
+        <div style="background: rgba(30, 41, 59, 0.7); border: 1px dashed #475569; border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; margin-bottom: 6px;">
+                <span style="color:#94a3b8;">Güncel Kilometre:</span>
+                <span id="veh-current-km-badge" style="color:#38bdf8; font-weight:700; font-size:1rem;">- km</span>
+            </div>
+            <div id="veh-bakim-detay" style="font-size:0.8rem; color:#cbd5e1; line-height: 1.5;">
+                Son Bakım ve KM bilgilerini girerek yaklaşan bakımı takip edin.
+            </div>
+        </div>
+        
+        <button class="btn btn-outline" style="width:100%" onclick="openVehicleModal()">✏️ Araç Bilgilerini Düzenle</button>
+      </div>
+    </section>
+
+    <!-- SECTION: Analytics & Cost Projections -->
+    <section id="section-analytics" class="analytics-section">
+      <h2 style="font-size: 1.3rem; margin-bottom: 16px; font-weight: 800;">📊 Aylık & Yıllık Maliyet Analizi</h2>
+      
+      <div class="cost-projections-grid">
+        <div class="projection-card">
+          <h4>Aylık Sabit Abonelikler</h4>
+          <div class="proj-amount" id="proj-monthly-subs">0 ₺</div>
+          <p>Netflix, Xbox, Prime, Spotify vb. düzenli çekilen aylık toplam dijital abonelik gideriniz.</p>
+        </div>
+
+        <div class="projection-card">
+          <h4>Aboneliklerin Yıllık Yükü</h4>
+          <div class="proj-amount" id="proj-annual-subs" style="color:#c084fc;">0 ₺</div>
+          <p>Tüm dijital platform ve servislerin 1 yıllık kümülatif maliyet toplamı.</p>
+        </div>
+
+        <div class="projection-card">
+          <h4>Yıllık Araç & Garaj Masrafı</h4>
+          <div class="proj-amount" id="proj-annual-vehicle" style="color:#f59e0b;">0 ₺</div>
+          <p>Trafik Sigortası, Kasko, Yıllık Periyodik Bakım ve Muayene (2 yıllık ortalama).</p>
+        </div>
+
+        <div class="projection-card">
+          <h4>Yıllık Tahmini Toplam Gider</h4>
+          <div class="proj-amount" id="proj-annual-all" style="color:#34d399;">0 ₺</div>
+          <p>Tüm faturalar, abonelikler, kredi kartı harcamaları ve araç giderlerinizin 1 yıllık projeksiyonu.</p>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">
+            <span>📅</span> 12 Aylık Tahmini Harcama Dağılımı
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="chart-12-months"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">
+            <span>🍰</span> Kategori Bazlı Dağılım
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="chart-categories"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: Payment History -->
+    <section id="section-history" class="history-section">
+      <h2 style="font-size: 1.3rem; margin-bottom: 16px; font-weight: 800;">📜 Ödenen Faturalar & Ödeme Geçmişi</h2>
+      <div class="history-card">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Başlık</th>
+              <th>Kategori</th>
+              <th>Ödenen Tutar</th>
+              <th>Ödeme Tarihi</th>
+              <th>Dekont / Not</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <!-- Rendered by app.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  
+    <!-- SECTION: Ayarlar (Yönetici Paneli) -->
+    <section id="section-settings" style="display: none; padding-bottom: 80px; max-width: 650px; margin: 0 auto;">
+      <h2 style="font-size: 1.3rem; margin-bottom: 16px; font-weight: 800;">⚙️ Sistem Ayarları & Yönetici Paneli</h2>
+      
+      <div id="settings-auth-box" class="stat-card" style="margin-bottom: 20px;">
+        <h4 style="margin-bottom: 12px; color: #38bdf8;">🔒 Yönetici Girişi</h4>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">Veritabanını sıfırlamak veya geçmişi temizlemek için yönetici parolanızı girin.</p>
+        <div style="display: flex; gap: 10px;">
+          <input type="password" id="admin-pass" class="form-control" placeholder="Yönetici Parolası (Varsayılan: admin123)" style="flex: 1;" onkeydown="if(event.key === 'Enter') verifyAdminPass()">
+          <button class="btn btn-primary" onclick="verifyAdminPass()">Giriş Yap</button>
+        </div>
+      </div>
+
+      <div id="settings-panel" style="display: none;">
+
+        <!-- Gemini Yapay Zeka API Anahtarı Paneli -->
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #8b5cf6;">
+          <h4 style="margin-bottom: 8px; color: #a78bfa;">🧠 Google Gemini Yapay Zeka Beyni</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 12px;">
+            Maskotun seninle akıllıca konuşabilmesi ve finansal tavsiyeler verebilmesi için ücretsiz Gemini API anahtarınızı buraya kaydedin.
+          </p>
+          <div style="display: flex; gap: 10px;">
+            <input type="password" id="gemini-api-key-input" class="form-control" placeholder="AIzaSy... ile başlayan anahtar" style="flex: 1;" onkeydown="if(event.key === 'Enter') saveGeminiApiKey()">
+            <button class="btn btn-outline" style="border-color: #8b5cf6; color: #a78bfa; white-space: nowrap;" onclick="saveGeminiApiKey()">
+              💾 Anahtarı Kaydet
+            </button>
+          </div>
+          <div style="margin-top: 8px; font-size: 0.75rem; color: #38bdf8;">
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #38bdf8; text-decoration: underline;">Ücretsiz Gemini API Anahtarı Almak İçin Buraya Tıklayın &rarr;</a>
+          </div>
+        </div>
+
+        <!-- ElevenLabs Mazlum Kiper Birebir Ses Klonlama Paneli -->
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #f43f5e;">
+          <h4 style="margin-bottom: 8px; color: #fb7185;">🎙️ ElevenLabs: Birebir Mazlum Kiper Ses Klonu</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 12px;">
+            YouTube tanıtım demosundan aldığımız Mazlum Kiper ses kaydını stüdyo kusursuzluğunda birebir konuşturmak için ElevenLabs bilgilerinizi girin.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label style="font-size: 0.78rem; color: #cbd5e1; display: block; margin-bottom: 4px;">ElevenLabs API Key</label>
+              <input type="password" id="eleven-api-key-input" class="form-control" placeholder="sk_... ile başlayan anahtar">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: #cbd5e1; display: block; margin-bottom: 4px;">Mazlum Kiper Voice ID</label>
+              <input type="text" id="eleven-voice-id-input" class="form-control" placeholder="Örn: 21m00Tcm4TlvDq8ikWAM">
+            </div>
+            <button class="btn btn-outline" style="border-color: #f43f5e; color: #fb7185; align-self: flex-start;" onclick="saveElevenLabsConfig()">
+              🎙️ Klon Ses Ayarlarını Kaydet
+            </button>
+          </div>
+        <!-- Gmail Otomatik Kredi Kartı Ekstresi & Fatura Tarama Paneli -->
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #ea4335;">
+          <h4 style="margin-bottom: 8px; color: #f87171;">📬 Gmail: Kredi Kartı Ekstreleri & Faturaları Otomatik Oku</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 12px;">
+            Bankalardan (Garanti, İş Bankası, Yapı Kredi vb.) veya kurumlardan gelen e-postaları tarayıp dönem borcu, asgari tutar ve son ödeme tarihlerini otomatik listeye ekler.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label style="font-size: 0.78rem; color: #cbd5e1; display: block; margin-bottom: 4px;">Gmail Adresiniz</label>
+              <input type="email" id="gmail-address-input" class="form-control" placeholder="ornek@gmail.com">
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: #cbd5e1; display: block; margin-bottom: 4px;">Google 16 Haneli Uygulama Şifresi (App Password)</label>
+              <input type="password" id="gmail-app-pw-input" class="form-control" placeholder="xxxx xxxx xxxx xxxx">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 4px;">
+              <button class="btn btn-outline" style="border-color: #ea4335; color: #f87171;" onclick="saveGmailCredentials()">
+                💾 Bilgileri Kaydet
+              </button>
+              <button class="btn btn-primary" id="btn-sync-gmail" style="background: #ea4335; border-color: #ea4335;" onclick="triggerGmailSync()">
+                🔄 E-postaları Tara & Ekstreleri Çek
+              </button>
+            </div>
+          </div>
+          <div style="margin-top: 10px; font-size: 0.75rem; color: #94a3b8; line-height: 1.4;">
+            💡 <strong>Nasıl Alınır?</strong> Google Hesabınız &rarr; Güvenlik &rarr; <em>2 Adımlı Doğrulama</em> &rarr; <em>Uygulama Şifreleri</em> (App Passwords) bölümünden 16 haneli güvenli şifre oluşturup buraya yapıştırabilirsiniz. Normal şifreniz asla istenmez.
+          </div>
+          <div style="margin-top: 10px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 8px 12px; font-size: 0.78rem; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+            <span>⏰</span>
+            <span><strong>Otomatik Tarama Aktif:</strong> Sistem her gün <strong>09:00</strong> ve <strong>22:00</strong> saatlerinde sessizce arka planda e-postalarınızı kontrol eder.</span>
+          </div>
+        </div>
+
+        <!-- Android Banka Bildirimi Otomasyon Kartı -->
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #10b981;">
+          <h4 style="margin-bottom: 8px; color: #34d399;">📱 Android Banka Bildirimi Köprüsü (Anlık Harcama & Ekstre)</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 12px;">
+            Telefonunuza Yapı Kredi veya diğer bankalardan harcama ya da ekstre bildirimi geldiğinde doğrudan asistanınıza iletilir ve anında kaydedilir.
+          </p>
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 12px; font-size: 0.8rem; color: #e2e8f0; line-height: 1.6;">
+            <strong>Kurulum (MacroDroid ile 1 Dakika):</strong><br>
+            1. Google Play'den ücretsiz <strong>MacroDroid</strong> uygulamasını indirin.<br>
+            2. Tetikleyici (Trigger): <em>Bildirim Alındı (Notification Received)</em> &rarr; Bankanızı seçin (Örn: Yapı Kredi Mobil).<br>
+            3. Eylem (Action): <em>HTTP İstemi (HTTP Request)</em> &rarr; <strong>POST</strong>:<br>
+               <code style="background: #0f172a; padding: 3px 8px; border-radius: 4px; color: #38bdf8; display: block; margin: 6px 0; word-break: break-all;" id="android-webhook-url">http://192.168.0.53:8000/api/bank/notification</code>
+               Body / İçerik (JSON):<br>
+               <code style="background: #0f172a; padding: 4px 8px; border-radius: 4px; color: #34d399; display: block; margin: 4px 0;">{"title": "[not_title]", "text": "[not_body]"}</code>
+          </div>
+        </div>
+
+        <!-- Uyarı Zilleri (20 Çeşit) & Windows Bildirim Ayarları Paneli -->
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #38bdf8;">
+          <h4 style="margin-bottom: 8px; color: #38bdf8;">🔔 Uyarı Zili & Bildirim Ayarları</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 14px;">
+            Kırmızı neon uyarılarında, hatırlatmalarda ve ritimli alarmda çalacak zil sesini 20 farklı ton arasından seçebilirsiniz.
+          </p>
+          
+          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px;">
+            <select id="select-alarm-tone" class="form-control" style="flex: 1;" onchange="saveSelectedTone()">
+              <option value="1">1. Klasik Dijital Çan (Ding-Dong)</option>
+              <option value="2">2. Radar / Sonar Uyarısı (Derin Bip)</option>
+              <option value="3">3. Kristal Melodi (Yüksek Işıltı)</option>
+              <option value="4">4. Acil Durum Sireni (Kesik Çift Ton)</option>
+              <option value="5">5. Yumuşak Zen Tonu (Hafif Marimba)</option>
+              <option value="6">6. Nakit Kasa Şıngırtısı (Cash Ring)</option>
+              <option value="7">7. Uzay Işını (Sci-Fi Laser)</option>
+              <option value="8">8. Ahşap Tokmak (Kalimba Vuruşu)</option>
+              <option value="9">9. Akıllı Telefon Melodisi (Trill Chime)</option>
+              <option value="10">10. Derin Gecikme Uyarısı (Sub Bass Drop)</option>
+              <option value="11">11. Bilim Kurgu Bilgisayarı (Retro Blip)</option>
+              <option value="12">12. Oyun Jeton Sesi (Arcade Coin)</option>
+              <option value="13">13. Yüksek İkaz Düdüğü (Hi-Frequency Ping)</option>
+              <option value="14">14. Metalik Gong (Ambient Gong)</option>
+              <option value="15">15. Çift Tıklama Uyarısı (Double Click Clack)</option>
+              <option value="16">16. Hızlı Nabız Kalp Atışı (Heartbeat Pulse)</option>
+              <option value="17">17. Yükselen Melodi (Rising Triad Arp)</option>
+              <option value="18">18. Su Damlası (Water Drop Echo)</option>
+              <option value="19">19. Uçak Kokpit Zili (Flight Ding)</option>
+              <option value="20">20. Siber Matrix Titreşimi (Cyber Vibrato)</option>
+            </select>
+            <button class="btn btn-outline" style="border-color: #38bdf8; color: #38bdf8; white-space: nowrap;" onclick="previewSelectedTone()">
+              🔊 Dinle
+            </button>
+          </div>
+
+          <!-- Windows Sağ Alt Popup Bildirim Aç/Kapat Şalteri -->
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 0.88rem; font-weight: 600; color: #f8fafc;">🖥️ Windows Sağ Alt Bildirim Popup'ları</div>
+              <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">
+                4 günün altına inen kritik ödemelerde 10 dakikada bir sağ alttan açılan masaüstü pencereleri.
+              </div>
+            </div>
+            <label style="position: relative; display: inline-block; width: 48px; height: 26px; cursor: pointer; margin-left: 12px; flex-shrink: 0;">
+              <input type="checkbox" id="toggle-windows-popup" onchange="toggleWindowsPopupSetting()" style="opacity: 0; width: 0; height: 0;">
+              <span id="popup-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 26px;"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Otomatik & Manuel Yedekleme ve Geri Yükleme Paneli -->
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+            <div>
+              <h4 style="margin: 0; color: #60a5fa; display: flex; align-items: center; gap: 8px;">
+                <span>📦</span> <span>Veritabanı Yedekleme &amp; Geri Yükleme</span>
+              </h4>
+              <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 0 0;">
+                Belirleyeceğiniz gün ve saatte bilgisayarınıza otomatik yedek alır. Programa bir şey olduğunda tek tıkla eski yedeğe geri dönebilirsiniz.
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="top-nav-btn top-nav-btn-add" onclick="createManualBackupNow()" style="height: 36px; padding: 0 14px; font-size: 0.8rem;">
+                <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <polyline points="17 21 17 13 7 13 7 21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <polyline points="7 3 7 8 15 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>💾 Şimdi Yedek Al</span>
+              </button>
+              <button type="button" class="top-nav-btn" onclick="openBackupFolderOnPC()" style="height: 36px; padding: 0 12px; font-size: 0.8rem;" title="Yedeklerin bulunduğu bilgisayar klasörünü aç">
+                <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>📁 Klasörü Aç</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Yedekleme Konumu & Otomatik Ayarlar -->
+          <form id="backupSettingsForm" onsubmit="saveBackupSettings(event)" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label style="font-size: 0.82rem; font-weight: 600; color: #cbd5e1; display: flex; align-items: center; justify-content: space-between;">
+                <span>📁 Bilgisayardaki Yedekleme Klasörü</span>
+                <span id="backup-last-time-badge" style="font-size: 0.72rem; color: #38bdf8; font-weight: normal;"></span>
+              </label>
+              <input type="text" id="backup-folder-input" class="form-control" placeholder="C:\Yedekler..." style="font-family: monospace; font-size: 0.82rem;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: center;">
+              <!-- Otomatik Yedekleme Aç/Kapat -->
+              <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); padding: 8px 12px; border-radius: 10px;">
+                <span style="font-size: 0.82rem; font-weight: 600; color: #f8fafc;">⏰ Otomatik Yedek</span>
+                <label style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; margin: 0;">
+                  <input type="checkbox" id="backup-auto-toggle" onchange="toggleAutoBackupSwitch(this)" style="opacity: 0; width: 0; height: 0;">
+                  <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px;" id="backup-auto-slider"></span>
+                </label>
+              </div>
+
+              <!-- Gün Seçimi -->
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 4px;">Yedekleme Günü</label>
+                <select id="backup-schedule-day" class="form-control" style="height: 38px; font-size: 0.82rem;">
+                  <option value="everyday">📅 Her Gün</option>
+                  <option value="mon">Pazartesi</option>
+                  <option value="tue">Salı</option>
+                  <option value="wed">Çarşamba</option>
+                  <option value="thu">Perşembe</option>
+                  <option value="fri">Cuma</option>
+                  <option value="sat">Cumartesi</option>
+                  <option value="sun">Pazar</option>
+                </select>
+              </div>
+
+              <!-- Saat Seçimi -->
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 4px;">Yedekleme Saati</label>
+                <input type="time" id="backup-schedule-time" class="form-control" value="03:00" style="height: 38px; font-size: 0.82rem;">
+              </div>
+
+              <!-- Ayarları Kaydet Butonu -->
+              <div style="display: flex; align-items: flex-end;">
+                <button type="submit" class="top-nav-btn top-nav-btn-briefing" style="height: 38px; width: 100%; justify-content: center;">
+                  💾 Ayarları Kaydet
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Yedek Yükleme / Geri Alma & Yedekler Listesi -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 0.88rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 6px;">
+              <span>📜</span> <span>Mevcut Yedekler &amp; Geri Alma (Restore)</span>
+            </div>
+            <!-- Dosyadan Geri Yükle -->
+            <label class="top-nav-btn top-nav-btn-export" style="height: 32px; padding: 0 10px; font-size: 0.75rem; cursor: pointer; margin: 0;">
+              <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="17 8 12 3 7 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="12" y1="3" x2="12" y2="15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Dışarıdan .db Yükle &amp; Geri Al</span>
+              <input type="file" id="backup-upload-input" accept=".db" onchange="handleBackupFileUpload(event)" style="display: none;">
+            </label>
+          </div>
+
+          <!-- Yedekler Tablosu / Listesi -->
+          <div id="backup-list-container" style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; background: rgba(15, 23, 42, 0.4); padding: 8px;">
+            <div style="text-align: center; color: #94a3b8; padding: 18px; font-size: 0.82rem;">
+              ⏳ Yedekler yükleniyor...
+            </div>
+          </div>
+        </div>
+
+        <!-- Parola Değiştirme Paneli -->
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #10b981;">
+          <h4 style="margin-bottom: 8px; color: #10b981;">🔑 Yönetici Parolasını Değiştir</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 12px;">
+            Yönetim paneline giriş yaparken kullandığınız şifreyi buradan güncelleyebilirsiniz.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <input type="password" id="admin-new-pass" class="form-control" placeholder="Yeni Parola" onkeydown="if(event.key === 'Enter') document.getElementById('admin-new-pass-confirm').focus()">
+            <input type="password" id="admin-new-pass-confirm" class="form-control" placeholder="Yeni Parola (Tekrar)" onkeydown="if(event.key === 'Enter') adminChangePassword()">
+            <button class="btn btn-outline" style="border-color: #10b981; color: #10b981; align-self: flex-start;" onclick="adminChangePassword()">
+              💾 Parolayı Güncelle
+            </button>
+          </div>
+        </div>
+
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+          <h4 style="margin-bottom: 8px; color: #f59e0b;">📜 Ödeme Geçmişini Temizle</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 15px;">
+            Daha önce "Ödendi" olarak işaretlenmiş tüm geçmiş arşiv kayıtlarını siler. Mevcut aktif faturalarınız ve ayarlarınız korunur.
+          </p>
+          <button class="btn btn-outline" style="border-color: #f59e0b; color: #f59e0b;" onclick="adminClearHistory()">
+            🗑️ Geçmişi Temizle
+          </button>
+        </div>
+
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #ef4444;">
+          <h4 style="margin-bottom: 8px; color: #ef4444;">⚠️ Fabrika Ayarlarına Sıfırla</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 15px;">
+            Tüm kullanıcı verilerini, araç profilini, eklenmiş ödemeleri ve geçmişi tamamen temizler. Sistemi ilk kurulduğu fabrika ayarlarına döndürür.
+          </p>
+          <button class="btn btn-outline" style="border-color: #ef4444; color: #ef4444;" onclick="adminResetFactory()">
+            🚨 Tüm Verileri Sıfırla (Fabrika Ayarları)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: Garanti Takip & Ürün Belgeleri -->
+    <section id="section-contracts" style="display: none; padding-bottom: 80px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px; color: #f8fafc;">
+            <span>🛡️</span> <span>Garanti Takip &amp; Ürün Belgeleri</span>
+          </h2>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 0 0;">Satın aldığınız ürünlerin garanti bitiş sürelerini takip edin, 1 ay kala uyarı alın.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openAddContractModal()" style="font-size: 0.85rem; padding: 8px 18px; gap: 8px; box-shadow: 0 0 16px rgba(37,99,235,0.4);">
+          <span>➕</span> <span>Yeni Ürün / Garanti Ekle</span>
+        </button>
+      </div>
+
+      <!-- 1 Ay Kalanlar Uyarı Şeridi (Varsa otomatik çıkar) -->
+      <div id="warranty-alert-banner" style="display: none; background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.2)); border: 1.5px solid #ef4444; border-radius: 12px; padding: 12px 18px; margin-bottom: 18px; box-shadow: 0 0 18px rgba(239, 68, 68, 0.3);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.5rem;">⚠️</span>
+          <div>
+            <strong style="color: #f87171; font-size: 0.95rem;">DİKKAT: Garantisi 1 Ay İçinde Bitecek Ürünleriniz Var!</strong>
+            <div id="warranty-alert-text" style="font-size: 0.82rem; color: #fca5a5; margin-top: 2px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="contracts-container" class="payments-grid">
+        <!-- app.js tarafından doldurulacak -->
+      </div>
+    </section>
+
+    <!-- SECTION: Görevler & Notlar -->
+    <section id="section-tasks" style="display: none; padding-bottom: 80px; max-width: 750px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px; color: #f8fafc;">
+            <span>📝</span> <span>Optimus Görev &amp; Hatırlatıcı Notları</span>
+          </h2>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 0 0;">Finansal işlerinizi, aranacak kişileri ve önemli randevularınızı kaydedin.</p>
+        </div>
+      </div>
+
+      <div class="stat-card" style="margin-bottom: 20px;">
+        <form id="task-form" onsubmit="handleAddTaskSubmit(event)" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="task-input" class="form-control" placeholder="Örn: Dyson servisini ara, filtre siparişi ver..." required style="flex: 1; min-width: 220px;">
+          <input type="date" id="task-date" class="form-control" style="width: 140px;" title="Hedef Tarih (İsteğe Bağlı)">
+          <button type="submit" class="btn btn-primary" style="white-space: nowrap; padding: 9px 18px;">➕ Ekle</button>
+        </form>
+      </div>
+
+      <div id="tasks-container" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- app.js tarafından doldurulacak -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mobile & Desktop Bottom Navigation Bar (Centered & Evenly Distributed) -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <!-- 1. Ödemeler (Her Cihaz) -->
+      <div class="bnav-item active" data-tab="dashboard" onclick="switchTab('dashboard')" title="Ödemeler & Faturalar">
+        <div class="bnav-icon-wrapper">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="2" y="5" width="20" height="14" rx="3" stroke-width="2" />
+            <line x1="2" y1="10" x2="22" y2="10" stroke-width="2" />
+            <line x1="6" y1="15" x2="10" y2="15" stroke-width="2" stroke-linecap="round" />
+            <circle cx="17" cy="15" r="1.2" fill="currentColor" />
+          </svg>
+        </div>
+        <span class="bnav-label">Ödemeler</span>
+      </div>
+
+      <!-- 2. Araç / Garaj (Her Cihaz) -->
+      <div class="bnav-item" data-tab="garage" onclick="switchTab('garage')" title="Araç & Bakım Takibi">
+        <div class="bnav-icon-wrapper">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="7" cy="17" r="2" stroke-width="2"/>
+            <path d="M9 17h6" stroke-width="2"/>
+            <circle cx="17" cy="17" r="2" stroke-width="2"/>
+          </svg>
+        </div>
+        <span class="bnav-label">Araç</span>
+      </div>
+
+      <!-- Desktop Sadece: Garanti -->
+      <div class="bnav-item bnav-desktop-only" data-tab="contracts" onclick="switchTab('contracts')" title="Ürün & Garanti Takibi">
+        <div class="bnav-icon-wrapper">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="m9 12 2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label">Garanti</span>
+      </div>
+
+      <!-- 3. Merkez Hızlı Ekle FAB (Her Cihaz) -->
+      <div class="bnav-item bnav-item-center" onclick="openAddModal()" title="Yeni Ödeme / Harcama Ekle">
+        <div class="bnav-add-btn">
+          <svg class="bnav-svg-add" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="12" y1="5" x2="12" y2="19" stroke-width="2.6" stroke-linecap="round"/>
+            <line x1="5" y1="12" x2="19" y2="12" stroke-width="2.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label">Ekle</span>
+      </div>
+
+      <!-- Mobil Sadece: 4. Yapay Zeka Asistanı -->
+      <div class="bnav-item bnav-mobile-only" onclick="toggleAiChatModal()" title="Optimus Prime Sesli Asistan">
+        <div class="bnav-icon-wrapper" style="color: #38bdf8;">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="19" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/>
+            <line x1="8" y1="23" x2="16" y2="23" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label" style="color: #38bdf8;">Asistan</span>
+      </div>
+
+      <!-- Desktop Sadece: Görevler -->
+      <div class="bnav-item bnav-desktop-only" data-tab="tasks" onclick="switchTab('tasks')" title="Görevler & Hatırlatıcılar">
+        <div class="bnav-icon-wrapper">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="9" y="3" width="6" height="4" rx="1" stroke-width="2"/>
+            <path d="m9 14 2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label">Görevler</span>
+      </div>
+
+      <!-- Desktop Sadece: Maliyet & Analiz -->
+      <div class="bnav-item bnav-desktop-only" data-tab="analytics" onclick="switchTab('analytics')" title="Maliyet & Grafikler">
+        <div class="bnav-icon-wrapper">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="20" x2="18" y2="10" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="12" y1="20" x2="12" y2="4" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="6" y1="20" x2="6" y2="14" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label">Maliyet</span>
+      </div>
+
+      <!-- Desktop Sadece: Geçmiş -->
+      <div class="bnav-item bnav-desktop-only" data-tab="history" onclick="switchTab('history')" title="Geçmiş Kayıtlar">
+        <div class="bnav-icon-wrapper">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="9" stroke-width="2"/>
+            <polyline points="12 7 12 12 15 14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label">Geçmiş</span>
+      </div>
+
+      <!-- Desktop Sadece: Ayarlar -->
+      <div class="bnav-item bnav-desktop-only" data-tab="settings" onclick="switchTab('settings')" title="Sistem Ayarları">
+        <div class="bnav-icon-wrapper">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="3" stroke-width="2"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label">Ayarlar</span>
+      </div>
+
+      <!-- Mobil Sadece: 5. Hızlı Menü Çekmecesi -->
+      <div class="bnav-item bnav-mobile-only" onclick="openModal('modal-mobile-menu')" title="Tüm Modüller & Menü">
+        <div class="bnav-icon-wrapper">
+          <svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="4" y1="7" x2="20" y2="7" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="4" y1="12" x2="20" y2="12" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="4" y1="17" x2="20" y2="17" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="bnav-label">Menü</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MODAL: Android Mobile Quick Menu Sheet -->
+  <div class="modal-overlay" id="modal-mobile-menu" onclick="if(event.target === this) closeModal('modal-mobile-menu')">
+    <div class="modal-box mobile-bottom-sheet" style="max-width: 480px; max-height: 82vh; display: flex; flex-direction: column;">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header" style="padding-bottom: 6px; flex-shrink: 0;">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+          <span>📱</span>
+          <span>Tüm Modüller & Menü</span>
+        </div>
+        <button class="btn-close" onclick="closeModal('modal-mobile-menu')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 10px 14px 20px 14px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+        <div class="mobile-menu-grid">
+          <!-- 1. SİSTEM AYARLARI (En Başta, Belirgin ve Parlak) -->
+          <div class="mobile-menu-card" style="border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.1);" onclick="switchTab('settings'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(99, 102, 241, 0.25); color: #a5b4fc;">⚙️</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title" style="color: #a5b4fc;">Sistem Ayarları</div>
+              <div class="mmenu-sub">Şifre & Veritabanı Yedeği</div>
+            </div>
+          </div>
+
+          <!-- 2. 7 GÜNLÜK NAKİT PLANI -->
+          <div class="mobile-menu-card" onclick="openMobileWeeklyCashflow();">
+            <div class="mmenu-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">📅</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">7 Günlük Nakit Planı</div>
+              <div class="mmenu-sub">Haftalık ödeme takvimi</div>
+            </div>
+          </div>
+
+          <!-- 3. GARANTİ & SÖZLEŞMELER -->
+          <div class="mobile-menu-card" onclick="switchTab('contracts'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8;">🛡️</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Garanti & Sözleşme</div>
+              <div class="mmenu-sub">Ürün garantileri & vadeler</div>
+            </div>
+          </div>
+
+          <!-- 4. GÖREVLER & HATIRLATICILAR -->
+          <div class="mobile-menu-card" onclick="switchTab('tasks'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">📋</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Görevler</div>
+              <div class="mmenu-sub">Yapılacaklar & alarmlar</div>
+            </div>
+          </div>
+
+          <!-- 5. MALİYET & ANALİZ -->
+          <div class="mobile-menu-card" onclick="switchTab('analytics'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(34, 197, 94, 0.15); color: #4ade80;">📊</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Maliyet & Analiz</div>
+              <div class="mmenu-sub">Harcama grafikleri & tahminler</div>
+            </div>
+          </div>
+
+          <!-- 6. GEÇMİŞ ÖDEMELER -->
+          <div class="mobile-menu-card" onclick="switchTab('history'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">🕒</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Geçmiş Kayıtlar</div>
+              <div class="mmenu-sub">Ödenen faturalar arşivi</div>
+            </div>
+          </div>
+
+          <!-- 7. EV ŞARJ EKLE -->
+          <div class="mobile-menu-card" onclick="openEvChargeModal(); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">⚡</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">EV Şarj Ekle</div>
+              <div class="mmenu-sub">KIA EV6 şarj kaydı</div>
+            </div>
+          </div>
+
+          <!-- 8. EXCEL RAPORU -->
+          <a href="/api/export/csv" class="mobile-menu-card" style="text-decoration: none;" onclick="closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">📥</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">Excel Raporu</div>
+              <div class="mmenu-sub">Verileri CSV indir</div>
+            </div>
+          </a>
+        </div>
+
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 0.76rem; color: #94a3b8;">
+            Hesap: <strong id="mobile-menu-user" style="color: #f8fafc;">onder.cihan.acar@gmail.com</strong>
+          </div>
+          <button type="button" onclick="handleLogout()" class="btn btn-outline" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171; padding: 6px 12px; font-size: 0.78rem; border-radius: 10px;">
+            🚪 Çıkış
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: 7 Günlük Nakit Akışı Detayı (Mobilde Menüden Açılır) -->
+  <div class="modal-overlay" id="modal-weekly-cashflow" onclick="if(event.target === this) closeModal('modal-weekly-cashflow')">
+    <div class="modal-box mobile-bottom-sheet" style="max-width: 520px; max-height: 80vh; overflow-y: auto;">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+          <span>📅</span>
+          <span>Önümüzdeki 7 Günün Nakit Çıkış Planı</span>
+        </div>
+        <button class="btn-close" onclick="closeModal('modal-weekly-cashflow')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 12px 14px 24px 14px;">
+        <div id="weekly-cashflow-modal-content">
+          <!-- openMobileWeeklyCashflow tarafından dinamik doldurulur -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- MODAL: Edit Vehicle -->
+  <div class="modal-overlay" id="modal-vehicle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-vehicle-title">🚗 Araç Bilgilerini Düzenle</div>
+        <button class="btn-close" onclick="closeModal('modal-vehicle')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="vehicleForm">
+          <input type="hidden" id="v-id">
+          <div class="form-group">
+            <label>Plaka</label>
+            <input type="text" id="v-plate" class="form-control" placeholder="34 ABC 123" required>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <div class="form-group" style="flex:2;">
+              <label>Marka & Model</label>
+              <input type="text" id="v-brand" class="form-control" placeholder="Örn: KIA Sportage">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label>Yıl</label>
+              <input type="number" id="v-year" class="form-control" placeholder="2022">
+            </div>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid #334155; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <div style="font-size:0.85rem; font-weight:700; color:#38bdf8; margin-bottom:8px;">🛠️ Periyodik Servis Bakım Kuralı (Tarih & KM)</div>
+            
+            <div style="display:flex; gap:10px;">
+              <div class="form-group" style="flex:1;">
+                <label>Aracın Güncel KM'si</label>
+                <input type="number" id="v-current-km" class="form-control" placeholder="Örn: 52000">
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label>Son Bakım Yapılan KM</label>
+                <input type="number" id="v-last-km" class="form-control" placeholder="Örn: 30000">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+              <div class="form-group" style="flex:1;">
+                <label>Son Bakım Tarihi</label>
+                <input type="date" id="v-last-date" class="form-control">
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label>Bakım Aralığı (KM)</label>
+                <input type="number" id="v-interval-km" class="form-control" value="30000" placeholder="30000">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Bakım Periyodu (Yıl Aralığı)</label>
+              <input type="number" id="v-interval-year" class="form-control" value="2" placeholder="2 Yıl">
+              <small style="color:#94a3b8; font-size:0.75rem;">Hangisi önce gelirse (Örn: 2 Yıl veya 30.000 KM ve katları)</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>🚦 Trafik Sigortası Bitiş Tarihi</label>
+            <input type="date" id="v-trafik" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>🛡️ Kasko Bitiş Tarihi</label>
+            <input type="date" id="v-kasko" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>🏢 TÜVTÜRK Muayene Bitiş Tarihi</label>
+            <input type="date" id="v-tuv" class="form-control">
+          </div>
+
+                  <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Kaydet</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add / Edit Payment -->
+  <div class="modal-overlay" id="modal-add-payment">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-payment-title">➕ Yeni Ödeme & Hatırlatıcı</div>
+        <button class="btn-close" onclick="closeModal('modal-add-payment')">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Yapay Zeka ile Fiş/Fatura/Ekstre Yükle (OCR) -->
+        <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(99, 102, 241, 0.08)); border: 1.5px dashed #38bdf8; border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 18px; cursor: pointer; transition: all 0.25s ease;" onclick="document.getElementById('ocr-file-input').click()">
+          <input type="file" id="ocr-file-input" accept="image/*,application/pdf" style="display: none;" onchange="handleOcrFileUpload(event)">
+          <div style="font-size: 1.5rem; margin-bottom: 4px;">🧾📸</div>
+          <div style="font-weight: 700; color: #38bdf8; font-size: 0.9rem;" id="ocr-dropzone-title">Fiş, Fatura veya Kart Ekstresi Yükle</div>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">Fotoğraf (JPG/PNG) veya PDF seçin; tutar ve vade otomatik doldurulsun</div>
+          <div id="ocr-loading-spinner" style="display: none; margin-top: 8px; font-size: 0.8rem; color: #a78bfa; font-weight: 600;">
+            ⏳ Gemini yapay zekası faturayı çözümlüyor...
+          </div>
+        </div>
+
+        <form id="payment-form">
+          <input type="hidden" id="form-item-id">
+
+          <div class="form-group">
+            <label for="form-title">Ödeme / Kalem Başlığı *</label>
+            <input type="text" id="form-title" class="form-control" placeholder="Örn: Netflix, EnerjiSA Elektrik, Garanti Bonus..." required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="form-category">Kategori *</label>
+              <select id="form-category" class="form-control">
+                <option value="fatura">⚡ Fatura (Elektrik, Su, Gaz...)</option>
+                <option value="abonelik">📺 Abonelik (Netflix, Xbox, Prime...)</option>
+                <option value="kredi_karti">💳 Kredi Kartı / Kredi</option>
+                <option value="arac">🚗 Araç (Muayene, Sigorta, Bakım)</option>
+                <option value="vergi">🏛️ Vergi & Harç (MTV, Emlak...)</option>
+                <option value="diger">📁 Diğer Hatırlatıcı</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="form-subtype">Alt Tür (Opsiyonel)</label>
+              <input type="text" id="form-subtype" class="form-control" placeholder="Örn: elektrik, kasko, oyun">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="form-amount">Ödenecek Tutar (TL) *</label>
+              <input type="number" step="0.01" id="form-amount" class="form-control" placeholder="0.00" required>
+            </div>
+
+            <div class="form-group">
+              <label for="form-due-date">Son Ödeme / Vade Tarihi *</label>
+              <input type="date" id="form-due-date" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="form-repeat">Tekrarlama / Yinelenme Sıklığı</label>
+            <select id="form-repeat" class="form-control">
+              <option value="none">Tek Seferlik (Ödenince arşive kalkar)</option>
+              <option value="monthly">Aylık Döngü (Ödenince otomatik sonraki aya geçer)</option>
+              <option value="yearly">Yıllık Döngü (Sigorta, Kasko, Yıllık Abonelik vb.)</option>
+              <option value="2_yearly">2 Yılda Bir (TÜVTÜRK Araç Muayenesi vb.)</option>
+              <option value="6_monthly">6 Aylık Döngü</option>
+            </select>
+          </div>
+
+          <!-- Extra Vehicle Fields (Conditional) -->
+          <div class="form-row" id="vehicle-extra-fields" style="display: none; background: rgba(59,130,246,0.06); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="form-plate">Araç Plakası</label>
+              <input type="text" id="form-plate" class="form-control" placeholder="34 ABC 123">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="form-km">Mevcut / Bakım Km</label>
+              <input type="number" id="form-km" class="form-control" placeholder="75000">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="form-notes">Notlar / Abone No / Açıklama</label>
+            <textarea id="form-notes" class="form-control" rows="2" placeholder="Sözleşme no, asgari ödeme tutarı, servis randevusu veya özel notunuz..."></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-payment')">Vazgeç</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kullanıcı Giriş & Kayıt Modal (Auth Overlay) -->
+  <div id="auth-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(5, 10, 20, 0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+    <div class="auth-card" style="width: 100%; max-width: 440px; background: rgba(15, 23, 42, 0.96); border: 1.5px solid rgba(56, 189, 248, 0.4); border-radius: 24px; box-shadow: 0 0 35px rgba(56, 189, 248, 0.25), 0 25px 50px -12px rgba(0, 0, 0, 0.85); overflow: hidden; animation: authFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+      
+      <!-- Modal Header -->
+      <div style="padding: 26px 28px 16px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+        <div style="width: 68px; height: 68px; margin: 0 auto 12px; border-radius: 16px; overflow: hidden; border: 2px solid rgba(56, 189, 248, 0.7); box-shadow: 0 0 18px rgba(56, 189, 248, 0.45); background: #000;">
+          <video src="logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
+        </div>
+        <h3 id="auth-modal-title" style="font-size: 1.35rem; font-weight: 800; color: #f8fafc; margin-bottom: 4px;">Ödeme Asistanı</h3>
+        <p id="auth-modal-subtitle" style="font-size: 0.82rem; color: #94a3b8;">Kişisel ve güvenli finans takibi</p>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div style="display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.25);">
+        <button type="button" id="tab-btn-login" class="auth-tab-btn active" onclick="switchAuthTab('login')" style="flex: 1; padding: 12px; font-weight: 700; font-size: 0.9rem; border: none; background: transparent; cursor: pointer; color: #38bdf8; border-bottom: 2px solid #38bdf8; transition: all 0.2s;">Giriş Yap</button>
+        <button type="button" id="tab-btn-register" class="auth-tab-btn" onclick="switchAuthTab('register')" style="flex: 1; padding: 12px; font-weight: 700; font-size: 0.9rem; border: none; background: transparent; cursor: pointer; color: #94a3b8; border-bottom: 2px solid transparent; transition: all 0.2s;">Yeni Hesap Oluştur</button>
+      </div>
+
+      <!-- Form Body -->
+      <form id="auth-form" onsubmit="event.preventDefault(); handleAuthSubmit();" style="padding: 22px 28px 26px;">
+        <div id="auth-alert" style="display: none; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; font-size: 0.82rem; line-height: 1.4;"></div>
+
+        <!-- Full Name (Only on Register) -->
+        <div id="auth-group-fullname" style="display: none; margin-bottom: 15px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">Ad Soyad</label>
+          <input type="text" id="auth-fullname" class="form-control" placeholder="Örn: Caner Selim" style="width: 100%; box-sizing: border-box;" autocomplete="name">
+        </div>
+
+        <!-- Email -->
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">E-posta Adresi (veya Gmail)</label>
+          <div style="position: relative;">
+            <input type="email" id="auth-email" class="form-control" placeholder="ornek@gmail.com" required style="width: 100%; box-sizing: border-box; padding-left: 38px;" autocomplete="email" onkeydown="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('auth-password').focus(); }">
+            <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">Parola</label>
+          <div style="position: relative;">
+            <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required style="width: 100%; box-sizing: border-box; padding-left: 38px; padding-right: 38px;" autocomplete="current-password" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleAuthSubmit(); }">
+            <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            <button type="button" onclick="togglePasswordVisibility('auth-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px;">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember Me Checkbox -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: #cbd5e1; cursor: pointer;">
+            <input type="checkbox" id="auth-remember-me" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;">
+            <span>Beni Hatırla (Oturumu Açık Tut)</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 700; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);">
+          <span id="auth-submit-text">Giriş Yap</span>
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+
+        <div style="margin-top: 14px; text-align: center; font-size: 0.76rem; color: #64748b;">
+          🔒 Tüm verileriniz bu bilgisayarda kullanıcı bazlı güvenle korunur.
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <script src="offline_adapter.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Canlı Hareketli Maskot: Sayfa Boyunca Devriye Gezen Robot Asistan (Kafası, Kolları, Elleri ve Bacakları Olan Saf Robot) -->
+  <div id="ai-chat-bubble" class="mascot-container" onclick="toggleAiChatModal()" title="Optimus Prime Asistan ile Konuşmak İçin Tıkla!">
+    <div class="mascot-robot-body">
+      <svg class="mascot-robot-svg" viewBox="0 0 100 135" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="roboHelmetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#334155" />
+            <stop offset="50%" stop-color="#1e293b" />
+            <stop offset="100%" stop-color="#0f172a" />
+          </linearGradient>
+          <linearGradient id="roboBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2563eb" />
+            <stop offset="45%" stop-color="#1e293b" />
+            <stop offset="100%" stop-color="#0b1329" />
+          </linearGradient>
+          <linearGradient id="roboArmGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#475569" />
+            <stop offset="100%" stop-color="#1e293b" />
+          </linearGradient>
+          <radialGradient id="roboCoreGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="35%" stop-color="#00f2fe" />
+            <stop offset="100%" stop-color="#0284c7" />
+          </radialGradient>
+          <filter id="roboGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="roboSmallGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.8" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="whiteGlow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.8" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Sol Bacak & Ayak (Yürüyen) -->
+        <g class="robot-leg-left">
+          <rect x="34" y="98" width="8" height="15" rx="4" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+          <circle cx="38" cy="112" r="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+          <path d="M 33 114 L 43 114 L 45 125 L 27 125 Q 27 120 33 120 Z" fill="url(#roboHelmetGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+          <line x1="28" y1="127" x2="44" y2="127" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#roboGlow)"/>
+        </g>
+
+        <!-- Sağ Bacak & Ayak (Yürüyen) -->
+        <g class="robot-leg-right">
+          <rect x="58" y="98" width="8" height="15" rx="4" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+          <circle cx="62" cy="112" r="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+          <path d="M 57 114 L 67 114 L 73 125 L 55 125 Q 55 120 57 120 Z" fill="url(#roboHelmetGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+          <line x1="56" y1="127" x2="72" y2="127" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#roboGlow)"/>
+        </g>
+
+        <!-- Gövde (Torso & Ark Reaktörü) -->
+        <g class="robot-torso">
+          <rect x="44" y="62" width="12" height="7" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
+          <path d="M 28 67 L 72 67 Q 76 67 76 72 L 72 96 Q 72 100 68 100 L 32 100 Q 28 100 28 96 L 24 72 Q 24 67 28 67 Z" fill="url(#roboBodyGrad)" stroke="#38bdf8" stroke-width="2"/>
+          <path d="M 32 76 L 43 82 L 57 82 L 68 76" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" fill="none"/>
+          <circle cx="50" cy="85" r="9" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+          <circle class="robot-core-pulse" cx="50" cy="85" r="5.5" fill="url(#roboCoreGlow)" filter="url(#roboGlow)"/>
+          <circle cx="50" cy="85" r="2" fill="#ffffff"/>
+        </g>
+
+        <!-- Sol Kol & El (El Sallayan) -->
+        <g class="robot-arm-left">
+          <circle cx="24" cy="71" r="5.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+          <path d="M 23 72 L 15 54 Q 13 50 16 48 L 19 49 Q 21 51 22 55 L 26 71 Z" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+          <circle cx="16" cy="46" r="4.5" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+          <line x1="13" y1="44" x2="10" y2="40" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+          <line x1="16" y1="42" x2="15" y2="37" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+          <line x1="19" y1="44" x2="21" y2="39" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="15" cy="38" r="2" fill="#ffffff" filter="url(#roboSmallGlow)"/>
+        </g>
+
+        <!-- Sağ Kol & El (Salınan) -->
+        <g class="robot-arm-right">
+          <circle cx="76" cy="71" r="5.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+          <path d="M 74 72 L 82 86 Q 84 90 82 92 L 79 92 Q 77 90 76 86 L 72 72 Z" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+          <circle cx="82" cy="94" r="4.5" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+          <line x1="80" y1="97" x2="79" y2="101" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+          <line x1="83" y1="98" x2="83" y2="102" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+          <line x1="86" y1="97" x2="87" y2="100" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+        </g>
+
+        <!-- Robot Kafası, Anteni & Gözleri -->
+        <g class="robot-head">
+          <!-- Tepe Anteni Direği -->
+          <line x1="50" y1="20" x2="50" y2="8" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+          
+          <!-- Beyaz Işık Saçan Işınlar / Flares -->
+          <g class="robot-antenna-rays">
+            <line x1="50" y1="-1" x2="50" y2="15" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" filter="url(#whiteGlow)"/>
+            <line x1="42" y1="7" x2="58" y2="7" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" filter="url(#whiteGlow)"/>
+          </g>
+
+          <!-- Dış Beyaz Işık Halesi / Parlama Dalgası -->
+          <circle class="robot-antenna-halo" cx="50" cy="7" r="7.5" fill="none" stroke="#ffffff" stroke-width="1.4" filter="url(#whiteGlow)"/>
+
+          <!-- Merkez Parlak Beyaz Işık Küresi -->
+          <circle class="robot-antenna-orb" cx="50" cy="7" r="5" fill="#ffffff" filter="url(#whiteGlow)"/>
+          
+          <rect x="22" y="20" width="56" height="43" rx="14" fill="url(#roboHelmetGrad)" stroke="#38bdf8" stroke-width="2.5"/>
+          <path d="M 38 20 L 44 14 L 56 14 L 62 20 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1.2"/>
+          
+          <rect x="16" y="32" width="7" height="18" rx="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+          <rect x="77" y="32" width="7" height="18" rx="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+          
+          <rect x="28" y="28" width="44" height="26" rx="8" fill="#030712" stroke="rgba(56,189,248,0.6)" stroke-width="1.5"/>
+          <line x1="30" y1="38" x2="70" y2="38" stroke="rgba(56,189,248,0.15)" stroke-width="1"/>
+          
+          <g class="robot-eyes-wrapper">
+            <ellipse class="robot-eye" cx="40" cy="39" rx="5" ry="6" fill="#38bdf8" filter="url(#roboSmallGlow)"/>
+            <circle cx="41.5" cy="37.5" r="1.5" fill="#ffffff"/>
+            <ellipse class="robot-eye" cx="60" cy="39" rx="5" ry="6" fill="#38bdf8" filter="url(#roboSmallGlow)"/>
+            <circle cx="61.5" cy="37.5" r="1.5" fill="#ffffff"/>
+          </g>
+          
+          <path d="M 44 48 Q 50 51 56 48" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div id="ai-chat-modal" style="display: none; position: fixed; bottom: 150px; right: 20px; width: 380px; max-width: calc(100vw - 40px); height: 500px; max-height: calc(100vh - 180px); background: #0f172a; border: 1.5px solid #38bdf8; border-radius: 18px; box-shadow: 0 10px 35px rgba(0,0,0,0.8), 0 0 25px rgba(56, 189, 248, 0.35); z-index: 1001; flex-direction: column; overflow: hidden;">
+    <!-- Chat Header -->
+    <div style="background: #1e293b; padding: 14px 16px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.4rem;">🤖</span>
+        <div>
+          <div style="font-weight: 800; color: #f8fafc; font-size: 0.95rem;">ASİSTAN AI</div>
+          <div style="font-size: 0.72rem; color: #38bdf8;">Gemini 2.5 Destekli Akıllı Beyin</div>
+        </div>
+      </div>
+      <button onclick="toggleAiChatModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer;">&times;</button>
+    </div>
+
+    <!-- Chat Messages Body -->
+    <div id="ai-chat-messages" style="flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.88rem; line-height: 1.4;">
+      <div style="align-self: flex-start; background: #1e293b; color: #f8fafc; padding: 10px 14px; border-radius: 14px 14px 14px 2px; max-width: 85%; border: 1px solid #334155;">
+        Merhaba! Ben senin yapay zeka asistanınım. Bütçen, faturaların, aracın veya dilediğin herhangi bir konu hakkında bana her şeyi sorabilirsin! 🚀
+      </div>
+    </div>
+
+    <!-- Chat Input Area -->
+    <form id="ai-chat-form" onsubmit="handleAiChatSubmit(event)" style="padding: 10px; background: #1e293b; border-top: 1px solid #334155; display: flex; gap: 8px;">
+      <input type="text" id="ai-chat-input" placeholder="Asistanına bir soru sor..." class="form-control" style="flex: 1; font-size: 0.85rem; padding: 8px 12px;" autocomplete="off">
+      <button type="button" id="ai-mic-btn" onclick="toggleVoiceRecognition()" style="background: rgba(56, 189, 248, 0.15); border: 1.5px solid #38bdf8; color: #38bdf8; border-radius: 8px; padding: 0 12px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;" title="Sesle Konuş">
+        🎙️
+      </button>
+              <button type="submit" class="btn btn-primary" style="padding: 8px 14px;">Gönder</button>
+    </form>
+  </div>
+
+
+  <!-- MODAL: Add EV Charge -->
+  <div class="modal-overlay" id="modal-ev-charge">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title">⚡ KIA EV6 Şarj İşlemi Ekle</div>
+        <button class="btn-close" onclick="closeModal('modal-ev-charge')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="evChargeForm" onsubmit="handleEvChargeSubmit(event)">
+          <div class="form-group">
+            <label>Şarj Tarihi</label>
+            <input type="date" id="ev-date" class="form-control" required>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+              <label>Şarj Türü</label>
+              <select id="ev-type" class="form-control" onchange="autoFillEvStation()">
+                <option value="ac_home">Ev (AC Yavaş Şarj)</option>
+                <option value="dc_fast">İstasyon (DC Hızlı Şarj)</option>
+                <option value="work">İş Yeri / Diğer AC</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label>İstasyon / Konum</label>
+              <input type="text" id="ev-station" class="form-control" placeholder="Örn: Trugo, ZES, Ev">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+              <label>Çekilen Enerji (kWh)</label>
+              <input type="number" step="0.01" id="ev-kwh" class="form-control" placeholder="Örn: 42.5" required oninput="calculateKwhCost()">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label>Toplam Tutar (₺)</label>
+              <input type="number" step="0.01" id="ev-cost" class="form-control" placeholder="Örn: 380" required oninput="calculateKwhCost()">
+            </div>
+          </div>
+
+          <div id="ev-calc-hint" style="font-size: 0.78rem; color: #38bdf8; margin-bottom: 12px; font-weight: 600;"></div>
+
+          <div class="form-group">
+            <label>Şarj Anındaki Araç KM (İsteğe Bağlı)</label>
+            <input type="number" id="ev-odometer" class="form-control" placeholder="Örn: 52400">
+          </div>
+
+                  <button type="submit" class="btn btn-primary" style="background: #10b981; border-color: #10b981; width: 100%; margin-top: 8px;">
+            ⚡ Şarjı Kaydet
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Yeni Ürün & Garanti Ekle -->
+  <div class="modal-overlay" id="modal-contract">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">🛡️ Yeni Ürün &amp; Garanti Ekle</div>
+        <button class="btn-close" onclick="closeModal('modal-contract')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="contractForm" onsubmit="handleContractSubmit(event)">
+          <div class="form-group">
+            <label>Ürün Adı / Cihaz Modeli *</label>
+            <input type="text" id="c-title" class="form-control" placeholder="Örn: Dyson V15 Süpürge, iPhone 15 Pro, Samsung OLED TV..." required>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <div class="form-group" style="flex:1;">
+              <label>Kategori</label>
+              <select id="c-category" class="form-control">
+                <option value="garanti">🛡️ Elektronik &amp; Beyaz Eşya</option>
+                <option value="telefon_pc">📱 Telefon / Bilgisayar / Tablet</option>
+                <option value="ev_aleti">🏠 Ev &amp; Mutfak Cihazı</option>
+                <option value="arac">🚗 Araç Donanımı &amp; Parça</option>
+                <option value="taahhut">📶 İnternet / GSM Taahhüdü</option>
+                <option value="diger">📦 Diğer Ürün / Hizmet</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label>Marka / Satıcı Mağaza</label>
+              <input type="text" id="c-provider" class="form-control" placeholder="Örn: Dyson, Apple, MediaMarkt, Vatan">
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <div class="form-group" style="flex:1;">
+              <label>Satın Alma / Fatura Tarihi *</label>
+              <input type="date" id="c-purchase-date" class="form-control" required onchange="autoCalculateWarrantyEndDate()">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label>Garanti Süresi *</label>
+              <select id="c-duration" class="form-control" onchange="autoCalculateWarrantyEndDate()">
+                <option value="24" selected>2 Yıl (24 Ay) - Standart</option>
+                <option value="12">1 Yıl (12 Ay)</option>
+                <option value="36">3 Yıl (36 Ay)</option>
+                <option value="60">5 Yıl (60 Ay)</option>
+                <option value="120">10 Yıl (Motor/Gövde)</option>
+                <option value="custom">Özel / Belirtilmemiş</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+              <span>Garanti Bitiş Tarihi *</span>
+              <small style="color:#38bdf8; font-weight:normal;">(Otomatik Hesaplanır veya Elle Girilebilir)</small>
+            </label>
+            <input type="date" id="c-end-date" class="form-control" required style="border-color: #38bdf8;">
+          </div>
+
+          <div class="form-group">
+            <label>Fatura No / Seri No / Belge Notları</label>
+            <textarea id="c-notes" class="form-control" rows="2" placeholder="Fatura No: FAT2024001, Seri No: DY-90812, Kutu veya garanti belgesi nerede..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px; font-weight:700;">
+            💾 Ürün Garantisini Kaydet
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

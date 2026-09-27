@@ -1,0 +1,30 @@
+{
+  "name": "Akıllı Ödeme ve Takip Asistanı",
+  "short_name": "Asistan",
+  "description": "Faturalar, abonelikler, kredi kartları ve araç bakımı takip ve hatırlatıcı asistanı",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0f19",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/app_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app_icon_square.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/app_icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

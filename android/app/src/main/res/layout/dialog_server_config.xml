@@ -23,11 +23,21 @@
         android:textSize="13sp" />
 
     <Button
-        android:id="@+id/btnQuickUsb"
+        android:id="@+id/btnQuickLocal"
         style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:gravity="start|center_vertical"
+        android:text="@string/mode_local"
+        android:textColor="@color/text_primary" />
+
+    <Button
+        android:id="@+id/btnQuickUsb"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:gravity="start|center_vertical"
         android:text="@string/mode_usb"
         android:textColor="@color/text_primary" />

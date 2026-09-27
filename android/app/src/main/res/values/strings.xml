@@ -7,6 +7,7 @@
     <string name="connection_error">Sunucuya Bağlanılamadı</string>
     <string name="connection_error_desc">Lütfen bilgisayarınızda uygulamanın (baslat.bat) çalıştığından ve telefonunuzla aynı ağda olduğunuzdan emin olun.</string>
     <string name="server_settings">Sunucu Ayarları</string>
+    <string name="mode_local">📱 Bağımsız Yerel Mod (PC Gerektirmez)</string>
     <string name="mode_usb">⚡ USB Kablo Modu (localhost:8000)</string>
     <string name="mode_wifi">📶 Ev Wi-Fi Modu (10.22.250.66:8000)</string>
     <string name="mode_custom">🌐 Özel / Bulut Sunucu</string>
