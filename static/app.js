@@ -1049,10 +1049,22 @@ function renderStats() {
   if (!analyticsData) return;
   const tm = analyticsData.this_month;
 
-  document.getElementById('stat-month-pending').textContent = formatCurrency(tm.pending);
-  document.getElementById('stat-month-paid').textContent = formatCurrency(tm.paid);
-  document.getElementById('stat-month-total').textContent = formatCurrency(tm.total_due);
-  document.getElementById('stat-annual-proj').textContent = formatCurrency(analyticsData.annual_projected_total);
+  const statPending = document.getElementById('stat-month-pending');
+  if (statPending) statPending.textContent = formatCurrency(tm.pending);
+  const statPaid = document.getElementById('stat-month-paid');
+  if (statPaid) statPaid.textContent = formatCurrency(tm.paid);
+  const statTotal = document.getElementById('stat-month-total');
+  if (statTotal) statTotal.textContent = formatCurrency(tm.total_due);
+  const statAnnual = document.getElementById('stat-annual-proj');
+  if (statAnnual) statAnnual.textContent = formatCurrency(analyticsData.annual_projected_total);
+
+  // Mobil ekranlar için ultra kompakt stat bar güncellemesi
+  const mobPending = document.getElementById('mob-stat-pending');
+  if (mobPending) mobPending.textContent = formatCurrency(tm.pending);
+  const mobPaid = document.getElementById('mob-stat-paid');
+  if (mobPaid) mobPaid.textContent = formatCurrency(tm.paid);
+  const mobTotal = document.getElementById('mob-stat-total');
+  if (mobTotal) mobTotal.textContent = formatCurrency(tm.total_due);
 
   if (analyticsData.weekly_cashflow) {
     renderWeeklyCashflow(analyticsData.weekly_cashflow);
@@ -1617,10 +1629,15 @@ function switchTab(tabName) {
     el.classList.toggle('active', el.dataset.tab === tabName);
   });
 
-  // Üst istatistik kartları sadece Ana Ekranda (Dashboard) görünsün
+  // Üst istatistik kartları ve mobil stat bar sadece Ana Ekranda (Dashboard) görünsün
   const secStats = document.querySelector('.stats-grid');
   if (secStats) {
-    secStats.style.display = (tabName === 'dashboard') ? 'grid' : 'none';
+    secStats.classList.toggle('hidden-tab', tabName !== 'dashboard');
+    secStats.style.display = (tabName === 'dashboard') ? '' : 'none';
+  }
+  const mobStats = document.querySelector('.mobile-stat-bar');
+  if (mobStats) {
+    mobStats.classList.toggle('hidden-tab', tabName !== 'dashboard');
   }
 
   document.getElementById('section-dashboard').style.display = (tabName === 'dashboard') ? 'block' : 'none';
@@ -2624,6 +2641,51 @@ function renderWeeklyCashflow(cashflow) {
       </div>
     `;
   }).join('');
+}
+
+// Mobilde Menüden 7 Günlük Nakit Planı Modalını Açar
+function openMobileWeeklyCashflow() {
+  closeModal('modal-mobile-menu');
+  const target = document.getElementById('weekly-cashflow-modal-content');
+  if (target && analyticsData && analyticsData.weekly_cashflow) {
+    const cashflow = analyticsData.weekly_cashflow;
+    let html = `
+      <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 600; font-size: 0.88rem; color: #f8fafc;">7 Günlük Toplam Çıkış:</span>
+        <span style="font-weight: 800; font-size: 1.15rem; color: ${cashflow.total > 0 ? '#f87171' : '#34d399'};">${formatCurrency(cashflow.total)}</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+    `;
+    cashflow.days.forEach((day, idx) => {
+      const isToday = idx === 0;
+      const hasExpense = day.amount > 0;
+      const bg = hasExpense ? 'rgba(239, 68, 68, 0.12)' : (isToday ? 'rgba(56, 189, 248, 0.1)' : 'rgba(255, 255, 255, 0.03)');
+      const borderColor = hasExpense ? 'rgba(239, 68, 68, 0.3)' : (isToday ? 'rgba(56, 189, 248, 0.3)' : 'rgba(255, 255, 255, 0.06)');
+      
+      let billsListHtml = '';
+      if (day.bills && day.bills.length > 0) {
+        billsListHtml = `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 4px;">` +
+          day.bills.map(b => `<div style="display: flex; justify-content: space-between; font-size: 0.78rem;"><span style="color:#cbd5e1;">⚡ ${escapeHtml(b.title)}</span><strong style="color:#fca5a5;">${formatCurrency(b.amount)}</strong></div>`).join('') +
+          `</div>`;
+      }
+      
+      html += `
+        <div style="background: ${bg}; border: 1px solid ${borderColor}; border-radius: 10px; padding: 10px 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="font-weight: 700; font-size: 0.82rem; color: ${isToday ? '#38bdf8' : '#f8fafc'};">${isToday ? '📌 BUGÜN' : day.day_name}</span>
+              <span style="font-size: 0.74rem; color: #94a3b8; margin-left: 6px;">(${day.display})</span>
+            </div>
+            <strong style="font-size: 0.95rem; color: ${hasExpense ? '#f87171' : '#64748b'};">${hasExpense ? formatCurrency(day.amount) : 'Ödeme Yok'}</strong>
+          </div>
+          ${billsListHtml}
+        </div>
+      `;
+    });
+    html += `</div>`;
+    target.innerHTML = html;
+  }
+  openModal('modal-weekly-cashflow');
 }
 
 // ==========================================

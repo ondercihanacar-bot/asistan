@@ -813,8 +813,8 @@
   <!-- Main Content Area -->
   <main class="container">
 
-    <!-- Top Financial Overview / Stat Cards -->
-    <section class="stats-grid">
+    <!-- Top Financial Overview / Stat Cards (Desktop) -->
+    <section class="stats-grid desktop-only-stats">
       <div class="stat-card">
         <div class="stat-header">
           <span>BU AY KALAN BORÇ</span>
@@ -852,11 +852,29 @@
       </div>
     </section>
 
+    <!-- Mobile Ultra-Compact Financial Bar (Phones Only - Super Clean & Slim) -->
+    <div class="mobile-stat-bar mobile-only-feature">
+      <div class="mob-stat-item mob-stat-pending">
+        <span class="mob-stat-lbl">Kalan Borç</span>
+        <span class="mob-stat-val text-danger" id="mob-stat-pending">0 ₺</span>
+      </div>
+      <div class="mob-stat-divider"></div>
+      <div class="mob-stat-item">
+        <span class="mob-stat-lbl">Ödenen</span>
+        <span class="mob-stat-val text-success" id="mob-stat-paid">0 ₺</span>
+      </div>
+      <div class="mob-stat-divider"></div>
+      <div class="mob-stat-item">
+        <span class="mob-stat-lbl">Toplam</span>
+        <span class="mob-stat-val text-primary" id="mob-stat-total">0 ₺</span>
+      </div>
+    </div>
+
     <!-- SECTION: Dashboard & Reminders -->
     <section id="section-dashboard">
 
-      <!-- 1. HAFTALIK NAKİT AKIŞI ZAMAN ÇİZELGESİ (Önümüzdeki 7 Günlük Projeksiyon) -->
-      <div id="weekly-cashflow-banner" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+      <!-- 1. HAFTALIK NAKİT AKIŞI ZAMAN ÇİZELGESİ (Desktop Only - Mobilde Menüden Açılır) -->
+      <div id="weekly-cashflow-banner" class="desktop-only-feature" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.1rem;">📅</span>
@@ -872,8 +890,8 @@
         </div>
       </div>
 
-      <!-- 2. KIA EV6 ELEKTRİKLİ ARAÇ HIZLI TASARRUF & ŞARJ KARTI -->
-      <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.08)); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 12px; padding: 10px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <!-- 2. KIA EV6 ELEKTRİKLİ ARAÇ HIZLI TASARRUF & ŞARJ KARTI (Desktop Only - Mobilde Altta 'Araç' Sekmesi Var) -->
+      <div class="desktop-only-feature" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.08)); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 12px; padding: 10px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 12px;">
           <img src="/kia_ev6.png" class="neon-car-blue" style="height: 38px; width: auto; object-fit: contain;">
           <div>
@@ -905,13 +923,13 @@
         </div>
       </div>
 
-      <!-- Category Filter Tabs -->
+      <!-- Category Filter Tabs (Yatay Kaydırılabilir Şık Hap Butonlar) -->
       <div class="tabs-bar">
         <button class="tab-btn active" data-category="all" onclick="filterCategory('all')">
           <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>Yaklaşanlar (Son 7 Gün)</span>
+          <span>Yaklaşanlar</span>
         </button>
         <button class="tab-btn" data-category="fatura" onclick="filterCategory('fatura')">
           <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -928,7 +946,7 @@
             <rect x="2" y="7" width="20" height="15" rx="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <polyline points="17 2 12 7 7 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>Abonelikler</span>
+          <span>Abonelik</span>
         </button>
         <button class="tab-btn" data-category="kredi_karti" onclick="filterCategory('kredi_karti')">
           <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -936,7 +954,7 @@
             <line x1="2" y1="10" x2="22" y2="10" stroke-width="2"/>
             <line x1="6" y1="15" x2="10" y2="15" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <span>Kredi Kartları</span>
+          <span>Kartlar</span>
         </button>
         <button class="tab-btn" data-category="arac" onclick="filterCategory('arac')">
           <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -945,7 +963,7 @@
             <path d="M9 17h6" stroke-width="2"/>
             <circle cx="17" cy="17" r="2" stroke-width="2"/>
           </svg>
-          <span>Araç & Garaj</span>
+          <span>Araç</span>
         </button>
         <button class="tab-btn" data-category="vergi" onclick="filterCategory('vergi')">
           <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -959,7 +977,7 @@
             <line x1="19" y1="7" x2="19" y2="18" stroke-width="2" stroke-linecap="round"/>
             <line x1="3" y1="18" x2="21" y2="18" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <span>Vergiler & Harçlar</span>
+          <span>Vergiler</span>
         </button>
       </div>
 
@@ -1579,17 +1597,36 @@
 
   <!-- MODAL: Android Mobile Quick Menu Sheet -->
   <div class="modal-overlay" id="modal-mobile-menu" onclick="if(event.target === this) closeModal('modal-mobile-menu')">
-    <div class="modal-box mobile-bottom-sheet" style="max-width: 480px;">
+    <div class="modal-box mobile-bottom-sheet" style="max-width: 480px; max-height: 82vh; display: flex; flex-direction: column;">
       <div class="bottom-sheet-handle"></div>
-      <div class="modal-header" style="padding-bottom: 8px;">
+      <div class="modal-header" style="padding-bottom: 6px; flex-shrink: 0;">
         <div class="modal-title" style="display: flex; align-items: center; gap: 8px;">
           <span>📱</span>
           <span>Tüm Modüller & Menü</span>
         </div>
         <button class="btn-close" onclick="closeModal('modal-mobile-menu')">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 10px 16px 24px 16px;">
+      <div class="modal-body" style="padding: 10px 14px 20px 14px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;">
         <div class="mobile-menu-grid">
+          <!-- 1. SİSTEM AYARLARI (En Başta, Belirgin ve Parlak) -->
+          <div class="mobile-menu-card" style="border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.1);" onclick="switchTab('settings'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(99, 102, 241, 0.25); color: #a5b4fc;">⚙️</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title" style="color: #a5b4fc;">Sistem Ayarları</div>
+              <div class="mmenu-sub">Şifre & Veritabanı Yedeği</div>
+            </div>
+          </div>
+
+          <!-- 2. 7 GÜNLÜK NAKİT PLANI -->
+          <div class="mobile-menu-card" onclick="openMobileWeeklyCashflow();">
+            <div class="mmenu-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">📅</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title">7 Günlük Nakit Planı</div>
+              <div class="mmenu-sub">Haftalık ödeme takvimi</div>
+            </div>
+          </div>
+
+          <!-- 3. GARANTİ & SÖZLEŞMELER -->
           <div class="mobile-menu-card" onclick="switchTab('contracts'); closeModal('modal-mobile-menu');">
             <div class="mmenu-icon" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8;">🛡️</div>
             <div class="mmenu-info">
@@ -1597,13 +1634,17 @@
               <div class="mmenu-sub">Ürün garantileri & vadeler</div>
             </div>
           </div>
+
+          <!-- 4. GÖREVLER & HATIRLATICILAR -->
           <div class="mobile-menu-card" onclick="switchTab('tasks'); closeModal('modal-mobile-menu');">
             <div class="mmenu-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">📋</div>
             <div class="mmenu-info">
               <div class="mmenu-title">Görevler</div>
-              <div class="mmenu-sub">Hatırlatıcılar & yapılacaklar</div>
+              <div class="mmenu-sub">Yapılacaklar & alarmlar</div>
             </div>
           </div>
+
+          <!-- 5. MALİYET & ANALİZ -->
           <div class="mobile-menu-card" onclick="switchTab('analytics'); closeModal('modal-mobile-menu');">
             <div class="mmenu-icon" style="background: rgba(34, 197, 94, 0.15); color: #4ade80;">📊</div>
             <div class="mmenu-info">
@@ -1611,6 +1652,8 @@
               <div class="mmenu-sub">Harcama grafikleri & tahminler</div>
             </div>
           </div>
+
+          <!-- 6. GEÇMİŞ ÖDEMELER -->
           <div class="mobile-menu-card" onclick="switchTab('history'); closeModal('modal-mobile-menu');">
             <div class="mmenu-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">🕒</div>
             <div class="mmenu-info">
@@ -1618,13 +1661,8 @@
               <div class="mmenu-sub">Ödenen faturalar arşivi</div>
             </div>
           </div>
-          <div class="mobile-menu-card" onclick="switchTab('settings'); closeModal('modal-mobile-menu');">
-            <div class="mmenu-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">⚙️</div>
-            <div class="mmenu-info">
-              <div class="mmenu-title">Sistem Ayarları</div>
-              <div class="mmenu-sub">Veritabanı yedeği & şifre</div>
-            </div>
-          </div>
+
+          <!-- 7. EV ŞARJ EKLE -->
           <div class="mobile-menu-card" onclick="openEvChargeModal(); closeModal('modal-mobile-menu');">
             <div class="mmenu-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">⚡</div>
             <div class="mmenu-info">
@@ -1632,29 +1670,43 @@
               <div class="mmenu-sub">KIA EV6 şarj kaydı</div>
             </div>
           </div>
+
+          <!-- 8. EXCEL RAPORU -->
           <a href="/api/export/csv" class="mobile-menu-card" style="text-decoration: none;" onclick="closeModal('modal-mobile-menu');">
             <div class="mmenu-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">📥</div>
             <div class="mmenu-info">
               <div class="mmenu-title">Excel Raporu</div>
-              <div class="mmenu-sub">Tüm verileri CSV indir</div>
+              <div class="mmenu-sub">Verileri CSV indir</div>
             </div>
           </a>
-          <div class="mobile-menu-card" onclick="requestNotificationPermission(); closeModal('modal-mobile-menu');">
-            <div class="mmenu-icon" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">🔔</div>
-            <div class="mmenu-info">
-              <div class="mmenu-title">Bildirimleri Aç</div>
-              <div class="mmenu-sub">Vade bildirim izinleri</div>
-            </div>
-          </div>
         </div>
 
-        <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
-          <div style="font-size: 0.78rem; color: #94a3b8;">
-            Giriş Yapan: <strong id="mobile-menu-user" style="color: #f8fafc;">onder.cihan.acar@gmail.com</strong>
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 0.76rem; color: #94a3b8;">
+            Hesap: <strong id="mobile-menu-user" style="color: #f8fafc;">onder.cihan.acar@gmail.com</strong>
           </div>
-          <button type="button" onclick="handleLogout()" class="btn btn-outline" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171; padding: 6px 12px; font-size: 0.8rem; border-radius: 10px;">
-            🚪 Çıkış Yap
+          <button type="button" onclick="handleLogout()" class="btn btn-outline" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171; padding: 6px 12px; font-size: 0.78rem; border-radius: 10px;">
+            🚪 Çıkış
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: 7 Günlük Nakit Akışı Detayı (Mobilde Menüden Açılır) -->
+  <div class="modal-overlay" id="modal-weekly-cashflow" onclick="if(event.target === this) closeModal('modal-weekly-cashflow')">
+    <div class="modal-box mobile-bottom-sheet" style="max-width: 520px; max-height: 80vh; overflow-y: auto;">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+          <span>📅</span>
+          <span>Önümüzdeki 7 Günün Nakit Çıkış Planı</span>
+        </div>
+        <button class="btn-close" onclick="closeModal('modal-weekly-cashflow')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 12px 14px 24px 14px;">
+        <div id="weekly-cashflow-modal-content">
+          <!-- openMobileWeeklyCashflow tarafından dinamik doldurulur -->
         </div>
       </div>
     </div>

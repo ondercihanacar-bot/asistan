@@ -483,19 +483,42 @@ body {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .tabs-bar {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 8px !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 12px !important;
+  }
+  .tabs-bar::-webkit-scrollbar {
+    display: none !important;
   }
   .tab-btn {
-    height: 44px;
-    font-size: 0.84rem;
-    padding: 0 8px;
+    flex-shrink: 0 !important;
+    height: 36px !important;
+    padding: 0 14px !important;
+    border-radius: 20px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    gap: 6px !important;
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.35), rgba(99, 102, 241, 0.35)) !important;
+    border-color: #38bdf8 !important;
+    color: #38bdf8 !important;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.35) !important;
   }
   .tab-btn-svg {
-    width: 18px;
-    height: 18px;
+    width: 16px !important;
+    height: 16px !important;
   }
 }
 
@@ -1472,10 +1495,174 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
   transform: scale(0.95);
 }
 
+/* Visibility helpers for Desktop vs Mobile */
+.desktop-only-stats {
+  display: grid;
+}
+.desktop-only-feature {
+  display: block;
+}
+.mobile-only-feature {
+  display: none !important;
+}
+
 /* ==========================================================================
    Mobile Screen Rules (Phones & Tablets <= 768px)
    ========================================================================== */
 @media (max-width: 768px) {
+  /* Mobile Display Controls: Hide bulky desktop sections */
+  .desktop-only-stats,
+  .desktop-only-feature {
+    display: none !important;
+  }
+  .mobile-only-feature {
+    display: flex !important;
+  }
+  .mobile-only-feature.hidden-tab {
+    display: none !important;
+  }
+
+  /* Ultra-Compact Mobile Stat Bar (Minimal & Clean) */
+  .mobile-stat-bar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-around;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  }
+  .mob-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    text-align: center;
+  }
+  .mob-stat-lbl {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .mob-stat-val {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .mob-stat-divider {
+    width: 1px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 4px;
+  }
+
+  /* Slim & Flat Payment Rows (Alt Alta Sıralı Yatsı & Kompakt) */
+  .payments-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    margin-bottom: 24px !important;
+  }
+  .payment-card {
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+    margin-bottom: 0 !important;
+    gap: 6px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+  }
+  .payment-card:hover {
+    transform: none !important;
+  }
+  .card-top {
+    margin-bottom: 2px !important;
+    align-items: center !important;
+  }
+  .card-info {
+    gap: 8px !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+  .card-category-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+  }
+  .card-title {
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 165px !important;
+  }
+  .card-subtitle {
+    font-size: 0.68rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 165px !important;
+  }
+  .urgency-badge {
+    font-size: 0.66rem !important;
+    padding: 2px 7px !important;
+    border-radius: 12px !important;
+    white-space: nowrap !important;
+  }
+  .card-mid {
+    padding: 6px 0 !important;
+    margin: 2px 0 6px 0 !important;
+    align-items: center !important;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08) !important;
+  }
+  .amount-label {
+    display: none !important;
+  }
+  .card-amount {
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+  }
+  .card-dates {
+    text-align: right !important;
+  }
+  .due-date {
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+  }
+  .repeat-badge {
+    font-size: 0.65rem !important;
+  }
+  .vehicle-meta {
+    padding: 4px 8px !important;
+    margin-bottom: 4px !important;
+    font-size: 0.7rem !important;
+  }
+  .card-bottom {
+    gap: 6px !important;
+  }
+  .btn-pay {
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 0 12px !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+  }
+  .btn-action-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    border-radius: 8px !important;
+    font-size: 0.8rem !important;
+  }
+
   /* Hide desktop-only controls */
   .bnav-desktop-only {
     display: none !important;
