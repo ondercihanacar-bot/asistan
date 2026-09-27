@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Akıllı Ödeme & Hatırlatıcı Asistanı</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0b0f19">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="style.css">
-  <!-- Local Chart.js for 100% offline analytics -->
-  <script src="chart.min.js"></script>
+  <link rel="stylesheet" href="/style.css?v=10">
+  <!-- Chart.js for beautiful analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* Normal Durum: Mavi Fütüristik Neon (Sakin ve Yavaş, 3.8s) */
     @keyframes blueNeonSlowPulse {
@@ -64,25 +64,26 @@
     }
 
     /* 🤖 Canlı Yürüyen Devriye Robot Maskot (Optimus AI) */
-    @keyframes mascotWalkPatrol {
+    /* 🤖 Canlı Yürüyen Devriye Robot Maskot (Bu Ay Kalan Borç Satırının Üstünde Sağa Sola Yürür) */
+    @keyframes mascotWalkOnStats {
       0% {
-        left: 20px;
+        left: 15px;
         transform: scaleX(1);
       }
       48% {
-        left: calc(100vw - 110px);
+        left: calc(100% - 70px);
         transform: scaleX(1);
       }
       50% {
-        left: calc(100vw - 110px);
+        left: calc(100% - 70px);
         transform: scaleX(-1); /* Sağa varınca arkasını dönüp sola yürür */
       }
       98% {
-        left: 20px;
+        left: 15px;
         transform: scaleX(-1);
       }
       100% {
-        left: 20px;
+        left: 15px;
         transform: scaleX(1); /* Sola varınca tekrar sağa döner */
       }
     }
@@ -160,16 +161,16 @@
     }
 
     .mascot-container {
-      position: fixed;
-      bottom: 74px; /* Alt navigasyon çubuğunun tam üstünde */
-      left: 20px;
-      z-index: 1000;
+      position: absolute;
+      bottom: 42px; /* Bu Ay Kalan Borç kartlarının tam üst kenarında yürür */
+      left: 15px;
+      z-index: 10;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
       user-select: none;
-      animation: mascotWalkPatrol 65s linear infinite; /* Çok daha yavaş ve akıcı devriye */
+      animation: mascotWalkOnStats 26s linear infinite; /* Kartlar üstünde sağa-sola devriye */
       transition: filter 0.25s ease, transform 0.25s ease;
     }
 
@@ -179,10 +180,10 @@
     }
 
     .mascot-robot-svg {
-      width: 72px;
-      height: 98px;
+      width: 52px;
+      height: 70px;
       display: block;
-      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
     }
 
     .mascot-robot-body {
@@ -723,7 +724,7 @@
     <div class="brand" style="display: flex; align-items: center; gap: 12px; position: relative;">
       <div style="position: relative; flex-shrink: 0;">
         <div class="header-logo-box">
-          <video src="logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
+          <video src="/logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
         </div>
       </div>
 
@@ -808,45 +809,6 @@
   <!-- Main Content Area -->
   <main class="container">
 
-    <!-- Top Financial Overview / Stat Cards (Desktop) -->
-    <section class="stats-grid desktop-only-stats">
-      <div class="stat-card">
-        <div class="stat-header">
-          <span>BU AY KALAN BORÇ</span>
-          <span>⏳</span>
-        </div>
-        <div class="stat-value danger" id="stat-month-pending">0 ₺</div>
-        <div class="stat-desc">Bu ay ödenmesi gereken tutar</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <span>BU AY ÖDENEN</span>
-          <span>✓</span>
-        </div>
-        <div class="stat-value success" id="stat-month-paid">0 ₺</div>
-        <div class="stat-desc">Bu ay kapatılan ödemeler</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <span>BU AY TOPLAM MALİYET</span>
-          <span>📅</span>
-        </div>
-        <div class="stat-value primary" id="stat-month-total">0 ₺</div>
-        <div class="stat-desc">Bu ayın toplam gider bütçesi</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <span>YILLIK TAHMİNİ GİDER</span>
-          <span>📊</span>
-        </div>
-        <div class="stat-value purple" id="stat-annual-proj">0 ₺</div>
-        <div class="stat-desc">12 aylık projeksiyon + Araç & Vergiler</div>
-      </div>
-    </section>
-
     <!-- Mobile Ultra-Compact Financial Bar (Phones Only - Super Clean & Slim) -->
     <div class="mobile-stat-bar mobile-only-feature">
       <div class="mob-stat-item mob-stat-pending">
@@ -868,57 +830,7 @@
     <!-- SECTION: Dashboard & Reminders -->
     <section id="section-dashboard">
 
-      <!-- 1. HAFTALIK NAKİT AKIŞI ZAMAN ÇİZELGESİ (Desktop Only - Kompakt Tek Satır Şerit) -->
-      <div id="weekly-cashflow-banner" class="desktop-only-feature" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; padding: 7px 12px; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.25);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span style="font-size: 0.95rem;">📅</span>
-            <span style="font-weight: 700; font-size: 0.82rem; color: #f8fafc;">Önümüzdeki 7 Günün Nakit Çıkış Planı</span>
-            <span style="font-size: 0.7rem; color: #94a3b8;">(Banka hesabında hazır tutulmalı)</span>
-          </div>
-          <div style="font-size: 0.82rem; font-weight: 800; color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.25); padding: 2px 10px; border-radius: 12px;" id="weekly-cashflow-total">
-            Toplam: 0 ₺
-          </div>
-        </div>
-        <div id="weekly-cashflow-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
-          <!-- app.js tarafından doldurulacak -->
-        </div>
-      </div>
-
-      <!-- 2. KIA EV6 ELEKTRİKLİ ARAÇ HIZLI TASARRUF & ŞARJ KARTI (Desktop Only - Mobilde Altta 'Araç' Sekmesi Var) -->
-      <div class="desktop-only-feature" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.08)); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 12px; padding: 10px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="kia_ev6.png" class="neon-car-blue" style="height: 38px; width: auto; object-fit: contain;">
-          <div>
-            <div style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
-              <span>KIA EV6</span>
-              <span style="background: #2563eb; color: white; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 800;">41 ACR 610</span>
-            </div>
-            <div style="font-size: 0.76rem; color: #cbd5e1; margin-top: 2px;" id="home-ev-savings-text">
-              🌱 Elektrikli sürüşle benzine kıyasla <strong style="color: #34d399;" id="home-ev-savings-amount">~4.200 ₺</strong> yakıt tasarrufu sağladınız.
-            </div>
-          </div>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="top-nav-btn top-nav-btn-briefing" onclick="openEvChargeModal()" style="height: 34px; padding: 0 12px; font-size: 0.78rem;">
-            <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>Şarj Ekle</span>
-          </button>
-          <button class="top-nav-btn" onclick="switchTab('garage')" style="height: 34px; padding: 0 12px; font-size: 0.78rem;">
-            <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="7" cy="17" r="2" stroke-width="2"/>
-              <path d="M9 17h6" stroke-width="2"/>
-              <circle cx="17" cy="17" r="2" stroke-width="2"/>
-            </svg>
-            <span>Garaj Detayı &rarr;</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Category Filter Tabs (Yatay Kaydırılabilir Şık Hap Butonlar) -->
+      <!-- Category Filter Tabs (Yatay Kaydırılabilir Şık Hap Butonlar) - En Üstte -->
       <div class="tabs-bar">
         <button class="tab-btn active" data-category="all" onclick="filterCategory('all')">
           <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -980,6 +892,203 @@
       <div class="payments-grid" id="payments-container">
         <!-- Rendered by app.js -->
       </div>
+
+      <!-- BU AY KALAN BORÇ Platformu & Canlı Yürüyen Robot Maskot (Tek Robot, 4 Kartın Tam Üstünde Devriye Gezer) -->
+      <div id="stats-robot-platform" class="desktop-only-feature" style="position: relative; margin-top: auto; margin-bottom: 6px; padding-top: 48px;">
+        
+        <!-- Canlı Yürüyen Robot Maskot (Sayfada Tek Robot - Kartların Üstünde Sağa Sola Yürür) -->
+        <div id="ai-chat-bubble" class="mascot-container" onclick="toggleAiChatModal()" title="Optimus Prime Asistan ile Konuşmak İçin Tıkla!">
+          <div class="mascot-robot-body">
+            <svg class="mascot-robot-svg" viewBox="0 0 100 135" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="roboHelmetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#334155" />
+                  <stop offset="50%" stop-color="#1e293b" />
+                  <stop offset="100%" stop-color="#0f172a" />
+                </linearGradient>
+                <linearGradient id="roboBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#2563eb" />
+                  <stop offset="45%" stop-color="#1e293b" />
+                  <stop offset="100%" stop-color="#0b1329" />
+                </linearGradient>
+                <linearGradient id="roboArmGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#475569" />
+                  <stop offset="100%" stop-color="#1e293b" />
+                </linearGradient>
+                <radialGradient id="roboCoreGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ffffff" />
+                  <stop offset="35%" stop-color="#00f2fe" />
+                  <stop offset="100%" stop-color="#0284c7" />
+                </radialGradient>
+                <filter id="roboGlow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="roboSmallGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="1.8" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="whiteGlow" x="-60%" y="-60%" width="220%" height="220%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="2.8" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- Sol Bacak & Ayak (Yürüyen) -->
+              <g class="robot-leg-left">
+                <rect x="34" y="98" width="8" height="15" rx="4" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+                <circle cx="38" cy="112" r="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+                <path d="M 33 114 L 43 114 L 45 125 L 27 125 Q 27 120 33 120 Z" fill="url(#roboHelmetGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+                <line x1="28" y1="127" x2="44" y2="127" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#roboGlow)"/>
+              </g>
+
+              <!-- Sağ Bacak & Ayak (Yürüyen) -->
+              <g class="robot-leg-right">
+                <rect x="58" y="98" width="8" height="15" rx="4" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+                <circle cx="62" cy="112" r="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+                <path d="M 57 114 L 67 114 L 73 125 L 55 125 Q 55 120 57 120 Z" fill="url(#roboHelmetGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+                <line x1="56" y1="127" x2="72" y2="127" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#roboGlow)"/>
+              </g>
+
+              <!-- Gövde (Torso & Ark Reaktörü) -->
+              <g class="robot-torso">
+                <rect x="44" y="62" width="12" height="7" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
+                <path d="M 28 67 L 72 67 Q 76 67 76 72 L 72 96 Q 72 100 68 100 L 32 100 Q 28 100 28 96 L 24 72 Q 24 67 28 67 Z" fill="url(#roboBodyGrad)" stroke="#38bdf8" stroke-width="2"/>
+                <path d="M 32 76 L 43 82 L 57 82 L 68 76" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" fill="none"/>
+                <circle cx="50" cy="85" r="9" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                <circle class="robot-core-pulse" cx="50" cy="85" r="5.5" fill="url(#roboCoreGlow)" filter="url(#roboGlow)"/>
+                <circle cx="50" cy="85" r="2" fill="#ffffff"/>
+              </g>
+
+              <!-- Sol Kol & El (El Sallayan) -->
+              <g class="robot-arm-left">
+                <circle cx="24" cy="71" r="5.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+                <path d="M 23 72 L 15 54 Q 13 50 16 48 L 19 49 Q 21 51 22 55 L 26 71 Z" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+                <circle cx="16" cy="46" r="4.5" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+                <line x1="13" y1="44" x2="10" y2="40" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                <line x1="16" y1="42" x2="15" y2="37" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                <line x1="19" y1="44" x2="21" y2="39" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="15" cy="38" r="2" fill="#ffffff" filter="url(#roboSmallGlow)"/>
+              </g>
+
+              <!-- Sağ Kol & El (Salınan) -->
+              <g class="robot-arm-right">
+                <circle cx="76" cy="71" r="5.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+                <path d="M 74 72 L 82 86 Q 84 90 82 92 L 79 92 Q 77 90 76 86 L 72 72 Z" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+                <circle cx="82" cy="94" r="4.5" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+                <line x1="80" y1="97" x2="79" y2="101" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                <line x1="83" y1="98" x2="83" y2="102" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+                <line x1="86" y1="97" x2="87" y2="100" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+              </g>
+
+              <!-- Robot Kafası, Anteni & Gözleri -->
+              <g class="robot-head">
+                <line x1="50" y1="20" x2="50" y2="8" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
+                <g class="robot-antenna-rays">
+                  <line x1="50" y1="-1" x2="50" y2="15" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" filter="url(#whiteGlow)"/>
+                  <line x1="42" y1="7" x2="58" y2="7" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" filter="url(#whiteGlow)"/>
+                </g>
+                <circle class="robot-antenna-halo" cx="50" cy="7" r="7.5" fill="none" stroke="#ffffff" stroke-width="1.4" filter="url(#whiteGlow)"/>
+                <circle class="robot-antenna-orb" cx="50" cy="7" r="5" fill="#ffffff" filter="url(#whiteGlow)"/>
+                <rect x="22" y="20" width="56" height="43" rx="14" fill="url(#roboHelmetGrad)" stroke="#38bdf8" stroke-width="2.5"/>
+                <path d="M 38 20 L 44 14 L 56 14 L 62 20 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1.2"/>
+                <rect x="16" y="32" width="7" height="18" rx="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+                <rect x="77" y="32" width="7" height="18" rx="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+                <rect x="28" y="28" width="44" height="26" rx="8" fill="#030712" stroke="rgba(56,189,248,0.6)" stroke-width="1.5"/>
+                <line x1="30" y1="38" x2="70" y2="38" stroke="rgba(56,189,248,0.15)" stroke-width="1"/>
+                <g class="robot-eyes-wrapper">
+                  <ellipse class="robot-eye" cx="40" cy="39" rx="5" ry="6" fill="#38bdf8" filter="url(#roboSmallGlow)"/>
+                  <circle cx="41.5" cy="37.5" r="1.5" fill="#ffffff"/>
+                  <ellipse class="robot-eye" cx="60" cy="39" rx="5" ry="6" fill="#38bdf8" filter="url(#roboSmallGlow)"/>
+                  <circle cx="61.5" cy="37.5" r="1.5" fill="#ffffff"/>
+                </g>
+                <path d="M 44 48 Q 50 51 56 48" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" fill="none"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Financial Overview / Stat Cards (Desktop) -->
+        <section class="stats-grid desktop-only-stats" style="margin-top: 0; margin-bottom: 0;">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span>BU AY KALAN BORÇ</span>
+              <span>⏳</span>
+            </div>
+            <div class="stat-value danger" id="stat-month-pending">0 ₺</div>
+            <div class="stat-desc">Bu ay ödenmesi gereken tutar</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span>BU AY ÖDENEN</span>
+              <span>✓</span>
+            </div>
+            <div class="stat-value success" id="stat-month-paid">0 ₺</div>
+            <div class="stat-desc">Bu ay kapatılan ödemeler</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span>BU AY TOPLAM MALİYET</span>
+              <span>📅</span>
+            </div>
+            <div class="stat-value primary" id="stat-month-total">0 ₺</div>
+            <div class="stat-desc">Bu ayın toplam gider bütçesi</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span>YILLIK TAHMİNİ GİDER</span>
+              <span>📊</span>
+            </div>
+            <div class="stat-value purple" id="stat-annual-proj">0 ₺</div>
+            <div class="stat-desc">12 aylık projeksiyon + Araç & Vergiler</div>
+          </div>
+        </section>
+      </div>
+
+      <!-- KIA EV6 Panel Şeridi (En Altta, Gezinme Butonlarının Hemen Üstünde) -->
+      <div id="kia-ev6-banner" class="desktop-only-feature" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.08)); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 12px; padding: 6px 14px; margin-bottom: 0px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="/kia_ev6.png" class="neon-car-blue" style="height: 36px; width: auto; object-fit: contain;">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
+              <span>KIA EV6</span>
+              <span style="background: #2563eb; color: white; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 800;">41 ACR 610</span>
+            </div>
+            <div style="font-size: 0.76rem; color: #cbd5e1; margin-top: 2px;" id="home-ev-savings-text">
+              🌱 Elektrikli sürüşle benzine kıyasla <strong style="color: #34d399;" id="home-ev-savings-amount">~4.200 ₺</strong> yakıt tasarrufu sağladınız.
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="top-nav-btn top-nav-btn-briefing" onclick="openEvChargeModal()" style="height: 32px; padding: 0 12px; font-size: 0.78rem;">
+            <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Şarj Ekle</span>
+          </button>
+          <button class="top-nav-btn" onclick="switchTab('garage')" style="height: 32px; padding: 0 12px; font-size: 0.78rem;">
+            <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="7" cy="17" r="2" stroke-width="2"/>
+              <path d="M9 17h6" stroke-width="2"/>
+              <circle cx="17" cy="17" r="2" stroke-width="2"/>
+            </svg>
+            <span>Garaj Detayı &rarr;</span>
+          </button>
+        </div>
+      </div>
     </section>
 
     
@@ -1005,7 +1114,7 @@
               <button id="btn-delete-veh" onclick="deleteCurrentVehicle()" style="background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; display: none;" title="Aracı Garajdan Sil">🗑️</button>
             </div>
             <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
-              <img id="veh-img" src="kia_ev6.png" alt="Araç" class="neon-car-blue" style="height: 54px; width: auto; object-fit: contain;">
+              <img id="veh-img" src="/kia_ev6.png" alt="Araç" class="neon-car-blue" style="height: 54px; width: auto; object-fit: contain;">
             </div>
             <div style="background: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: bold; letter-spacing: 1px; color: white;" id="veh-plate">--</div>
         </div>
@@ -1887,7 +1996,7 @@
       <!-- Modal Header -->
       <div style="padding: 26px 28px 16px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
         <div style="width: 68px; height: 68px; margin: 0 auto 12px; border-radius: 16px; overflow: hidden; border: 2px solid rgba(56, 189, 248, 0.7); box-shadow: 0 0 18px rgba(56, 189, 248, 0.45); background: #000;">
-          <video src="logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
+          <video src="/logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
         </div>
         <h3 id="auth-modal-title" style="font-size: 1.35rem; font-weight: 800; color: #f8fafc; margin-bottom: 4px;">Ödeme Asistanı</h3>
         <p id="auth-modal-subtitle" style="font-size: 0.82rem; color: #94a3b8;">Kişisel ve güvenli finans takibi</p>
@@ -1952,142 +2061,10 @@
     </div>
   </div>
 
+  <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
-  <script src="offline_adapter.js"></script>
-  <script src="app.js"></script>
 
-  <!-- Canlı Hareketli Maskot: Sayfa Boyunca Devriye Gezen Robot Asistan (Kafası, Kolları, Elleri ve Bacakları Olan Saf Robot) -->
-  <div id="ai-chat-bubble" class="mascot-container" onclick="toggleAiChatModal()" title="Optimus Prime Asistan ile Konuşmak İçin Tıkla!">
-    <div class="mascot-robot-body">
-      <svg class="mascot-robot-svg" viewBox="0 0 100 135" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="roboHelmetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#334155" />
-            <stop offset="50%" stop-color="#1e293b" />
-            <stop offset="100%" stop-color="#0f172a" />
-          </linearGradient>
-          <linearGradient id="roboBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#2563eb" />
-            <stop offset="45%" stop-color="#1e293b" />
-            <stop offset="100%" stop-color="#0b1329" />
-          </linearGradient>
-          <linearGradient id="roboArmGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#475569" />
-            <stop offset="100%" stop-color="#1e293b" />
-          </linearGradient>
-          <radialGradient id="roboCoreGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#ffffff" />
-            <stop offset="35%" stop-color="#00f2fe" />
-            <stop offset="100%" stop-color="#0284c7" />
-          </radialGradient>
-          <filter id="roboGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          <filter id="roboSmallGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="1.8" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          <filter id="whiteGlow" x="-60%" y="-60%" width="220%" height="220%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="2.8" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        <!-- Sol Bacak & Ayak (Yürüyen) -->
-        <g class="robot-leg-left">
-          <rect x="34" y="98" width="8" height="15" rx="4" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
-          <circle cx="38" cy="112" r="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
-          <path d="M 33 114 L 43 114 L 45 125 L 27 125 Q 27 120 33 120 Z" fill="url(#roboHelmetGrad)" stroke="#38bdf8" stroke-width="1.5"/>
-          <line x1="28" y1="127" x2="44" y2="127" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#roboGlow)"/>
-        </g>
-
-        <!-- Sağ Bacak & Ayak (Yürüyen) -->
-        <g class="robot-leg-right">
-          <rect x="58" y="98" width="8" height="15" rx="4" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
-          <circle cx="62" cy="112" r="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
-          <path d="M 57 114 L 67 114 L 73 125 L 55 125 Q 55 120 57 120 Z" fill="url(#roboHelmetGrad)" stroke="#38bdf8" stroke-width="1.5"/>
-          <line x1="56" y1="127" x2="72" y2="127" stroke="#00f2fe" stroke-width="2.5" stroke-linecap="round" filter="url(#roboGlow)"/>
-        </g>
-
-        <!-- Gövde (Torso & Ark Reaktörü) -->
-        <g class="robot-torso">
-          <rect x="44" y="62" width="12" height="7" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
-          <path d="M 28 67 L 72 67 Q 76 67 76 72 L 72 96 Q 72 100 68 100 L 32 100 Q 28 100 28 96 L 24 72 Q 24 67 28 67 Z" fill="url(#roboBodyGrad)" stroke="#38bdf8" stroke-width="2"/>
-          <path d="M 32 76 L 43 82 L 57 82 L 68 76" stroke="rgba(56,189,248,0.5)" stroke-width="1.5" fill="none"/>
-          <circle cx="50" cy="85" r="9" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-          <circle class="robot-core-pulse" cx="50" cy="85" r="5.5" fill="url(#roboCoreGlow)" filter="url(#roboGlow)"/>
-          <circle cx="50" cy="85" r="2" fill="#ffffff"/>
-        </g>
-
-        <!-- Sol Kol & El (El Sallayan) -->
-        <g class="robot-arm-left">
-          <circle cx="24" cy="71" r="5.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
-          <path d="M 23 72 L 15 54 Q 13 50 16 48 L 19 49 Q 21 51 22 55 L 26 71 Z" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
-          <circle cx="16" cy="46" r="4.5" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
-          <line x1="13" y1="44" x2="10" y2="40" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
-          <line x1="16" y1="42" x2="15" y2="37" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
-          <line x1="19" y1="44" x2="21" y2="39" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="15" cy="38" r="2" fill="#ffffff" filter="url(#roboSmallGlow)"/>
-        </g>
-
-        <!-- Sağ Kol & El (Salınan) -->
-        <g class="robot-arm-right">
-          <circle cx="76" cy="71" r="5.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
-          <path d="M 74 72 L 82 86 Q 84 90 82 92 L 79 92 Q 77 90 76 86 L 72 72 Z" fill="url(#roboArmGrad)" stroke="#38bdf8" stroke-width="1.2"/>
-          <circle cx="82" cy="94" r="4.5" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
-          <line x1="80" y1="97" x2="79" y2="101" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
-          <line x1="83" y1="98" x2="83" y2="102" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
-          <line x1="86" y1="97" x2="87" y2="100" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
-        </g>
-
-        <!-- Robot Kafası, Anteni & Gözleri -->
-        <g class="robot-head">
-          <!-- Tepe Anteni Direği -->
-          <line x1="50" y1="20" x2="50" y2="8" stroke="#e2e8f0" stroke-width="2.5" stroke-linecap="round"/>
-          
-          <!-- Beyaz Işık Saçan Işınlar / Flares -->
-          <g class="robot-antenna-rays">
-            <line x1="50" y1="-1" x2="50" y2="15" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" filter="url(#whiteGlow)"/>
-            <line x1="42" y1="7" x2="58" y2="7" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" filter="url(#whiteGlow)"/>
-          </g>
-
-          <!-- Dış Beyaz Işık Halesi / Parlama Dalgası -->
-          <circle class="robot-antenna-halo" cx="50" cy="7" r="7.5" fill="none" stroke="#ffffff" stroke-width="1.4" filter="url(#whiteGlow)"/>
-
-          <!-- Merkez Parlak Beyaz Işık Küresi -->
-          <circle class="robot-antenna-orb" cx="50" cy="7" r="5" fill="#ffffff" filter="url(#whiteGlow)"/>
-          
-          <rect x="22" y="20" width="56" height="43" rx="14" fill="url(#roboHelmetGrad)" stroke="#38bdf8" stroke-width="2.5"/>
-          <path d="M 38 20 L 44 14 L 56 14 L 62 20 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1.2"/>
-          
-          <rect x="16" y="32" width="7" height="18" rx="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
-          <rect x="77" y="32" width="7" height="18" rx="3.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
-          
-          <rect x="28" y="28" width="44" height="26" rx="8" fill="#030712" stroke="rgba(56,189,248,0.6)" stroke-width="1.5"/>
-          <line x1="30" y1="38" x2="70" y2="38" stroke="rgba(56,189,248,0.15)" stroke-width="1"/>
-          
-          <g class="robot-eyes-wrapper">
-            <ellipse class="robot-eye" cx="40" cy="39" rx="5" ry="6" fill="#38bdf8" filter="url(#roboSmallGlow)"/>
-            <circle cx="41.5" cy="37.5" r="1.5" fill="#ffffff"/>
-            <ellipse class="robot-eye" cx="60" cy="39" rx="5" ry="6" fill="#38bdf8" filter="url(#roboSmallGlow)"/>
-            <circle cx="61.5" cy="37.5" r="1.5" fill="#ffffff"/>
-          </g>
-          
-          <path d="M 44 48 Q 50 51 56 48" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" fill="none"/>
-        </g>
-      </svg>
-    </div>
-  </div>
+  <script src="/app.js?v=338"></script>
 
   <div id="ai-chat-modal" style="display: none; position: fixed; bottom: 150px; right: 20px; width: 380px; max-width: calc(100vw - 40px); height: 500px; max-height: calc(100vh - 180px); background: #0f172a; border: 1.5px solid #38bdf8; border-radius: 18px; box-shadow: 0 10px 35px rgba(0,0,0,0.8), 0 0 25px rgba(56, 189, 248, 0.35); z-index: 1001; flex-direction: column; overflow: hidden;">
     <!-- Chat Header -->

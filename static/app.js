@@ -1115,10 +1115,20 @@ function getLogoUrlForTitle(title, category) {
     'prime': 'amazon.png',
     'netflix': 'netflix.png',
     'xbox': 'xbox.png',
-    'kia': 'kia.png',
     'tüvtürk': 'tuvturk.png',
     'tuvturk': 'tuvturk.png',
     'muayene': 'tuvturk.png',
+    'kasko': 'allianz.png',
+    'trafik': 'allianz.png',
+    'allianz': 'allianz.png',
+    'sigorta': 'allianz.png',
+    'sigortası': 'allianz.png',
+    'kia': 'kia.png',
+    'servis': 'kia.png',
+    'periyodik': 'kia.png',
+    'bakım': 'kia.png',
+    'bakımı': 'kia.png',
+    'bakim': 'kia.png',
     'izgaz': 'izgaz.png',
     'doğalgaz': 'izgaz.png',
     'dogalgaz': 'izgaz.png',
@@ -1144,7 +1154,7 @@ function getLogoUrlForTitle(title, category) {
   
   for (const key in logos) {
     if (t.includes(key)) {
-      return `/logos/${logos[key]}`;
+      return `logos/${logos[key]}`;
     }
   }
   return null;
@@ -1655,7 +1665,7 @@ function switchTab(tabName) {
     mobStats.classList.toggle('hidden-tab', tabName !== 'dashboard');
   }
 
-  document.getElementById('section-dashboard').style.display = (tabName === 'dashboard') ? 'block' : 'none';
+  document.getElementById('section-dashboard').style.display = (tabName === 'dashboard') ? 'flex' : 'none';
   
   const secGarage = document.getElementById('section-garage');
   if (secGarage) secGarage.style.display = (tabName === 'garage') ? 'block' : 'none';
