@@ -1190,6 +1190,7 @@ function createPaymentCardHtml(item) {
 
   // Urgency badge calculation
   let badgeHtml = '';
+  let cardClass = item.urgency || '';
   // 4 Kademeli Neon Işık Mantığı (Yeşil, Mavi, Sarı, Kırmızı):
   if (item.status === 'paid') {
     cardClass += ' card-completed neon-green';

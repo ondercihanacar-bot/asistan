@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefresh;
     private ProgressBar progressBar;
     private LinearLayout layoutError;
+    private LinearLayout layoutWakingUp;
+    private Button btnWakeupUseOffline;
     private TextView txtCurrentServer;
     private Button btnRetry;
     private Button btnSettings;
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences prefs;
     private String currentServerUrl;
     private boolean isPageLoadedSuccessfully = false;
+    private boolean isWakingUpPolling = false;
     private long backPressedTime = 0;
 
     private ValueCallback<Uri[]> fileUploadCallback;
@@ -100,9 +103,20 @@ public class MainActivity extends AppCompatActivity {
         swipeRefresh = findViewById(R.id.swipeRefresh);
         progressBar = findViewById(R.id.progressBar);
         layoutError = findViewById(R.id.layoutError);
+        layoutWakingUp = findViewById(R.id.layoutWakingUp);
+        btnWakeupUseOffline = findViewById(R.id.btnWakeupUseOffline);
         txtCurrentServer = findViewById(R.id.txtCurrentServer);
         btnRetry = findViewById(R.id.btnRetry);
         btnSettings = findViewById(R.id.btnSettings);
+
+        if (btnWakeupUseOffline != null) {
+            btnWakeupUseOffline.setOnClickListener(v -> {
+                isWakingUpPolling = false;
+                layoutWakingUp.setVisibility(View.GONE);
+                swipeRefresh.setVisibility(View.VISIBLE);
+                loadServerUrl(DEFAULT_LOCAL_URL);
+            });
+        }
 
         swipeRefresh.setColorSchemeResources(R.color.primary, R.color.secondary);
         swipeRefresh.setProgressBackgroundColorSchemeResource(R.color.surface);
@@ -187,18 +201,63 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                progressBar.setVisibility(View.VISIBLE);
-                progressBar.setProgress(10);
+                if (layoutWakingUp == null || layoutWakingUp.getVisibility() != View.VISIBLE) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    progressBar.setProgress(10);
+                }
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 progressBar.setVisibility(View.GONE);
                 swipeRefresh.setRefreshing(false);
-                if (!isPageLoadedSuccessfully) {
-                    isPageLoadedSuccessfully = true;
-                    layoutError.setVisibility(View.GONE);
-                    swipeRefresh.setVisibility(View.VISIBLE);
+
+                if (url != null && url.contains("onrender.com")) {
+                    view.evaluateJavascript(
+                        "(function() { " +
+                        "   var bodyText = (document.body && document.body.innerText) ? document.body.innerText : ''; " +
+                        "   var title = document.title || ''; " +
+                        "   return (bodyText.indexOf('SERVICE WAKING UP') !== -1 || " +
+                        "           bodyText.indexOf('ALLOCATING COMPUTE') !== -1 || " +
+                        "           bodyText.indexOf('spun down') !== -1 || " +
+                        "           (title.indexOf('Render') !== -1 && bodyText.indexOf('Render') !== -1 && !document.getElementById('app-header'))); " +
+                        "})();",
+                        value -> {
+                            boolean isRenderWakingUp = "true".equals(value);
+                            if (isRenderWakingUp) {
+                                isWakingUpPolling = true;
+                                if (layoutWakingUp != null) {
+                                    layoutWakingUp.setVisibility(View.VISIBLE);
+                                }
+                                swipeRefresh.setVisibility(View.GONE);
+                                view.postDelayed(() -> {
+                                    if (isWakingUpPolling && !isFinishing() && !isDestroyed()) {
+                                        view.reload();
+                                    }
+                                }, 4000);
+                            } else {
+                                isWakingUpPolling = false;
+                                if (layoutWakingUp != null) {
+                                    layoutWakingUp.setVisibility(View.GONE);
+                                }
+                                swipeRefresh.setVisibility(View.VISIBLE);
+                                if (!isPageLoadedSuccessfully) {
+                                    isPageLoadedSuccessfully = true;
+                                    layoutError.setVisibility(View.GONE);
+                                }
+                            }
+                        }
+                    );
+                } else {
+                    isWakingUpPolling = false;
+                    if (layoutWakingUp != null) {
+                        layoutWakingUp.setVisibility(View.GONE);
+                    }
+                    if (!isPageLoadedSuccessfully) {
+                        isPageLoadedSuccessfully = true;
+                        layoutError.setVisibility(View.GONE);
+                        swipeRefresh.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -278,6 +337,10 @@ public class MainActivity extends AppCompatActivity {
         currentServerUrl = url;
         prefs.edit().putString(KEY_SERVER_URL, currentServerUrl).apply();
         isPageLoadedSuccessfully = false;
+        isWakingUpPolling = false;
+        if (layoutWakingUp != null) {
+            layoutWakingUp.setVisibility(View.GONE);
+        }
         webView.loadUrl(currentServerUrl);
     }
 

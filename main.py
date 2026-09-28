@@ -98,6 +98,26 @@ async def scheduled_backup_worker():
 
         await asyncio.sleep(30)
 
+async def render_keep_alive_worker():
+    """Render bulut sunucusunu uyku moduna geçmemesi için düzenli uyarır."""
+    import urllib.request
+    await asyncio.sleep(10)
+    while True:
+        try:
+            def ping():
+                req = urllib.request.Request(
+                    "https://asistan-cl3h.onrender.com/",
+                    headers={"User-Agent": "AsistanKeepAlive/1.0"}
+                )
+                with urllib.request.urlopen(req, timeout=25) as resp:
+                    pass
+            await asyncio.to_thread(ping)
+        except asyncio.CancelledError:
+            break
+        except Exception:
+            pass
+        await asyncio.sleep(600)
+
 def perform_database_backup(target_folder: Optional[str] = None) -> tuple:
     try:
         if not target_folder:
@@ -174,9 +194,11 @@ async def lifespan(app: FastAPI):
     # Otomatik arka plan görevlerini başlat
     sync_task = asyncio.create_task(scheduled_gmail_sync_worker())
     backup_task = asyncio.create_task(scheduled_backup_worker())
+    keep_alive_task = asyncio.create_task(render_keep_alive_worker())
     yield
     sync_task.cancel()
     backup_task.cancel()
+    keep_alive_task.cancel()
 
 app = FastAPI(title="Akıllı Ödeme ve Hatırlatıcı Asistanı", lifespan=lifespan)
 

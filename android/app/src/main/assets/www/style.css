@@ -369,9 +369,12 @@ body {
   display: none;
 }
 
-/* Settings Panel Cards Fix: Ensure full-width block display, avoid flex child issues */
+/* Settings and Garage Panel Cards Fix: Ensure full-width block display, avoid flex child issues */
 #section-settings .stat-card,
 #settings-panel .stat-card,
+#section-garage .stat-card,
+.vehicle-card,
+.vehicle-profile-card,
 .settings-card {
   display: block !important;
   width: 100% !important;
