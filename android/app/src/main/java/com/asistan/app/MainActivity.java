@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
         setupLaunchers();
         setupWebView();
         setupBackNavigation();
-        requestNecessaryPermissions();
 
         loadServerUrl(currentServerUrl);
     }
