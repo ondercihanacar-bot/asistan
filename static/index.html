@@ -814,6 +814,21 @@
         <span class="desktop-only-btn-label">Günün Brifingi</span>
       </button>
 
+      <button class="top-nav-btn" id="btn-chat-history" onclick="toggleAiChatModal()" title="Geçmiş Yazışmaları Gör">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="desktop-only-btn-label">Geçmiş</span>
+      </button>
+
+      <button class="top-nav-btn" id="btn-clear-chat-history" onclick="if(confirm('Geçmiş yazışmaları temizlemek istediğinize emin misiniz?')){document.getElementById('ai-chat-messages').innerHTML=''; showToast('🧹 Geçmiş yazışmalar temizlendi.');}" title="Geçmiş Yazışmaları Temizle" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1);">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <polyline points="3 6 5 6 21 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="desktop-only-btn-label">Temizle</span>
+      </button>
+
       <button class="top-nav-btn top-nav-btn-antigravity" id="btn-antigravity-studio" onclick="openAntigravityStudio()" title="Optimus Canlı Kod & Geliştirici Stüdyosu">
         <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
