@@ -97,8 +97,8 @@ function switchAuthTab(tab) {
     if (submitText) submitText.textContent = 'Giriş Yap';
     const tEl = document.getElementById('auth-modal-title');
     const sEl = document.getElementById('auth-modal-subtitle');
-    if (tEl) tEl.textContent = 'Ödeme Asistanı';
-    if (sEl) sEl.textContent = 'Kişisel ve güvenli finans takibi';
+    if (tEl) tEl.textContent = 'ASİSTAN';
+    if (sEl) sEl.textContent = 'Kişisel Asistanınız';
   } else {
     if (tabLogin) tabLogin.className = 'auth-tab-btn';
     if (tabReg) tabReg.className = 'auth-tab-btn active';
