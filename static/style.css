@@ -1290,15 +1290,33 @@ body {
   border-left: 5px solid #38bdf8 !important;
 }
 
-.payment-card.card-completed {
-  border-left: 4px solid var(--success) !important;
-  opacity: 0.85;
+/* ========================================================
+   GELİŞMİŞ NEON IŞIK SİSTEMİ (Yeşil, Mavi, Sarı, Kırmızı)
+   ======================================================== */
+@keyframes neonPulseGreen {
+  0% {
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.4), 0 0 12px rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.65);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.9), 0 0 26px rgba(5, 150, 105, 0.5), inset 0 0 6px rgba(16, 185, 129, 0.25);
+    border-color: #10b981;
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.4), 0 0 12px rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.65);
+  }
 }
 
-
-/* ========================================================
-   GELİŞMİŞ NEON IŞIK SİSTEMİ (Mavi, Sarı, Kırmızı)
-   ======================================================== */
+/* Ödenmiş Kartlar: ZÜMRÜT YEŞİLİ NEON */
+.payment-card.card-completed,
+.payment-card.neon-paid,
+.payment-card.neon-green {
+  animation: neonPulseGreen 2.2s infinite ease-in-out !important;
+  border: 1px solid #10b981 !important;
+  border-left: 5px solid #10b981 !important;
+  opacity: 1 !important;
+}
 @keyframes neonPulseRed {
   0% {
     box-shadow: 0 0 6px rgba(239, 68, 68, 0.4), 0 0 12px rgba(239, 68, 68, 0.2), inset 0 0 4px rgba(239, 68, 68, 0.2);

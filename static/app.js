@@ -1190,10 +1190,9 @@ function createPaymentCardHtml(item) {
 
   // Urgency badge calculation
   let badgeHtml = '';
-  let cardClass = item.urgency;
-  // 3 Kademeli Neon Işık Mantığı:
+  // 4 Kademeli Neon Işık Mantığı (Yeşil, Mavi, Sarı, Kırmızı):
   if (item.status === 'paid') {
-    cardClass += ' card-completed';
+    cardClass += ' card-completed neon-green';
   } else {
     // 4 günün altına düşenler (<= 3 gün veya günü geçmişler): KIRMIZI NEON
     if (item.days_remaining < 4) {
@@ -1273,10 +1272,17 @@ function createPaymentCardHtml(item) {
       </div>
 
       <div class="card-bottom">
-        <button class="btn-pay" onclick="markPaid(${item.id}, '${escapeHtml(item.title)}', ${item.amount})">
-          <span>✓</span>
-          <span>Ödendi</span>
-        </button>
+        ${item.status === 'paid' ? `
+          <button class="btn-pay" style="background: rgba(16, 185, 129, 0.2); border: 1.5px solid #10b981; color: #34d399; font-weight: 700; cursor: default;" title="Bu ödeme tamamlandı olarak işaretlendi">
+            <span>✓</span>
+            <span>Ödendi</span>
+          </button>
+        ` : `
+          <button class="btn-pay" onclick="markPaid(${item.id}, '${escapeHtml(item.title)}', ${item.amount})">
+            <span>✓</span>
+            <span>Ödendi</span>
+          </button>
+        `}
         <button class="btn-action-icon" onclick="openEditModal(${item.id})" title="Düzenle">
           ✏️
         </button>

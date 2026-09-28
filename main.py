@@ -2379,7 +2379,14 @@ def list_backups():
     row = cursor.execute("SELECT value FROM admin_settings WHERE key = 'backup_folder'").fetchone()
     conn.close()
     folder = (row["value"] if row and row["value"] else None) or os.path.abspath(os.path.join(os.path.dirname(__file__), "backups"))
-    os.makedirs(folder, exist_ok=True)
+    try:
+        os.makedirs(folder, exist_ok=True)
+    except Exception:
+        folder = os.path.abspath(os.path.join(os.path.dirname(__file__), "backups"))
+        try:
+            os.makedirs(folder, exist_ok=True)
+        except Exception:
+            pass
 
     backups = []
     if os.path.exists(folder):
