@@ -1986,13 +1986,19 @@ function filterCategory(cat) {
 function openModal(id) {
   playHaptic(16);
   const el = document.getElementById(id);
-  if (el) el.classList.add('active');
+  if (el) {
+    el.style.display = 'flex';
+    el.classList.add('active');
+  }
 }
 
 function closeModal(id) {
   playHaptic(10);
   const el = document.getElementById(id);
-  if (el) el.classList.remove('active');
+  if (el) {
+    el.style.display = 'none';
+    el.classList.remove('active');
+  }
 }
 
 // Toast Alert
