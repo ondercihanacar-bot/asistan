@@ -1069,7 +1069,6 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
         if any(w in msg for w in ["muayene", "tüvtürk", "tuvturk"]):
             tuv_date = v_info.get("tuvturk_date")
             if tuv_date:
-                from datetime import datetime
                 dt = datetime.strptime(tuv_date, "%Y-%m-%d").date()
                 diff = (dt - datetime.now().date()).days
                 month_tr = tr_months[dt.month] if dt.month <= 12 else ""
@@ -1083,7 +1082,6 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
             ins_date = v_info.get("insurance_date")
             if ins_date:
                 try:
-                    from datetime import datetime
                     dt = datetime.strptime(ins_date, "%Y-%m-%d").date()
                     date_spoken = f"{dt.day} {tr_months[dt.month]} {dt.year}"
                 except Exception:
@@ -1094,7 +1092,6 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
             kasko_date = v_info.get("kasko_date")
             if kasko_date:
                 try:
-                    from datetime import datetime
                     dt = datetime.strptime(kasko_date, "%Y-%m-%d").date()
                     date_spoken = f"{dt.day} {tr_months[dt.month]} {dt.year}"
                 except Exception:
