@@ -3584,7 +3584,7 @@ async function handleSaveGymDay(e) {
 async function openAntigravityStudio() {
   // Yönetici Parolası Doğrulaması (Kullanıcı Oturumu / Admin Şifresi: 2213)
   if (!window._isAntigravityUnlocked && !currentAdminPass) {
-    const pwd = prompt('⚡ Antigravity Geliştirici Stüdyosu\nLütfen yönetici parolanızı girin:');
+    const pwd = prompt('⚡ Optimus Geliştirici Stüdyosu\nLütfen yönetici parolanızı girin:');
     if (pwd === null) return; // İptal edildi
     
     let isValid = false;
@@ -3607,7 +3607,7 @@ async function openAntigravityStudio() {
       return;
     }
     window._isAntigravityUnlocked = true;
-    showToast('🔓 Antigravity Geliştirici Modu Açıldı');
+    showToast('🔓 Optimus Geliştirici Modu Açıldı');
   }
 
   openModal('modal-antigravity-studio');
@@ -3645,7 +3645,7 @@ function appendAntigravityMessage(type, content, isHtml = false) {
   } else {
     const title = document.createElement('div');
     title.style.cssText = 'color: #c084fc; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;';
-    title.innerHTML = '<span>⚡</span> <span>Antigravity Engine</span>';
+    title.innerHTML = '<span>⚡</span> <span>Optimus Engine</span>';
     msgDiv.appendChild(title);
     
     const body = document.createElement('div');
