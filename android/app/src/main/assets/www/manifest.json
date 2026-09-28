@@ -1,7 +1,7 @@
 {
-  "name": "Akıllı Ödeme ve Takip Asistanı",
+  "name": "Akıllı Asistan",
   "short_name": "Asistan",
-  "description": "Faturalar, abonelikler, kredi kartları ve araç bakımı takip ve hatırlatıcı asistanı",
+  "description": "Kişisel Akıllı Asistanınız",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

@@ -200,7 +200,7 @@ async def lifespan(app: FastAPI):
     backup_task.cancel()
     keep_alive_task.cancel()
 
-app = FastAPI(title="Akıllı Ödeme ve Hatırlatıcı Asistanı", lifespan=lifespan)
+app = FastAPI(title="Akıllı Asistan", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
