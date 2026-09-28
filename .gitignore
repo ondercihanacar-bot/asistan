@@ -71,3 +71,11 @@ payments.db
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Android build outputs
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+phone_screen.png

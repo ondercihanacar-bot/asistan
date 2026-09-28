@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
             loadServerUrl(DEFAULT_WIFI_URL);
         });
 
-        dialog.findViewById(R.id.editServerUrl).setOnEditorActionListener((v, actionId, event) -> {
+        editUrl.setOnEditorActionListener((v, actionId, event) -> {
             String newUrl = editUrl.getText().toString().trim();
             if (!newUrl.isEmpty()) {
                 dialog.dismiss();
