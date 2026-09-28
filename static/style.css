@@ -127,10 +127,10 @@ body {
 }
 
 .top-nav-btn:hover {
-  transform: translateY(-2px);
+  transform: none;
   color: #ffffff;
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(56, 189, 248, 0.35);
 }
 
 .top-nav-svg {
@@ -243,7 +243,7 @@ body {
 }
 .btn-primary:hover {
   background: linear-gradient(135deg, #1d4ed8, #2563eb);
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .btn-outline {
@@ -334,9 +334,9 @@ body {
 }
 
 .stat-card:hover {
-  transform: translateY(-1px);
+  transform: none;
   background: var(--bg-card-hover);
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
 }
 
 .stat-header {
@@ -377,6 +377,7 @@ body {
   gap: 12px;
   width: 100%;
   margin-bottom: 14px;
+  padding: 4px 2px;
 }
 .tabs-bar::-webkit-scrollbar { display: none; }
 
@@ -405,20 +406,20 @@ body {
   overflow: hidden;
 }
 
-/* Hover: Parlak Mavi Neon Işıma */
+/* Hover: Parlak Mavi Neon Işıma - Sabit Konum (Kesilme/Kayma Yok) */
 .tab-btn:hover {
   color: #ffffff;
   background: rgba(14, 165, 233, 0.16);
   border-color: #38bdf8;
-  transform: translateY(-3px);
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.65), 0 0 35px rgba(14, 165, 233, 0.35), inset 0 0 12px rgba(56, 189, 248, 0.2);
+  transform: none;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.55), inset 0 0 10px rgba(56, 189, 248, 0.2);
   text-shadow: 0 0 8px rgba(56, 189, 248, 0.9);
 }
 
 .tab-btn:hover .tab-btn-svg {
   stroke: #38bdf8;
   filter: drop-shadow(0 0 8px #38bdf8) drop-shadow(0 0 14px rgba(56, 189, 248, 0.8));
-  transform: scale(1.18);
+  transform: scale(1.15);
 }
 
 /* Aktif Sekme: Fütüristik Neon Gradyan */
@@ -438,8 +439,8 @@ body {
 }
 
 .tab-btn.active:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 24px rgba(14, 165, 233, 0.7), 0 0 32px rgba(56, 189, 248, 0.75);
+  transform: none;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.7), 0 0 28px rgba(56, 189, 248, 0.75);
 }
 
 .tab-btn-svg {
@@ -525,8 +526,9 @@ body {
 }
 
 .payment-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.45);
+  transform: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 12px rgba(56, 189, 248, 0.15);
 }
 
 .payment-card.critical {
@@ -1036,7 +1038,7 @@ body {
 }
 
 .bnav-item:hover .bnav-svg {
-  transform: translateY(-2px);
+  transform: scale(1.12);
 }
 
 .bnav-item.active .bnav-svg {
@@ -1076,8 +1078,8 @@ body {
 }
 
 .bnav-item-center:hover .bnav-add-btn {
-  transform: translateY(-3px) scale(1.08);
-  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.6), 0 0 16px rgba(99, 102, 241, 0.55);
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px rgba(14, 165, 233, 0.6), 0 0 16px rgba(99, 102, 241, 0.55);
 }
 
 .bnav-svg-add {
@@ -1509,7 +1511,7 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
-    padding: 6px 20px 56px 20px !important;
+    padding: 8px 20px 56px 20px !important;
     max-width: 1600px;
     width: 100%;
   }
@@ -1526,6 +1528,7 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
   .tabs-bar {
     flex-shrink: 0;
     margin-bottom: 8px;
+    padding: 3px 2px;
   }
 
   .payments-grid {
@@ -1534,7 +1537,7 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     overflow-y: auto;
     overflow-x: hidden;
     margin-bottom: 6px;
-    padding-right: 4px;
+    padding: 4px 4px 6px 2px;
     align-content: start !important;
     align-items: start !important;
     grid-auto-rows: max-content !important;
