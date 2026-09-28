@@ -498,18 +498,18 @@
           if (navigator.geolocation) {
             try {
               const pos = await new Promise((resolve, reject) => {
-                const timer = setTimeout(() => reject('timeout'), 1500);
+                const timer = setTimeout(() => reject('timeout'), 500);
                 navigator.geolocation.getCurrentPosition(
                   (p) => { clearTimeout(timer); resolve(p); },
                   (err) => { clearTimeout(timer); reject(err); },
-                  { timeout: 1500, maximumAge: 300000, enableHighAccuracy: false }
+                  { timeout: 500, maximumAge: 600000, enableHighAccuracy: false }
                 );
               });
               if (pos && pos.coords) {
                 url += `?lat=${pos.coords.latitude.toFixed(4)}&lon=${pos.coords.longitude.toFixed(4)}`;
               }
             } catch(geoErr) {
-              console.log('GPS pas geçildi, varsayılan şehir kullanılacak');
+              console.log('GPS pas geçildi, hızlı yanıt modu aktif');
             }
           }
 
