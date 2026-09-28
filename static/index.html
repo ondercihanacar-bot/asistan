@@ -809,7 +809,7 @@
         <span class="desktop-only-btn-label">Günün Brifingi</span>
       </button>
 
-      <button class="top-nav-btn top-nav-btn-antigravity" id="btn-antigravity-studio" onclick="openAntigravityStudio()" title="Antigravity Canlı Kod & Geliştirici Stüdyosu">
+      <button class="top-nav-btn top-nav-btn-antigravity" id="btn-antigravity-studio" onclick="const pwd = prompt('Lütfen Antigravity Geliştirici Stüdyosu için yönetici parolasını girin:'); if (pwd === '1234' || pwd === 'admin' || pwd === 'antigravity') { openAntigravityStudio(); } else if (pwd !== null) { alert('Hatalı parola!'); }" title="Antigravity Canlı Kod & Geliştirici Stüdyosu">
         <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
