@@ -1163,9 +1163,9 @@ function getLogoUrlForTitle(title, category) {
 function getLogoForTitle(title, category, fallbackIcon) {
   const url = getLogoUrlForTitle(title, category);
   if (!url) {
-    return `<span style="width:22px; height:22px; border-radius:5px; display:inline-flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.06); font-size:0.95rem; line-height:1; vertical-align:middle;">${fallbackIcon || '💳'}</span>`;
+    return `<span style="width:26px; height:26px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.06); font-size:1.05rem; line-height:1; vertical-align:middle;">${fallbackIcon || '💳'}</span>`;
   }
-  return `<img src="${url}" style="width:22px; height:22px; border-radius:5px; object-fit:contain; vertical-align:middle; background: white; padding: 1.5px;" onerror="this.outerHTML='${fallbackIcon}'">`;
+  return `<img src="${url}" style="width:26px; height:26px; border-radius:6px; object-fit:contain; vertical-align:middle; background: white; padding: 2px;" onerror="this.outerHTML='${fallbackIcon}'">`;
 }
 
 function createPaymentCardHtml(item) {
@@ -1250,7 +1250,7 @@ function createPaymentCardHtml(item) {
       <div class="card-top">
         <div class="card-info">
           <div class="card-category-icon">${getLogoForTitle(item.title, item.category, categoryIcons[item.category] || '💰')}</div>
-          <div>
+          <div style="min-width: 0; flex: 1; overflow: hidden;">
             <div class="card-title">${escapeHtml(item.title)}</div>
             <div class="card-subtitle">${categoryNames[item.category] || 'Ödeme'} ${item.notes ? '• ' + escapeHtml(item.notes) : ''}</div>
           </div>

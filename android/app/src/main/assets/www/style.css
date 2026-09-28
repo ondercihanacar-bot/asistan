@@ -36,7 +36,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: 70px; /* Space for mobile nav */
+  margin: 0;
+  padding: 0;
 }
 
 /* Scrollbar */
@@ -499,104 +500,106 @@ body {
   }
 }
 
-/* Payment List Cards - Ultra Kompakt ve İnce Dikey Tasarım (Yarı Yarıyadan da Küçük) */
+/* Payment List Cards - Şık, Okunaklı ve Dengeli Kompakt Tasarım */
 .payments-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
   align-content: start;
   align-items: start;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .payment-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 6px 10px;
+  border-radius: 12px;
+  padding: 10px 14px;
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 2px;
+  justify-content: space-between;
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
-  height: auto;
+  min-height: 118px;
 }
 
 .payment-card:hover {
   border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .payment-card.critical {
-  border-left: 3px solid var(--danger);
+  border-left: 3.5px solid var(--danger);
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, var(--bg-card) 60%);
 }
 
 .payment-card.soon {
-  border-left: 3px solid var(--warning);
+  border-left: 3.5px solid var(--warning);
 }
 
 .payment-card.normal {
-  border-left: 3px solid var(--primary);
+  border-left: 3.5px solid var(--primary);
 }
 
 .payment-card.paid {
-  border-left: 3px solid var(--success);
+  border-left: 3.5px solid var(--success);
   opacity: 0.85;
 }
 
 .card-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2px;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .card-info {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
   min-width: 0;
   flex: 1;
 }
 
 .card-category-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
   background: var(--bg-surface);
   flex-shrink: 0;
 }
 
 .card-title {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.25;
+  color: #f8fafc;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .card-subtitle {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   margin-top: 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .urgency-badge {
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 12px;
+  padding: 3px 8px;
+  border-radius: 14px;
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -637,11 +640,11 @@ body {
 .card-mid {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 2px 0;
+  align-items: flex-end;
+  padding: 4px 0;
   border-top: 1px dashed var(--border-color);
   border-bottom: 1px dashed var(--border-color);
-  margin: 2px 0;
+  margin: 4px 0;
 }
 
 .card-amount-box {
@@ -650,18 +653,19 @@ body {
 }
 
 .amount-label {
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .card-amount {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-main);
   letter-spacing: -0.01em;
   line-height: 1.1;
+  margin-top: 1px;
 }
 
 .card-dates {
@@ -669,33 +673,35 @@ body {
 }
 
 .due-date {
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 600;
+  color: #e2e8f0;
 }
 
 .repeat-badge {
-  font-size: 0.6rem;
+  font-size: 0.64rem;
   color: #94a3b8;
   display: inline-block;
+  margin-top: 1px;
 }
 
 .vehicle-meta {
   background: rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-sm);
   padding: 2px 6px;
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   color: #cbd5e1;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
   display: flex;
   gap: 8px;
 }
 
 .card-bottom {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
   justify-content: space-between;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .btn-pay {
@@ -703,10 +709,10 @@ body {
   background: linear-gradient(135deg, #059669, #10b981);
   color: white;
   border: none;
-  padding: 3px 8px;
-  height: 25px;
-  border-radius: 6px;
-  font-size: 0.74rem;
+  padding: 4px 10px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -722,9 +728,9 @@ body {
 }
 
 .btn-action-icon {
-  width: 25px;
-  height: 25px;
-  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
@@ -732,7 +738,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   transition: all 0.2s ease;
 }
 
@@ -1479,6 +1485,8 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
   html, body {
     height: 100vh;
     overflow: hidden;
+    margin: 0;
+    padding: 0;
   }
 
   body {
@@ -1486,6 +1494,8 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
+    margin: 0;
+    padding: 0;
   }
 
   .navbar {
@@ -1499,7 +1509,7 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
-    padding: 6px 20px 4px 20px !important;
+    padding: 6px 20px 56px 20px !important;
     max-width: 1600px;
     width: 100%;
   }
@@ -1515,7 +1525,7 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
 
   .tabs-bar {
     flex-shrink: 0;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 
   .payments-grid {
@@ -1523,7 +1533,7 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     padding-right: 4px;
     align-content: start !important;
     align-items: start !important;
@@ -1554,20 +1564,27 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
   #kia-ev6-banner {
     flex-shrink: 0;
     margin-bottom: 0 !important;
-    padding: 5px 12px !important;
+    padding: 6px 14px !important;
   }
 
   .bottom-nav {
-    position: static !important;
-    flex-shrink: 0 !important;
-    height: 48px !important;
-    margin-top: 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 50px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.5);
+    z-index: 990 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
 
   .bottom-nav-inner {
-    height: 48px !important;
+    height: 50px !important;
   }
 
   .bnav-item {
