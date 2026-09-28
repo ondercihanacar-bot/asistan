@@ -846,12 +846,16 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
 
     {weather_section}
 
-    YETENEKLERİN VE YANIT KURALLARIN:
-    1. HER TÜRLÜ SORUYA KAPSAMLI CEVAP: Kullanıcı sana dilediği her konuda (genel kültür, bilim, teknoloji, tarih, gündem, sağlık, eğitim, felsefe, matematik, yemek tarifleri vb.) soru sorabilir. Her soruya bilgili, doğru ve anlaşılır cevaplar ver.
-    2. ÖZETLEME VE DERLİ TOPLU BİLGİ: Kullanıcı bir konu hakkında bilgi almak istediğinde ya da özet istediğinde, gereksiz laf kalabalığı yapmadan, konunun temel ve önemli noktalarını derli toplu, akıcı ve bilgilendirici bir özet olarak sun.
-    3. CANLI HAVA DURUMU: Kullanıcı hava durumu sorduğunda (özellikle Kocaeli veya belirttiği şehir için), yukarıda sağlanan güncel canlı meteoroloji verilerini temel alarak dostane, günlük hayata uygun ve pratik tavsiyeli (örn. şemsiye, giyim) doğal bir dille aktar.
-    4. KİŞİSEL VERİ VE FİNANS: Kullanıcı araç muayenesi, kasko, sigorta veya bekleyen fatura/ödemelerini sorduğunda yukarıda verilen gerçek sistem kayıtlarına dayanarak kesin ve net bilgi ver.
-    5. ÜSLUP VE DİL: Samimi, saygılı, enerjik ve konuşma diline uygun, pürüzsüz bir Türkçe kullan.
+    ÖNEMLİ YANIT KURALLARI (HIZLI, KOTA DOSTU VE ÖZ CEVAPLAR):
+    1. GÜNLÜK VE BASİT SORULAR (Hava durumu, fatura, araç durumu, selam vb.):
+       - ASLA lafı uzatma! Giriş veya kapanış kalıpları ("Merhaba ben asistan", "Başka sorunuz var mı" vb.) kullanma.
+       - Doğrudan, net, 1 veya en fazla 2-3 cümlelik öz ve kısa bir cevap ver.
+       - Örnek hava yanıtı: "Kocaeli'de şu an hava hafif yağmurlu ve 19°C. Gün içinde en yüksek 21°C olacak; dışarı çıkarken şemsiyenizi almayı unutmayın."
+    2. BİLGİ VE ÖZET SORULARI:
+       - Kullanıcı bir konu hakkında bilgi veya özet istediğinde dolandırmadan, en can alıcı noktaları 1-2 kısa paragraf veya birkaç madde halinde hızlıca özetle.
+    3. HIZ VE KOTA TASARRUFU:
+       - Cevaplar kısa, net ve doğrudan hedefe yönelik olsun. Sesli okuma için akıcı ve pürüzsüz Türkçe kur.
+    4. KİŞİSEL VERİ VE FİNANS: Araç muayenesi, kasko, sigorta veya faturaları yukarıdaki sistem verilerini temel alarak kesin ve net belirt.
     """
 
     MODELS_TO_TRY = [
@@ -873,8 +877,8 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
                     contents=payload.message,
                     config={
                         'system_instruction': system_instruction,
-                        'max_output_tokens': 800,
-                        'temperature': 0.7
+                        'max_output_tokens': 250,
+                        'temperature': 0.3
                     }
                 )
                 if response and response.text:
