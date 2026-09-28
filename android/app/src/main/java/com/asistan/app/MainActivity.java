@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -171,6 +172,8 @@ public class MainActivity extends AppCompatActivity {
         ws.setLoadWithOverviewMode(true);
         ws.setCacheMode(WebSettings.LOAD_DEFAULT);
         ws.setUserAgentString(ws.getUserAgentString() + " AsistanAndroidApp/1.0");
+        ws.setGeolocationEnabled(true);
+        ws.setGeolocationDatabasePath(getFilesDir().getPath());
 
         android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
@@ -223,6 +226,11 @@ public class MainActivity extends AppCompatActivity {
                 if (newProgress >= 100) {
                     progressBar.setVisibility(View.GONE);
                 }
+            }
+
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, true, false);
             }
 
             @Override
@@ -335,12 +343,16 @@ public class MainActivity extends AppCompatActivity {
             permissionsLauncher.launch(new String[]{
                     Manifest.permission.CAMERA,
                     Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.POST_NOTIFICATIONS
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
             });
         } else {
             permissionsLauncher.launch(new String[]{
                     Manifest.permission.CAMERA,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
             });
         }
     }

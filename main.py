@@ -892,25 +892,110 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
         return {"reply": f"Hata oluştu: {str(e)}", "configured": True}
 
 
+def get_city_name_from_coords(lat: float, lon: float) -> str:
+    """GPS koordinatlarından şehir adını tespit eder"""
+    try:
+        import urllib.request
+        import json
+        url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json&accept-language=tr"
+        req = urllib.request.Request(url, headers={"User-Agent": "AsistanPro/1.0 (contact@asistan.app)"})
+        with urllib.request.urlopen(req, timeout=2.5) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            addr = data.get("address", {})
+            city = addr.get("province") or addr.get("city") or addr.get("state") or addr.get("town") or addr.get("county") or "Kocaeli"
+            city = city.replace(" İli", "").replace("Province", "").replace("ili", "").strip()
+            return city
+    except Exception:
+        # En yakın bilinen şehri hesapla
+        cities = [
+            ("Kocaeli", 40.76, 29.92),
+            ("İstanbul", 41.01, 28.97),
+            ("Sakarya", 40.77, 30.40),
+            ("Yalova", 40.65, 29.27),
+            ("Bursa", 40.18, 29.06),
+            ("Bolu", 40.73, 31.60),
+            ("Düzce", 40.84, 31.15),
+            ("Ankara", 39.93, 32.85),
+            ("İzmir", 38.42, 27.14),
+            ("Antalya", 36.89, 30.70),
+        ]
+        best_city = "Kocaeli"
+        min_dist = float("inf")
+        for c_name, c_lat, c_lon in cities:
+            dist = (lat - c_lat)**2 + (lon - c_lon)**2
+            if dist < min_dist:
+                min_dist = dist
+                best_city = c_name
+        return best_city
+
+
+def get_weather_for_briefing(lat: float, lon: float, city_name: str) -> str:
+    """Anlık hava durumu ve günün en yüksek sıcaklığını seslendirmeye uygun akıcı metin olarak döndürür"""
+    try:
+        import urllib.request
+        import json
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto"
+        req = urllib.request.Request(url, headers={"User-Agent": "AsistanAI/1.0"})
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            curr = data.get("current", {})
+            daily = data.get("daily", {})
+            w_codes = {
+                0: "açık ve güneşli", 1: "çoğunlukla güneşli", 2: "parçalı bulutlu", 3: "bulutlu",
+                45: "sisli", 51: "hafif çisentili", 61: "hafif yağmurlu", 63: "yağmurlu",
+                65: "kuvvetli yağmurlu", 71: "kar yağışlı", 80: "sağanak yağışlı", 95: "fırtınalı"
+            }
+            desc = w_codes.get(curr.get("weather_code", 0), "parçalı bulutlu")
+            curr_temp = round(curr.get("temperature_2m", 20))
+            t_max_list = daily.get("temperature_2m_max", [])
+            t_max = round(t_max_list[0]) if t_max_list else curr_temp
+            return f"Bugün {city_name}'de hava {desc}, sıcaklık şu an {curr_temp} derece ve en yüksek {t_max} derece bekleniyor."
+    except Exception:
+        return f"Bugün {city_name}'de genel olarak sakin bir hava bekleniyor."
+
+
 @app.get("/api/briefing/today")
-def get_daily_briefing(user: dict = Depends(get_current_user)):
-    """Optimus Prime tarzı Günün Brifingi: Vadesi gelen faturalar, araç durumu ve EV tasarrufu"""
+def get_daily_briefing(lat: Optional[float] = None, lon: Optional[float] = None, user: dict = Depends(get_current_user)):
+    """Kişiselleştirilmiş Günün Brifingi: İsimle selamlama, GPS canlı hava durumu, faturalar ve önemli özetler"""
     conn = get_db()
     cursor = conn.cursor()
     today_str = datetime.now().strftime("%Y-%m-%d")
     
-    # 1. Bekleyen / vadesi yaklaşan faturalar
+    # 1. Kullanıcı İsmi (Örn: "Önder merhaba")
+    user_full_name = (user.get("full_name") or "").strip()
+    if user_full_name:
+        first_name = user_full_name.split()[0].capitalize()
+    else:
+        email_prefix = user.get("email", "").split("@")[0].split(".")[0]
+        first_name = email_prefix.capitalize() if email_prefix else "Önder"
+
+    # 2. Şehir ve Hava Durumu
+    if lat is not None and lon is not None:
+        city_name = get_city_name_from_coords(lat, lon)
+        weather_phrase = get_weather_for_briefing(lat, lon, city_name)
+    else:
+        city_name = "Kocaeli"
+        weather_phrase = get_weather_for_briefing(40.76, 29.92, city_name)
+    
+    # 3. Bekleyen / vadesi yaklaşan faturalar
     pending_bills = cursor.execute("""
         SELECT title, amount, due_date FROM payments 
         WHERE status != 'paid' AND user_id = ?
         ORDER BY due_date ASC LIMIT 3
     """, (user["id"],)).fetchall()
     
-    # 2. Araç bilgisi
+    # 4. Bugünkü Görevler
+    tasks = cursor.execute("""
+        SELECT title FROM tasks 
+        WHERE is_completed = 0 AND user_id = ? AND (due_date = ? OR due_date < ?)
+        ORDER BY due_date ASC LIMIT 2
+    """, (user["id"], today_str, today_str)).fetchall()
+
+    # 5. Araç bilgisi
     v_row = cursor.execute("SELECT * FROM vehicle_profile WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user["id"],)).fetchone()
     v_info = dict(v_row) if v_row else {}
     
-    # 3. EV Tasarruf hesabı
+    # 6. EV Tasarruf hesabı
     charges = cursor.execute("SELECT kwh_amount, cost FROM ev_charges WHERE user_id = ?", (user["id"],)).fetchall()
     total_cost = sum(c["cost"] for c in charges)
     total_kwh = sum(c["kwh_amount"] for c in charges)
@@ -918,21 +1003,28 @@ def get_daily_briefing(user: dict = Depends(get_current_user)):
     ev_savings = max(0, gas_equiv - total_cost)
     conn.close()
 
-    # Brifing metnini doğal, tok ve akıcı şekilde oluştur
-    parts = ["Günaydın komutanım. Sistemler aktif, durum raporunu arz ediyorum."]
+    # Brifing metni: Sadece adını söyleyerek başla, canlı hava durumunu ilet, net özet geç
+    parts = [f"{first_name}, merhaba.", weather_phrase]
     
     if pending_bills:
         earliest = dict(pending_bills[0])
         due_d = datetime.strptime(earliest["due_date"], "%Y-%m-%d")
         diff = (due_d - datetime.now()).days
+        amount_val = int(earliest['amount'])
+        amount_formatted = f"{amount_val:,} lira".replace(",", ".")
         if diff < 0:
-            parts.append(f"Gecikmede olan {earliest['title']} için {int(earliest['amount'])} liralık ödemeniz bulunuyor.")
+            parts.append(f"Gecikmede olan {earliest['title']} için {amount_formatted} ödemeniz bulunuyor.")
         elif diff == 0:
-            parts.append(f"Bugün son ödeme günü olan {earliest['title']} için {int(earliest['amount'])} lira ödemeniz var.")
+            parts.append(f"Bugün son ödeme günü olan {earliest['title']} için {amount_formatted} ödemeniz var.")
+        elif diff == 1:
+            parts.append(f"Yarın son ödeme günü olan {earliest['title']} için {amount_formatted} ödemeniz var.")
         else:
-            parts.append(f"En yakın ödemeniz {diff} gün sonraki {earliest['title']}, tutarı {int(earliest['amount'])} lira.")
+            parts.append(f"En yakın ödemeniz {diff} gün sonraki {earliest['title']}, tutarı {amount_formatted}.")
     else:
-        parts.append("Ödemeleriniz tamamen güncel, bekleyen acil bir faturanız bulunmuyor.")
+        parts.append("Ödemeleriniz tamamen güncel, bekleyen acil bir faturanız yok.")
+
+    if tasks:
+        parts.append(f"Bugün için tamamlanması gereken {len(tasks)} göreviniz bulunuyor.")
 
     # Araç özeti
     plate = v_info.get('plate', '')
@@ -940,13 +1032,12 @@ def get_daily_briefing(user: dict = Depends(get_current_user)):
     if plate and plate != 'Belirtilmedi':
         parts.append(f"{brand} aracınız hazır durumda.")
     
-    # Tasarruf
     if ev_savings > 100:
         parts.append(f"Elektrikli aracınızla bugüne kadar yaklaşık {int(ev_savings):,} lira yakıt tasarrufu sağladınız.")
         
-    parts.append("Gününüz verimli ve başarılı geçsin.")
+    parts.append("Harika ve verimli bir gün dilerim.")
     briefing_text = " ".join(parts)
-    return {"briefing": briefing_text}
+    return {"briefing": briefing_text, "first_name": first_name, "city": city_name}
 
 
 # ==========================================

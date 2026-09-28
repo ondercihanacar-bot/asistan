@@ -472,21 +472,37 @@
         }
       }
 
-      // Optimus Prime Günün Brifingi Oynatıcı
+      // Optimus Prime Günün Brifingi Oynatıcı (GPS Şehir Tespiti & İsimle Kişisel Seslendirme)
       async function playDailyBriefing() {
         const btn = document.getElementById('btn-daily-briefing');
         const micSvg = '<svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="19" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke-width="2" stroke-linecap="round"/></svg>';
         const loadingSvg = '<svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke-width="2"/></svg>';
         if (btn) {
           btn.style.opacity = '0.6';
-          btn.innerHTML = loadingSvg + ' <span>Hazırlanıyor...</span>';
+          btn.innerHTML = loadingSvg + ' <span>Konum & Hava Durumu...</span>';
         }
         try {
-          const res = await fetch('/api/briefing/today');
+          let url = '/api/briefing/today';
+          if (navigator.geolocation) {
+            try {
+              const pos = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3500, maximumAge: 180000, enableHighAccuracy: false });
+              });
+              if (pos && pos.coords) {
+                url += `?lat=${pos.coords.latitude.toFixed(4)}&lon=${pos.coords.longitude.toFixed(4)}`;
+              }
+            } catch(geoErr) {
+              console.log('GPS konumu alınamadı, kayıtlı şehir kullanılacak:', geoErr);
+            }
+          }
+          if (btn) btn.innerHTML = loadingSvg + ' <span>Brifing Hazırlanıyor...</span>';
+          const res = await fetch(url);
           if (res.ok) {
             const data = await res.json();
             if (data.briefing) {
-              if (typeof showToast === 'function') showToast('🎙️ Optimus Prime brifing veriyor...');
+              const nameStr = data.first_name || 'Önder';
+              const cityStr = data.city ? `(${data.city})` : '';
+              if (typeof showToast === 'function') showToast(`🎙️ ${nameStr} ${cityStr} Günün Brifingi`);
               await speakAssistantText(data.briefing);
             }
           }
