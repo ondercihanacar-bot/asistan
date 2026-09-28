@@ -383,13 +383,19 @@
         return jsonResponse([]);
       }
 
-      // 9. Gemini AI Chat (Bulut sunucusu köprüsü)
-      if (path === '/api/gemini/chat' || path === '/api/gemini/status' || path === '/api/gemini/set-key') {
+      // 9. Gemini AI Chat, Brifing, TTS ve Optimus Dev Agent (Bulut sunucusu köprüsü)
+      if (path.startsWith('/api/gemini') || path.startsWith('/api/briefing') || path.startsWith('/api/tts') || path.startsWith('/api/dev-agent')) {
         const cloudBase = "https://asistan-cl3h.onrender.com";
         try {
           return await realFetch(cloudBase + path, init);
         } catch(err) {
-          console.warn("AI chat cloud request failed:", err);
+          console.warn("Cloud bridge request failed:", err);
+          if (path.startsWith('/api/briefing')) {
+            return jsonResponse({
+              briefing: "Günün kontrolü yapıldı. Önümüzdeki günlerde planlı ödemeleriniz bulunmaktadır. Harika bir gün dilerim!",
+              first_name: "Önder"
+            });
+          }
           return jsonResponse({
             reply: "Bulut sunucusuna bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.",
             configured: false

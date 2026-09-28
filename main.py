@@ -1325,7 +1325,7 @@ def get_daily_briefing(lat: Optional[float] = None, lon: Optional[float] = None,
     
     # 4. Bugünkü Görevler
     tasks = cursor.execute("""
-        SELECT title FROM tasks 
+        SELECT title FROM reminders_tasks 
         WHERE is_completed = 0 AND user_id = ? AND (due_date = ? OR due_date < ?)
         ORDER BY due_date ASC LIMIT 2
     """, (user["id"], today_str, today_str)).fetchall()
@@ -2420,6 +2420,52 @@ def open_backup_folder():
         return {"success": True, "message": f"Yedek klasörü açıldı: {folder}"}
     except Exception as e:
         return {"success": False, "message": f"Klasör açılamadı: {str(e)}"}
+
+# ============================================================
+# 🛠️ OPTIMUS DEV AGENT (ANTIGRAVITY IN-APP AGENT)
+# ============================================================
+from dev_agent import (
+    process_dev_instruction,
+    get_git_status,
+    git_rollback,
+    run_system_health_check
+)
+
+class DevAgentRequest(BaseModel):
+    instruction: str
+
+@app.get("/api/dev-agent/status")
+def dev_agent_status(user: dict = Depends(get_current_user)):
+    """Git durumu ve son commitleri döner"""
+    return get_git_status()
+
+@app.post("/api/dev-agent/execute")
+async def dev_agent_execute(payload: DevAgentRequest, user: dict = Depends(get_current_user)):
+    """Kullanıcının talimatını işleyen Dev Agent motoru"""
+    res = await process_dev_instruction(payload.instruction)
+    if res.get("action_type") in ["code_edited", "rollback"]:
+        await manager.broadcast({
+            "type": "DEV_AGENT_UPDATED",
+            "message": res.get("reply", "Kod güncellendi."),
+            "action_type": res.get("action_type")
+        })
+    return res
+
+@app.post("/api/dev-agent/rollback")
+async def dev_agent_rollback(user: dict = Depends(get_current_user)):
+    """Son yapılan değişikliği geri alır"""
+    res = git_rollback()
+    await manager.broadcast({
+        "type": "DEV_AGENT_UPDATED",
+        "message": "Değişiklikler geri alındı.",
+        "action_type": "rollback"
+    })
+    return res
+
+@app.get("/api/dev-agent/health")
+def dev_agent_health(user: dict = Depends(get_current_user)):
+    """Sistem bütünlüğü ve sözdizimi testi"""
+    return run_system_health_check()
 
 # Mount static files folder
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")

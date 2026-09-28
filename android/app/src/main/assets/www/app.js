@@ -1000,6 +1000,8 @@ function initWebSocket() {
           showToast(`✏️ Ödeme güncellendi.`);
         } else if (data.type === 'PAYMENT_DELETED') {
           showToast(`🗑️ Ödeme kaydı silindi.`);
+        } else if (data.type === 'DEV_AGENT_UPDATED') {
+          showToast(`⚡ Antigravity: Kod güncellendi!`);
         }
         
         // Auto-reload data across all open devices
@@ -1031,6 +1033,7 @@ async function loadData(showLoading = true) {
     }
 
     paymentsData = await paymentsRes.json();
+    window.paymentsData = paymentsData;
     analyticsData = await analyticsRes.json();
 
     renderStats();
@@ -3573,4 +3576,125 @@ async function handleSaveGymDay(e) {
   } catch (err) {
     showToast('❌ Bağlantı hatası.');
   }
+}
+
+// ============================================================
+// ⚡ ANTIGRAVITY DEV ENGINE / IN-APP AGENT CLIENT CONTROLLER
+// ============================================================
+async function openAntigravityStudio() {
+  openModal('modal-antigravity-studio');
+  try {
+    const res = await fetch('/api/dev-agent/status');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.branch) {
+        const branchEl = document.getElementById('ag-git-branch');
+        if (branchEl) branchEl.textContent = data.branch;
+      }
+      if (data.recent_commits && data.recent_commits.length > 0) {
+        const commitEl = document.getElementById('ag-latest-commit');
+        if (commitEl) commitEl.textContent = data.recent_commits[0].substring(0, 30) + '...';
+      }
+    }
+  } catch(e) {
+    console.log('Dev agent status check:', e);
+  }
+  setTimeout(() => {
+    const inp = document.getElementById('antigravity-input');
+    if (inp) inp.focus();
+  }, 150);
+}
+
+function appendAntigravityMessage(type, content, isHtml = false) {
+  const consoleEl = document.getElementById('antigravity-console');
+  if (!consoleEl) return;
+  
+  const msgDiv = document.createElement('div');
+  msgDiv.className = (type === 'user') ? 'antigravity-msg-user' : 'antigravity-msg-agent';
+  
+  if (type === 'user') {
+    msgDiv.textContent = content;
+  } else {
+    const title = document.createElement('div');
+    title.style.cssText = 'color: #c084fc; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;';
+    title.innerHTML = '<span>⚡</span> <span>Antigravity Engine</span>';
+    msgDiv.appendChild(title);
+    
+    const body = document.createElement('div');
+    if (isHtml) {
+      body.innerHTML = content;
+    } else {
+      let parsed = content
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code style="background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; color: #38bdf8; font-family: monospace;">$1</code>')
+        .replace(/\n/g, '<br>');
+      body.innerHTML = parsed;
+    }
+    msgDiv.appendChild(body);
+  }
+  
+  consoleEl.appendChild(msgDiv);
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+  return msgDiv;
+}
+
+async function handleAntigravitySubmit(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById('antigravity-input');
+  const btn = document.getElementById('antigravity-btn-send');
+  if (!input) return;
+  const prompt = input.value.trim();
+  if (!prompt) return;
+
+  appendAntigravityMessage('user', prompt);
+  input.value = '';
+  
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> <span>İşleniyor...</span>';
+  }
+
+  const thinkingDiv = appendAntigravityMessage('agent', '<span style="color: #a855f7;">⚡ Kod inceleniyor ve talimat işleniyor...</span>', true);
+
+  try {
+    const res = await fetch('/api/dev-agent/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ instruction: prompt })
+    });
+    
+    thinkingDiv.remove();
+
+    if (res.ok) {
+      const data = await res.json();
+      appendAntigravityMessage('agent', data.reply || 'İşlem tamamlandı.');
+      if (data.action_type === 'code_edited' || data.action_type === 'rollback') {
+        showToast('⚡ Değişiklik uygulandı!');
+        openAntigravityStudio();
+      }
+    } else {
+      appendAntigravityMessage('agent', '❌ Sunucu hatası oluştu: ' + res.statusText);
+    }
+  } catch (err) {
+    thinkingDiv.remove();
+    appendAntigravityMessage('agent', '⚠️ Bağlantı hatası: ' + err.message);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>⚡</span> <span>Gönder</span>';
+    }
+  }
+}
+
+async function executeAntigravityQuick(action) {
+  const map = {
+    'git_status': 'Git durumunu göster',
+    'health_check': 'Sistem sağlık testini çalıştır',
+    'rollback': 'Son yapılan değişikliği geri al'
+  };
+  const prompt = map[action] || action;
+  const input = document.getElementById('antigravity-input');
+  if (input) input.value = prompt;
+  handleAntigravitySubmit();
 }

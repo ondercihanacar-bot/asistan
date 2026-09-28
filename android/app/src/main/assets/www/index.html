@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Akıllı Asistan</title>
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b0f19">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -775,7 +775,7 @@
     <div class="brand" style="display: flex; align-items: center; gap: 12px; position: relative;">
       <div style="position: relative; flex-shrink: 0;">
         <div class="header-logo-box">
-          <video src="/logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
+          <video src="logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
         </div>
       </div>
 
@@ -807,6 +807,13 @@
           <line x1="8" y1="23" x2="16" y2="23" stroke-width="2" stroke-linecap="round"/>
         </svg>
         <span class="desktop-only-btn-label">Günün Brifingi</span>
+      </button>
+
+      <button class="top-nav-btn top-nav-btn-antigravity" id="btn-antigravity-studio" onclick="openAntigravityStudio()" title="Antigravity Canlı Kod & Geliştirici Stüdyosu">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="desktop-only-btn-label">⚡ Antigravity</span>
       </button>
 
       <button class="top-nav-btn" id="btn-pwa-install" onclick="triggerPwaInstall()" style="display: none; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;" title="Uygulamayı Telefona Yükle">
@@ -1117,7 +1124,7 @@
       <!-- KIA EV6 Panel Şeridi (En Altta, Gezinme Butonlarının Hemen Üstünde) -->
       <div id="kia-ev6-banner" class="desktop-only-feature" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(16, 185, 129, 0.08)); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 12px; padding: 6px 14px; margin-bottom: 0px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="/kia_ev6.png" class="neon-car-blue" style="height: 36px; width: auto; object-fit: contain;">
+          <img src="kia_ev6.png" class="neon-car-blue" style="height: 36px; width: auto; object-fit: contain;">
           <div>
             <div style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
               <span>KIA EV6</span>
@@ -1171,7 +1178,7 @@
               <button id="btn-delete-veh" onclick="deleteCurrentVehicle()" style="background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; display: none;" title="Aracı Garajdan Sil">🗑️</button>
             </div>
             <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
-              <img id="veh-img" src="/kia_ev6.png" alt="Araç" class="neon-car-blue" style="height: 54px; width: auto; object-fit: contain;">
+              <img id="veh-img" src="kia_ev6.png" alt="Araç" class="neon-car-blue" style="height: 54px; width: auto; object-fit: contain;">
             </div>
             <div style="background: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: bold; letter-spacing: 1px; color: white;" id="veh-plate">--</div>
         </div>
@@ -1920,6 +1927,15 @@
             </div>
           </div>
 
+          <!-- 0.5. ANTIGRAVITY DEV ENGINE (CANLI KOD GÜNCELLEYİCİ) -->
+          <div class="mobile-menu-card" style="border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.12);" onclick="closeModal('modal-mobile-menu'); openAntigravityStudio();">
+            <div class="mmenu-icon" style="background: rgba(168, 85, 247, 0.25); color: #c084fc;">⚡</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title" style="color: #c084fc;">⚡ Antigravity Dev Studio</div>
+              <div class="mmenu-sub">Canlı Kod Güncelleyici & Sistem Terminali</div>
+            </div>
+          </div>
+
           <!-- 1. SİSTEM AYARLARI (En Başta, Belirgin ve Parlak) -->
           <div class="mobile-menu-card" style="border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.1);" onclick="switchTab('settings'); closeModal('modal-mobile-menu');">
             <div class="mmenu-icon" style="background: rgba(99, 102, 241, 0.25); color: #a5b4fc;">⚙️</div>
@@ -2213,7 +2229,7 @@
       <!-- Modal Header -->
       <div style="padding: 26px 28px 16px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
         <div style="width: 68px; height: 68px; margin: 0 auto 12px; border-radius: 16px; overflow: hidden; border: 2px solid rgba(56, 189, 248, 0.7); box-shadow: 0 0 18px rgba(56, 189, 248, 0.45); background: #000;">
-          <video src="/logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
+          <video src="logo.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
         </div>
         <h3 id="auth-modal-title" style="font-size: 1.35rem; font-weight: 800; color: #f8fafc; margin-bottom: 4px;">ASİSTAN</h3>
         <p id="auth-modal-subtitle" style="font-size: 0.82rem; color: #94a3b8;">Kişisel Asistanınız</p>
@@ -2604,6 +2620,81 @@
           Anladım, Kapat ✓
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ⚡ MODAL: ANTIGRAVITY DEV ENGINE & IN-APP CODE STUDIO -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" id="modal-antigravity-studio" onclick="if(event.target === this) closeModal('modal-antigravity-studio')">
+    <div class="modal-box antigravity-modal-box mobile-bottom-sheet">
+      <div class="bottom-sheet-handle"></div>
+      
+      <!-- Modal Header -->
+      <div class="modal-header" style="background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid rgba(168, 85, 247, 0.3);">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.3rem;">⚡</span>
+          <div>
+            <div style="color: #c084fc; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.5px;">ANTIGRAVITY DEV STUDIO</div>
+            <div style="font-size: 0.72rem; color: #94a3b8;">Canlı Kod Düzenleyici &amp; Otonom Ajan Konsolu</div>
+          </div>
+        </div>
+        <button class="btn-close" onclick="closeModal('modal-antigravity-studio')">&times;</button>
+      </div>
+
+      <!-- Status Bar -->
+      <div class="antigravity-status-bar">
+        <div style="display: flex; align-items: center;">
+          <span class="antigravity-live-dot"></span>
+          <span style="color: #10b981; font-weight: 700;">DEV ENGINE HAZIR</span>
+          <span style="margin: 0 8px; color: #475569;">|</span>
+          <span style="color: #94a3b8;">DAL: <strong id="ag-git-branch" style="color: #38bdf8;">main</strong></span>
+        </div>
+        <div id="ag-latest-commit" style="color: #64748b; font-size: 0.74rem;">v2.0 Entegre</div>
+      </div>
+
+      <!-- Quick Action Chips -->
+      <div class="antigravity-chips-row">
+        <button type="button" class="antigravity-chip" onclick="executeAntigravityQuick('git_status')">
+          <span>📊</span> <span>Git Durumu</span>
+        </button>
+        <button type="button" class="antigravity-chip" onclick="executeAntigravityQuick('health_check')">
+          <span>🩺</span> <span>Sistem Sağlık Testi</span>
+        </button>
+        <button type="button" class="antigravity-chip" onclick="executeAntigravityQuick('rollback')" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+          <span>⏪</span> <span>Geri Al (Rollback)</span>
+        </button>
+        <button type="button" class="antigravity-chip" onclick="window.location.reload();">
+          <span>🔄</span> <span>Sayfayı Yenile</span>
+        </button>
+      </div>
+
+      <!-- Terminal / Console Messages -->
+      <div class="antigravity-console" id="antigravity-console">
+        <div class="antigravity-msg-agent">
+          <div style="color: #c084fc; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <span>🤖</span> <span>Antigravity Engine</span>
+          </div>
+          <div>Merhaba Önder! Artık doğrudan bu konsol üzerinden sisteme talimat verebilirsin.</div>
+          <div style="margin-top: 6px; font-size: 0.76rem; color: #94a3b8;">
+            Örnek komutlar:<br>
+            • <em>"Ana sayfadaki brifing butonunun rengini zümrüt yeşili yap"</em><br>
+            • <em>"Git durumunu göster"</em><br>
+            • <em>"Sistem sağlık testini çalıştır"</em><br>
+            • <em>"Son değişikliği geri al"</em>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <form class="antigravity-input-bar" id="antigravity-form" onsubmit="handleAntigravitySubmit(event)">
+        <input type="text" id="antigravity-input" placeholder="Antigravity'ye komut verin (Örn: 'Git durumunu göster')..." autocomplete="off" required>
+        <button type="submit" class="antigravity-btn-submit" id="antigravity-btn-send">
+          <span>⚡</span>
+          <span>Gönder</span>
+        </button>
+      </form>
+
     </div>
   </div>
 
