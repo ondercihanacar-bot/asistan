@@ -490,7 +490,7 @@ body {
     overflow-x: hidden !important;
     width: 100% !important;
     max-width: 100% !important;
-    box-sizing: border-box !important;
+    box-sizing: border-box !important;zing: border-box !important;
   }
   .tabs-bar::-webkit-scrollbar {
     display: none !important;
