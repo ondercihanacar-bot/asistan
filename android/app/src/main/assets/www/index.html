@@ -358,7 +358,7 @@
         return turkishVoices[0];
       }
 
-      // Optimus Prime / Mazlum Kiper Stüdyo Nöral Ses Motoru (Tok, Derin, Robotik Rezonanslı)
+      // Optimus Prime / Mazlum Kiper Stüdyo Nöral Ses Motoru (Tok, Derin Bariton, %100 Güvenilir)
       window._currentAudioPlayer = null;
       window._activeSpeechUtterances = [];
 
@@ -371,9 +371,11 @@
             window._currentAudioPlayer.pause();
             window._currentAudioPlayer.currentTime = 0;
           } catch(e) {}
+          window._currentAudioPlayer = null;
         }
         if ('speechSynthesis' in window) {
           try { window.speechSynthesis.cancel(); } catch(e) {}
+          window._activeSpeechUtterances = [];
         }
 
         // 2. Metni seslendirmeye hazırla (tarihleri ve parantezleri temizle)
@@ -391,7 +393,8 @@
         });
         cleanedText = cleanedText.replace(/[()\[\]{}]/g, ' ').replace(/\s+/g, ' ').trim();
 
-        // 3. Gerçek Nöral Stüdyo Mazlum Kiper Sesini Çağır (/api/tts/mazlum-kiper)
+        // 3. Nöral Stüdyo Mazlum Kiper / Optimus Prime Sesini Çağır (/api/tts/mazlum-kiper)
+        let playedSuccessfully = false;
         try {
           const token = (typeof getAuthToken === 'function') ? getAuthToken() : (localStorage.getItem('asistan_auth_token') || '');
           const ttsHeaders = { 'Content-Type': 'application/json' };
@@ -412,67 +415,58 @@
             const audioUrl = URL.createObjectURL(blob);
             const audio = new Audio(audioUrl);
             window._currentAudioPlayer = audio;
-            
-            // Web Audio API ile Optimus Prime Robotik / Derin Bas ve Rezonans Efekti
-            try {
-              const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-              if (AudioContextClass) {
-                const audioCtx = new AudioContextClass();
-                if (audioCtx.state === 'suspended') {
-                  audioCtx.resume();
-                }
-                const source = audioCtx.createMediaElementSource(audio);
-                
-                // 1. Derin Bas Güçlendirici (Sub-bass booster for commander tone)
-                const bassFilter = audioCtx.createBiquadFilter();
-                bassFilter.type = 'lowshelf';
-                bassFilter.frequency.value = 180;
-                bassFilter.gain.value = 8.5;
 
-                // 2. Netlik ve Metalik Tını Filtresi (Presence EQ)
-                const midFilter = audioCtx.createBiquadFilter();
-                midFilter.type = 'peaking';
-                midFilter.frequency.value = 2400;
-                midFilter.Q.value = 1.4;
-                midFilter.gain.value = 3.0;
+            await new Promise((resolve) => {
+              audio.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+                window._currentAudioPlayer = null;
+                playedSuccessfully = true;
+                resolve();
+              };
+              audio.onerror = (err) => {
+                console.warn('Audio element error:', err);
+                URL.revokeObjectURL(audioUrl);
+                window._currentAudioPlayer = null;
+                resolve();
+              };
+              audio.play().then(() => {
+                playedSuccessfully = true;
+              }).catch((playErr) => {
+                console.warn('Audio play() engellendi, yerel seslendiriciye geçiliyor:', playErr);
+                URL.revokeObjectURL(audioUrl);
+                window._currentAudioPlayer = null;
+                resolve();
+              });
+            });
 
-                source.connect(bassFilter);
-                bassFilter.connect(midFilter);
-                midFilter.connect(audioCtx.destination);
-              }
-            } catch(fxErr) {
-              console.log('Filtre pas geçildi:', fxErr);
-            }
-
-            audio.onended = () => {
-              URL.revokeObjectURL(audioUrl);
-              window._currentAudioPlayer = null;
-            };
-            audio.play().catch(e => console.log('Ses çalma uyarısı:', e));
-            return;
+            if (playedSuccessfully) return;
           }
         } catch(e) {
-          console.warn('Nöral ses sunucusu yanıt vermedi, yerel ses motoru devreye alınıyor:', e);
+          console.warn('Nöral ses servisi yanıt vermedi, yerel ses motoruna geçiliyor:', e);
         }
 
         // 4. Yedek (Fallback): Web Speech API ile Optimus Prime Tok Bariton Ses Profili
         if ('speechSynthesis' in window) {
           try {
+            window.speechSynthesis.cancel();
             const sentences = cleanedText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 0);
             if (sentences.length === 0) sentences.push(cleanedText);
 
             const bestVoice = getBestTurkishVoice();
-            sentences.forEach((sentence, idx) => {
-              const utter = new SpeechSynthesisUtterance(sentence);
-              utter.lang = 'tr-TR';
-              utter.rate = 0.85;
-              utter.pitch = 0.70;
-              if (bestVoice) utter.voice = bestVoice;
-              window._activeSpeechUtterances.push(utter);
-              if (idx === sentences.length - 1) {
-                utter.onend = () => { window._activeSpeechUtterances = []; };
-              }
-              window.speechSynthesis.speak(utter);
+            await new Promise((resolve) => {
+              sentences.forEach((sentence, idx) => {
+                const utter = new SpeechSynthesisUtterance(sentence);
+                utter.lang = 'tr-TR';
+                utter.rate = 0.88;
+                utter.pitch = 0.72;
+                if (bestVoice) utter.voice = bestVoice;
+                window._activeSpeechUtterances.push(utter);
+                if (idx === sentences.length - 1) {
+                  utter.onend = () => { window._activeSpeechUtterances = []; resolve(); };
+                  utter.onerror = () => { window._activeSpeechUtterances = []; resolve(); };
+                }
+                window.speechSynthesis.speak(utter);
+              });
             });
           } catch(err) {
             console.error('Konuşma sentezleme hatası:', err);
@@ -485,10 +479,12 @@
         const btn = document.getElementById('btn-daily-briefing');
         const micSvg = '<svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="19" x2="12" y2="23" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke-width="2" stroke-linecap="round"/></svg>';
         const loadingSvg = '<svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke-width="2"/></svg>';
+        
         if (btn) {
           btn.style.opacity = '0.6';
           btn.innerHTML = loadingSvg + ' <span class="desktop-only-btn-label">Hazırlanıyor...</span>';
         }
+        
         try {
           let baseUrl = '';
           if (window.location.protocol === 'file:') {
@@ -530,15 +526,24 @@
             console.log('Brifing servisi uzak çağrı hatası:', netErr);
           }
 
-          // Fallback: Çevrimdışı veya hata durumunda yerel brifing üret
+          // Fallback: Çevrimdışı veya hata durumunda güvenli yerel brifing üret
           if (!briefingText) {
-            const pendingList = Array.isArray(paymentsData) ? paymentsData.filter(p => p.status !== 'paid' && p.days_remaining <= 7) : [];
+            const pData = (typeof paymentsData !== 'undefined' && Array.isArray(paymentsData))
+              ? paymentsData
+              : ((typeof window.paymentsData !== 'undefined' && Array.isArray(window.paymentsData)) ? window.paymentsData : []);
+            const pendingList = pData.filter(p => p.status !== 'paid' && p.days_remaining <= 7);
             const urgentCount = pendingList.length;
             nameStr = (typeof currentUser !== 'undefined' && currentUser && currentUser.full_name) ? currentUser.full_name.split(' ')[0] : 'Önder';
             briefingText = `${nameStr} merhaba! Günün kontrolü yapıldı. Önümüzdeki 7 gün içinde vadesi gelen veya yaklaşan ${urgentCount} adet ödemeniz bulunuyor. Tüm kayıtlarınız güvende, harika bir gün dilerim!`;
           }
 
           if (typeof showToast === 'function') showToast(`🎙️ ${nameStr} Günün Brifingi`);
+          
+          if (btn) {
+            btn.style.opacity = '0.9';
+            btn.innerHTML = '🎙️ <span class="desktop-only-btn-label">Seslendiriliyor...</span>';
+          }
+
           await speakAssistantText(briefingText);
         } catch(e) {
           console.error('Brifing hatası:', e);
