@@ -958,6 +958,7 @@ let chartCategories = null;
 
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
+  document.title = 'Akıllı Asistan';
   initServiceWorker();
   initWebSocket();
   checkAuthStatus();
@@ -3572,20 +3573,4 @@ async function handleSaveGymDay(e) {
   } catch (err) {
     showToast('❌ Bağlantı hatası.');
   }
-}
-
-// Optimus'a tek tıkla soru sorma ve sesli cevap alma
-function askOptimusQuick(question) {
-  playHaptic(16);
-  const input = document.getElementById('ai-chat-input');
-  if (input) {
-    input.value = question;
-  }
-  const modal = document.getElementById('modal-ai-chat');
-  if (modal && !modal.classList.contains('active')) {
-    toggleAiChatModal();
-  }
-  setTimeout(() => {
-    handleAiChatSubmit(new Event('submit'));
-  }, 250);
 }

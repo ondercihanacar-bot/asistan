@@ -9,7 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="/style.css?v=16">
+  <link rel="stylesheet" href="/style.css?v=18">
   <!-- Chart.js for beautiful analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -393,9 +393,17 @@
 
         // 3. Gerçek Nöral Stüdyo Mazlum Kiper Sesini Çağır (/api/tts/mazlum-kiper)
         try {
-          const res = await fetch('/api/tts/mazlum-kiper', {
+          const token = (typeof getAuthToken === 'function') ? getAuthToken() : (localStorage.getItem('asistan_auth_token') || '');
+          const ttsHeaders = { 'Content-Type': 'application/json' };
+          if (token) ttsHeaders['Authorization'] = 'Bearer ' + token;
+          
+          let ttsUrl = '/api/tts/mazlum-kiper';
+          if (window.location.protocol === 'file:') {
+            ttsUrl = 'https://asistan-cl3h.onrender.com/api/tts/mazlum-kiper';
+          }
+          const res = await fetch(ttsUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: ttsHeaders,
             body: JSON.stringify({ text: cleanedText })
           });
 
@@ -479,39 +487,66 @@
         const loadingSvg = '<svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><polyline points="12 6 12 12 16 14" stroke-width="2"/></svg>';
         if (btn) {
           btn.style.opacity = '0.6';
-          btn.innerHTML = loadingSvg + ' <span>Konum & Hava Durumu...</span>';
+          btn.innerHTML = loadingSvg + ' <span class="desktop-only-btn-label">Hazırlanıyor...</span>';
         }
         try {
-          let url = '/api/briefing/today';
+          let baseUrl = '';
+          if (window.location.protocol === 'file:') {
+            baseUrl = 'https://asistan-cl3h.onrender.com';
+          }
+          let url = baseUrl + '/api/briefing/today';
           if (navigator.geolocation) {
             try {
               const pos = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3500, maximumAge: 180000, enableHighAccuracy: false });
+                const timer = setTimeout(() => reject('timeout'), 1500);
+                navigator.geolocation.getCurrentPosition(
+                  (p) => { clearTimeout(timer); resolve(p); },
+                  (err) => { clearTimeout(timer); reject(err); },
+                  { timeout: 1500, maximumAge: 300000, enableHighAccuracy: false }
+                );
               });
               if (pos && pos.coords) {
                 url += `?lat=${pos.coords.latitude.toFixed(4)}&lon=${pos.coords.longitude.toFixed(4)}`;
               }
             } catch(geoErr) {
-              console.log('GPS konumu alınamadı, kayıtlı şehir kullanılacak:', geoErr);
+              console.log('GPS pas geçildi, varsayılan şehir kullanılacak');
             }
           }
-          if (btn) btn.innerHTML = loadingSvg + ' <span>Brifing Hazırlanıyor...</span>';
-          const res = await fetch(url);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.briefing) {
-              const nameStr = data.first_name || 'Önder';
-              const cityStr = data.city ? `(${data.city})` : '';
-              if (typeof showToast === 'function') showToast(`🎙️ ${nameStr} ${cityStr} Günün Brifingi`);
-              await speakAssistantText(data.briefing);
+
+          const token = (typeof getAuthToken === 'function') ? getAuthToken() : (localStorage.getItem('asistan_auth_token') || '');
+          const reqHeaders = {};
+          if (token) reqHeaders['Authorization'] = 'Bearer ' + token;
+
+          let briefingText = '';
+          let nameStr = 'Önder';
+          try {
+            const res = await fetch(url, { headers: reqHeaders });
+            if (res.ok) {
+              const data = await res.json();
+              briefingText = data.briefing || '';
+              nameStr = data.first_name || 'Önder';
             }
+          } catch(netErr) {
+            console.log('Brifing servisi uzak çağrı hatası:', netErr);
           }
+
+          // Fallback: Çevrimdışı veya hata durumunda yerel brifing üret
+          if (!briefingText) {
+            const pendingList = Array.isArray(paymentsData) ? paymentsData.filter(p => p.status !== 'paid' && p.days_remaining <= 7) : [];
+            const urgentCount = pendingList.length;
+            nameStr = (typeof currentUser !== 'undefined' && currentUser && currentUser.full_name) ? currentUser.full_name.split(' ')[0] : 'Önder';
+            briefingText = `${nameStr} merhaba! Günün kontrolü yapıldı. Önümüzdeki 7 gün içinde vadesi gelen veya yaklaşan ${urgentCount} adet ödemeniz bulunuyor. Tüm kayıtlarınız güvende, harika bir gün dilerim!`;
+          }
+
+          if (typeof showToast === 'function') showToast(`🎙️ ${nameStr} Günün Brifingi`);
+          await speakAssistantText(briefingText);
         } catch(e) {
           console.error('Brifing hatası:', e);
+          if (typeof showToast === 'function') showToast('⚠️ Brifing seslendirilemedi');
         } finally {
           if (btn) {
             btn.style.opacity = '1';
-            btn.innerHTML = micSvg + ' <span>Günün Brifingi</span>';
+            btn.innerHTML = micSvg + ' <span class="desktop-only-btn-label">Günün Brifingi</span>';
           }
         }
       }
@@ -1331,27 +1366,6 @@
         </div>
       </div>
 
-      <!-- Optimus Hızlı Soru Hapları (Optimus'a Tek Tıkla Sor) -->
-      <div style="margin-bottom: 12px;">
-        <div style="font-size: 0.72rem; color: #a78bfa; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-          <span>🤖</span> <span>OPTIMUS'A DOĞRUDAN SOR (SESLİ YANITLAR):</span>
-        </div>
-        <div class="optimus-questions-bar">
-          <button type="button" class="optimus-ask-pill" onclick="askOptimusQuick('Bugün kullanacağım ilaçlarım var mıydı?')">
-            <span>💊</span> <span>Bugün ilaçlarım var mıydı?</span>
-          </button>
-          <button type="button" class="optimus-ask-pill" onclick="askOptimusQuick('Bugün spor günüm mü?')">
-            <span>🏋️</span> <span>Bugün spor günüm mü?</span>
-          </button>
-          <button type="button" class="optimus-ask-pill" onclick="askOptimusQuick('Spor için kullanmam gereken ürün var mı? (Creatin, Protein Tozu gibi)')">
-            <span>⚡</span> <span>Hangi takviyeleri almalıyım?</span>
-          </button>
-          <button type="button" class="optimus-ask-pill" onclick="askOptimusQuick('Optimus, arabanın şarjı ne kadar?')">
-            <span>🔋</span> <span>Arabanın şarjı ne kadar?</span>
-          </button>
-        </div>
-      </div>
-
       <!-- Sağlık & Spor Alt Sekmeler -->
       <div class="health-subtabs">
         <button type="button" class="health-subtab-btn active" id="btn-subtab-meds" onclick="switchHealthSubtab('meds')">
@@ -1897,6 +1911,15 @@
       </div>
       <div class="modal-body" style="padding: 10px 14px 20px 14px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;">
         <div class="mobile-menu-grid">
+          <!-- 0. GÜNÜN BRİFİNGİ (MOBİL İÇİN ÖZEL BUTON) -->
+          <div class="mobile-menu-card" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.12);" onclick="closeModal('modal-mobile-menu'); playDailyBriefing();">
+            <div class="mmenu-icon" style="background: rgba(56, 189, 248, 0.25); color: #38bdf8;">🎙️</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title" style="color: #38bdf8;">Günün Sesli Brifingi</div>
+              <div class="mmenu-sub">Hava durumu & Borç özeti dinle</div>
+            </div>
+          </div>
+
           <!-- 1. SİSTEM AYARLARI (En Başta, Belirgin ve Parlak) -->
           <div class="mobile-menu-card" style="border-color: rgba(99, 102, 241, 0.4); background: rgba(99, 102, 241, 0.1);" onclick="switchTab('settings'); closeModal('modal-mobile-menu');">
             <div class="mmenu-icon" style="background: rgba(99, 102, 241, 0.25); color: #a5b4fc;">⚙️</div>
@@ -2258,7 +2281,7 @@
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="/app.js?v=341"></script>
+  <script src="/app.js?v=343"></script>
 
   <div id="ai-chat-modal" style="display: none; position: fixed; bottom: 150px; right: 20px; width: 380px; max-width: calc(100vw - 40px); height: 500px; max-height: calc(100vh - 180px); background: #0f172a; border: 1.5px solid #38bdf8; border-radius: 18px; box-shadow: 0 10px 35px rgba(0,0,0,0.8), 0 0 25px rgba(56, 189, 248, 0.35); z-index: 1001; flex-direction: column; overflow: hidden;">
     <!-- Chat Header -->
