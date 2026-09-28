@@ -466,20 +466,25 @@ body {
   /* Android / Mobil Kategori Menüsü: 3 Kolon x 2 Satır Modern Izgara (Yana Kaydırmasız, Tüm Butonlar Ekranda) */
   .tabs-bar {
     display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 6px !important;
     padding: 2px 1px !important;
     margin-bottom: 10px !important;
-    overflow-x: visible !important;
+    overflow-x: hidden !important;
     width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   .tabs-bar::-webkit-scrollbar {
     display: none !important;
   }
   .tab-btn {
     width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
     height: 38px !important;
-    padding: 0 6px !important;
+    padding: 0 4px !important;
     border-radius: 10px !important;
     font-size: 0.76rem !important;
     font-weight: 700 !important;
@@ -1637,7 +1642,33 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
    Mobile Screen Rules (Phones & Tablets <= 768px)
    ========================================================================== */
 @media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    position: relative !important;
+    touch-action: pan-y;
+  }
+
+  main.container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+    padding-top: 10px !important;
+    padding-bottom: calc(85px + env(safe-area-inset-bottom, 15px)) !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    touch-action: pan-y;
+  }
+
   #section-dashboard {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
     min-height: auto !important;
   }
   /* Mobile Display Controls: Hide bulky desktop sections */
@@ -1665,6 +1696,9 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     padding: 6px 12px;
     margin-bottom: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   .mob-stat-item {
     display: flex;
@@ -1694,32 +1728,58 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     margin: 0 4px;
   }
 
-  /* Slim & Flat Payment Rows (Daha Kompakt, Şık ve Ekrana Çok Sığan Mobil Kartlar) */
+  /* Slim & Flat Payment Rows (Telefon Ekranına %100 Otomatik Sığan, Sağa-Sola Kaymayan Mobil Kartlar) */
   .payments-grid {
-    grid-template-columns: 1fr !important;
-    gap: 6px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    gap: 7px !important;
     margin-bottom: 20px !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    touch-action: pan-y;
   }
   .payment-card {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
     padding: 8px 10px !important;
     border-radius: 10px !important;
     margin-bottom: 0 !important;
     gap: 3px !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
     min-height: auto !important;
+    touch-action: pan-y;
   }
-  .payment-card:hover {
+  .payment-card:hover,
+  .payment-card:active {
     transform: none !important;
   }
   .card-top {
-    margin-bottom: 2px !important;
+    display: flex !important;
+    justify-content: space-between !important;
     align-items: center !important;
     gap: 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin-bottom: 2px !important;
   }
   .card-info {
+    display: flex !important;
+    align-items: center !important;
     gap: 6px !important;
     min-width: 0 !important;
     flex: 1 !important;
+    overflow: hidden !important;
   }
   .card-category-icon {
     width: 26px !important;
@@ -1739,7 +1799,9 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     line-height: 1.2 !important;
   }
   .card-subtitle {
@@ -1747,7 +1809,9 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     margin-top: 1px !important;
     line-height: 1.1 !important;
   }
@@ -1759,49 +1823,83 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     flex-shrink: 0 !important;
   }
   .card-mid {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
     padding: 3px 0 !important;
     margin: 1px 0 3px 0 !important;
-    align-items: center !important;
     border-top: 1px dashed rgba(255, 255, 255, 0.07) !important;
     border-bottom: 1px dashed rgba(255, 255, 255, 0.07) !important;
   }
   .amount-label {
     display: none !important;
   }
+  .card-amount-box {
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
+  }
   .card-amount {
     font-size: 1.02rem !important;
     font-weight: 800 !important;
     line-height: 1.1 !important;
+    white-space: nowrap !important;
   }
   .card-dates {
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
     text-align: right !important;
   }
   .due-date {
     font-size: 0.72rem !important;
     font-weight: 600 !important;
+    white-space: nowrap !important;
   }
   .repeat-badge {
     font-size: 0.60rem !important;
     margin-top: 0px !important;
+    white-space: nowrap !important;
   }
   .vehicle-meta {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
     padding: 3px 6px !important;
     margin-bottom: 3px !important;
     font-size: 0.66rem !important;
+    flex-wrap: wrap !important;
   }
   .card-bottom {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     gap: 5px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
     margin-top: 1px !important;
   }
   .btn-pay {
+    flex: 1 !important;
+    min-width: 0 !important;
     min-height: 28px !important;
     height: 28px !important;
     padding: 0 10px !important;
     font-size: 0.75rem !important;
     font-weight: 700 !important;
     border-radius: 6px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
   .btn-action-icon {
+    flex-shrink: 0 !important;
     width: 28px !important;
     height: 28px !important;
     min-height: 28px !important;
@@ -1855,14 +1953,6 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
   }
   .user-badge-text-box {
     display: none !important;
-  }
-
-  /* Body container safe padding for bottom nav */
-  main.container {
-    padding-top: 12px !important;
-    padding-bottom: calc(85px + env(safe-area-inset-bottom, 15px)) !important;
-    padding-left: 10px !important;
-    padding-right: 10px !important;
   }
 
   /* Android 5-Tab Material Bottom Navigation */
