@@ -573,6 +573,305 @@ async def delete_vehicle(v_id: int, user: dict = Depends(get_current_user)):
     return {"status": "ok", "message": "Araç garajdan kaldırıldı."}
 
 
+# ==========================================
+# 🚗 KIA EV6 CANLI OBD-II TELEMETRİ API
+# ==========================================
+class TelemetryPushPayload(BaseModel):
+    battery_percentage: Optional[float] = None
+    battery_soh: Optional[float] = None
+    range_km: Optional[int] = None
+    charging_status: Optional[str] = None
+    charging_power_kw: Optional[float] = None
+    remaining_charging_minutes: Optional[int] = None
+    battery_kwh_remaining: Optional[float] = None
+    battery_kwh_total: Optional[float] = None
+    battery_temp_c: Optional[float] = None
+    aux_battery_voltage: Optional[float] = None
+    odometer_km: Optional[int] = None
+
+@app.get("/api/vehicle/telemetry/live")
+def get_live_telemetry(user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    row = cursor.execute("SELECT * FROM vehicle_telemetry WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user["id"],)).fetchone()
+    conn.close()
+    if not row:
+        return {
+            "battery_percentage": 78.0,
+            "battery_soh": 100.0,
+            "range_km": 395,
+            "charging_status": "disconnected",
+            "charging_power_kw": 0.0,
+            "remaining_charging_minutes": 0,
+            "battery_kwh_remaining": 60.4,
+            "battery_kwh_total": 77.4,
+            "battery_temp_c": 24.0,
+            "aux_battery_voltage": 13.8,
+            "odometer_km": 30800,
+            "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M")
+        }
+    return dict(row)
+
+@app.post("/api/vehicle/telemetry/push")
+async def push_telemetry(payload: TelemetryPushPayload, user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    row = cursor.execute("SELECT id FROM vehicle_telemetry WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user["id"],)).fetchone()
+    
+    if row:
+        cursor.execute("""
+            UPDATE vehicle_telemetry SET
+                battery_percentage = COALESCE(?, battery_percentage),
+                battery_soh = COALESCE(?, battery_soh),
+                range_km = COALESCE(?, range_km),
+                charging_status = COALESCE(?, charging_status),
+                charging_power_kw = COALESCE(?, charging_power_kw),
+                remaining_charging_minutes = COALESCE(?, remaining_charging_minutes),
+                battery_kwh_remaining = COALESCE(?, battery_kwh_remaining),
+                battery_kwh_total = COALESCE(?, battery_kwh_total),
+                battery_temp_c = COALESCE(?, battery_temp_c),
+                aux_battery_voltage = COALESCE(?, aux_battery_voltage),
+                odometer_km = COALESCE(?, odometer_km),
+                updated_at = ?
+            WHERE id = ?
+        """, (
+            payload.battery_percentage, payload.battery_soh, payload.range_km,
+            payload.charging_status, payload.charging_power_kw, payload.remaining_charging_minutes,
+            payload.battery_kwh_remaining, payload.battery_kwh_total, payload.battery_temp_c,
+            payload.aux_battery_voltage, payload.odometer_km, now_str, row["id"]
+        ))
+    else:
+        cursor.execute("""
+            INSERT INTO vehicle_telemetry 
+            (user_id, vehicle_id, battery_percentage, battery_soh, range_km, charging_status, charging_power_kw, remaining_charging_minutes, battery_kwh_remaining, battery_kwh_total, battery_temp_c, aux_battery_voltage, odometer_km, updated_at)
+            VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            user["id"], payload.battery_percentage or 78.0, payload.battery_soh or 100.0,
+            payload.range_km or 395, payload.charging_status or "disconnected",
+            payload.charging_power_kw or 0.0, payload.remaining_charging_minutes or 0,
+            payload.battery_kwh_remaining or 60.4, payload.battery_kwh_total or 77.4,
+            payload.battery_temp_c or 24.0, payload.aux_battery_voltage or 13.8,
+            payload.odometer_km or 30800, now_str
+        ))
+    conn.commit()
+    conn.close()
+    await manager.broadcast({"type": "TELEMETRY_UPDATED"})
+    return {"status": "ok", "message": "Telemetri verisi başarıyla kaydedildi"}
+
+@app.post("/api/vehicle/telemetry/simulate")
+async def simulate_telemetry(user: dict = Depends(get_current_user)):
+    """OBD cihazı alınana kadar gerçekçi test verisi üretir"""
+    import random
+    conn = get_db()
+    cursor = conn.cursor()
+    row = cursor.execute("SELECT * FROM vehicle_telemetry WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user["id"],)).fetchone()
+    curr_pct = row["battery_percentage"] if row else 78.0
+    
+    new_pct = round(curr_pct + random.choice([-2.0, -1.0, 1.5, 3.0]), 1)
+    if new_pct > 100: new_pct = 98.0
+    if new_pct < 20: new_pct = 65.0
+    
+    new_range = int(new_pct * 4.9)
+    is_charging = random.choice([True, False])
+    status = "charging_ac" if is_charging else "disconnected"
+    power = round(random.uniform(9.5, 11.2), 1) if is_charging else 0.0
+    rem_min = int((100 - new_pct) * 1.8) if is_charging else 0
+    kwh_rem = round(77.4 * (new_pct / 100.0), 1)
+    temp = round(random.uniform(22.0, 26.5), 1)
+    aux = round(random.uniform(13.6, 14.1), 1)
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    if row:
+        cursor.execute("""
+            UPDATE vehicle_telemetry SET
+                battery_percentage = ?, range_km = ?, charging_status = ?,
+                charging_power_kw = ?, remaining_charging_minutes = ?,
+                battery_kwh_remaining = ?, battery_temp_c = ?, aux_battery_voltage = ?,
+                updated_at = ?
+            WHERE id = ?
+        """, (new_pct, new_range, status, power, rem_min, kwh_rem, temp, aux, now_str, row["id"]))
+    else:
+        cursor.execute("""
+            INSERT INTO vehicle_telemetry 
+            (user_id, vehicle_id, battery_percentage, battery_soh, range_km, charging_status, charging_power_kw, remaining_charging_minutes, battery_kwh_remaining, battery_kwh_total, battery_temp_c, aux_battery_voltage, odometer_km, updated_at)
+            VALUES (?, 1, ?, 100.0, ?, ?, ?, ?, ?, 77.4, ?, ?, 30800, ?)
+        """, (user["id"], new_pct, new_range, status, power, rem_min, kwh_rem, temp, aux, now_str))
+
+    conn.commit()
+    conn.close()
+    await manager.broadcast({"type": "TELEMETRY_UPDATED"})
+    return {"status": "ok", "message": f"OBD-II simülasyonu güncellendi: %{new_pct} - {new_range} km"}
+
+
+# ==========================================
+# 🏥 SAĞLIK, İLAÇ & SPOR PROGRAMI API
+# ==========================================
+class MedicationPayload(BaseModel):
+    id: Optional[int] = None
+    name: str
+    item_type: str = "hap" # hap, surup, toz, damla, igne
+    category: str = "ilac" # ilac, spor_takviyesi
+    dosage: Optional[str] = "1 Adet"
+    time_of_day: Optional[str] = "Sabah 09:00"
+    meal_condition: Optional[str] = "Tok Karnına"
+    notes: Optional[str] = ""
+
+class GymDayPayload(BaseModel):
+    id: int
+    is_workout_day: int
+    workout_title: Optional[str] = ""
+    workout_time: Optional[str] = "19:30"
+    supplements: Optional[str] = ""
+    notes: Optional[str] = ""
+
+@app.get("/api/health/medications")
+def get_medications(user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    rows = cursor.execute("""
+        SELECT *, (CASE WHEN last_taken_date = ? THEN 1 ELSE 0 END) as is_taken_today
+        FROM health_medications
+        WHERE user_id = ? AND is_active = 1
+        ORDER BY category ASC, id ASC
+    """, (today_str, user["id"])).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+@app.post("/api/health/medications")
+async def create_medication(payload: MedicationPayload, user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO health_medications (user_id, name, item_type, category, dosage, time_of_day, meal_condition, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (user["id"], payload.name.strip(), payload.item_type, payload.category, payload.dosage, payload.time_of_day, payload.meal_condition, payload.notes))
+    conn.commit()
+    conn.close()
+    await manager.broadcast({"type": "HEALTH_UPDATED"})
+    return {"status": "ok", "message": "İlaç / Takviye başarıyla eklendi."}
+
+@app.put("/api/health/medications/{med_id}")
+async def update_medication(med_id: int, payload: MedicationPayload, user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE health_medications SET
+            name = ?, item_type = ?, category = ?, dosage = ?, time_of_day = ?, meal_condition = ?, notes = ?
+        WHERE id = ? AND user_id = ?
+    """, (payload.name.strip(), payload.item_type, payload.category, payload.dosage, payload.time_of_day, payload.meal_condition, payload.notes, med_id, user["id"]))
+    conn.commit()
+    conn.close()
+    await manager.broadcast({"type": "HEALTH_UPDATED"})
+    return {"status": "ok", "message": "İlaç bilgileri güncellendi."}
+
+@app.delete("/api/health/medications/{med_id}")
+async def delete_medication(med_id: int, user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM health_medications WHERE id = ? AND user_id = ?", (med_id, user["id"]))
+    conn.commit()
+    conn.close()
+    await manager.broadcast({"type": "HEALTH_UPDATED"})
+    return {"status": "ok", "message": "İlaç / Takviye silindi."}
+
+@app.post("/api/health/medications/{med_id}/toggle-take")
+async def toggle_medication_taken(med_id: int, user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    row = cursor.execute("SELECT last_taken_date, name FROM health_medications WHERE id = ? AND user_id = ?", (med_id, user["id"])).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Kayıt bulunamadı")
+    
+    is_taken = (row["last_taken_date"] == today_str)
+    new_date = None if is_taken else today_str
+    cursor.execute("UPDATE health_medications SET last_taken_date = ? WHERE id = ? AND user_id = ?", (new_date, med_id, user["id"]))
+    conn.commit()
+    conn.close()
+    await manager.broadcast({"type": "HEALTH_UPDATED"})
+    msg = f"{row['name']} için bugün alındı işareti geri alındı." if is_taken else f"Harika! {row['name']} bugün alındı olarak kaydedildi. ✓"
+    return {"status": "ok", "is_taken": not is_taken, "message": msg}
+
+@app.get("/api/health/gym-schedule")
+def get_gym_schedule(user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    today_weekday = datetime.now().isoweekday()
+    rows = cursor.execute("""
+        SELECT *, 
+               (CASE WHEN last_completed_date = ? THEN 1 ELSE 0 END) as is_completed_today,
+               (CASE WHEN day_of_week = ? THEN 1 ELSE 0 END) as is_today
+        FROM gym_schedule
+        WHERE user_id = ?
+        ORDER BY day_of_week ASC
+    """, (today_str, today_weekday, user["id"])).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+@app.put("/api/health/gym-schedule/{day_id}")
+async def update_gym_day(day_id: int, payload: GymDayPayload, user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE gym_schedule SET
+            is_workout_day = ?, workout_title = ?, workout_time = ?, supplements = ?, notes = ?
+        WHERE id = ? AND user_id = ?
+    """, (payload.is_workout_day, payload.workout_title, payload.workout_time, payload.supplements, payload.notes, day_id, user["id"]))
+    conn.commit()
+    conn.close()
+    await manager.broadcast({"type": "HEALTH_UPDATED"})
+    return {"status": "ok", "message": "Spor programı güncellendi."}
+
+@app.post("/api/health/gym-schedule/{day_id}/complete")
+async def complete_gym_workout(day_id: int, user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    row = cursor.execute("SELECT last_completed_date, day_name, workout_title FROM gym_schedule WHERE id = ? AND user_id = ?", (day_id, user["id"])).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Kayıt bulunamadı")
+    
+    is_completed = (row["last_completed_date"] == today_str)
+    new_date = None if is_completed else today_str
+    cursor.execute("UPDATE gym_schedule SET last_completed_date = ? WHERE id = ? AND user_id = ?", (new_date, day_id, user["id"]))
+    conn.commit()
+    conn.close()
+    await manager.broadcast({"type": "HEALTH_UPDATED"})
+    msg = f"{row['day_name']} antrenmanı tamamlandı işareti kaldırıldı." if is_completed else f"Tebrikler! {row['workout_title'] or 'Antrenman'} bugün tamamlandı! 🔥"
+    return {"status": "ok", "is_completed": not is_completed, "message": msg}
+
+@app.get("/api/health/today-summary")
+def get_health_today_summary(user: dict = Depends(get_current_user)):
+    conn = get_db()
+    cursor = conn.cursor()
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    today_weekday = datetime.now().isoweekday()
+
+    meds = cursor.execute("SELECT * FROM health_medications WHERE user_id = ? AND is_active = 1", (user["id"],)).fetchall()
+    total_meds = len(meds)
+    taken_meds = sum(1 for m in meds if m["last_taken_date"] == today_str)
+    pending_meds = [dict(m) for m in meds if m["last_taken_date"] != today_str]
+
+    gym_today_row = cursor.execute("SELECT * FROM gym_schedule WHERE user_id = ? AND day_of_week = ?", (user["id"], today_weekday)).fetchone()
+    gym_today = dict(gym_today_row) if gym_today_row else {}
+    is_gym_completed = (gym_today.get("last_completed_date") == today_str)
+
+    conn.close()
+    return {
+        "total_meds": total_meds,
+        "taken_meds": taken_meds,
+        "remaining_meds": total_meds - taken_meds,
+        "pending_meds": pending_meds,
+        "gym_today": gym_today,
+        "is_gym_completed": is_gym_completed
+    }
+
+
 class AdminAuth(BaseModel):
     password: str
 
@@ -790,6 +1089,77 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
         if any(w in msg for w in ["araba", "aracım", "araç", "model"]):
             return {"reply": f"Aracınız {v_info.get('brand_model', 'KIA EV6')}, plakanız {v_info.get('plate', '41 ACR 610')} ve güncel kilometreniz {v_info.get('current_km', 30800)} km'dir.", "configured": True}
 
+        # 1. Optimus İlaç & Takviye Sorusu
+        if any(w in msg for w in ["ilaç", "ilac", "hap", "şurup", "surup", "ilaçlarım"]):
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            c2 = conn.cursor() if 'conn' in locals() and conn else get_db().cursor()
+            med_rows = c2.execute("SELECT * FROM health_medications WHERE user_id = ? AND is_active = 1", (user["id"],)).fetchall()
+            meds = [dict(m) for m in med_rows]
+            if not meds:
+                return {"reply": "Kayıtlı herhangi bir ilaç veya takviyeniz bulunmuyor. Sağlık & Spor menüsünden ekleyebilirsiniz.", "configured": True}
+            pending = [m for m in meds if m.get("last_taken_date") != today_str]
+            taken = [m for m in meds if m.get("last_taken_date") == today_str]
+            if pending:
+                items_str = ", ".join([f"{m['name']} ({m.get('time_of_day', '')}, {m.get('meal_condition', '')})" for m in pending])
+                text = f"Bugün henüz almadığınız {len(pending)} ilacınız/takviyeniz var: {items_str}."
+                if taken:
+                    text += f" (Bugün aldıklarınız: {', '.join([m['name'] for m in taken])})"
+                return {"reply": text, "configured": True}
+            else:
+                return {"reply": f"Harika haber! Bugünkü tüm ilaç ve takviyelerinizi ({len(taken)} adet) eksiksiz aldınız.", "configured": True}
+
+        # 2. Optimus Spor Günü Sorusu
+        if any(w in msg for w in ["spor günüm", "bugün spor", "spor günü", "antrenman var mı", "antrenman günü"]):
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            today_weekday = datetime.now().isoweekday()
+            c2 = conn.cursor() if 'conn' in locals() and conn else get_db().cursor()
+            gym_row = c2.execute("SELECT * FROM gym_schedule WHERE user_id = ? AND day_of_week = ?", (user["id"], today_weekday)).fetchone()
+            gym_today = dict(gym_row) if gym_row else None
+            if gym_today and gym_today.get("is_workout_day"):
+                is_completed = (gym_today.get("last_completed_date") == today_str)
+                w_title = gym_today.get("workout_title") or "Antrenman"
+                w_time = gym_today.get("workout_time") or "19:30"
+                if is_completed:
+                    return {"reply": f"Evet, bugün spor gününüz ({w_title}) ve bugünkü antrenmanınızı başarıyla tamamladınız! Harika formdasınız. 🔥", "configured": True}
+                else:
+                    supp_note = f" Önerilen takviyeler: {gym_today['supplements']}." if gym_today.get("supplements") else ""
+                    return {"reply": f"Evet, bugün spor gününüz! Programınız: {w_title}. Planlanan antrenman saati: {w_time}.{supp_note} İyi çalışmalar!", "configured": True}
+            else:
+                return {"reply": "Hayır, bugün dinlenme (Off-Day) gününüz. Kaslarınızı toparlamak ve dinlenmek için harika bir gün.", "configured": True}
+
+        # 3. Optimus Creatin / Protein Tozu / Takviye Sorusu
+        if any(w in msg for w in ["creatin", "kreatin", "protein", "takviye", "kullanmam gereken ürün", "ürün var mı"]):
+            today_weekday = datetime.now().isoweekday()
+            c2 = conn.cursor() if 'conn' in locals() and conn else get_db().cursor()
+            gym_row = c2.execute("SELECT * FROM gym_schedule WHERE user_id = ? AND day_of_week = ?", (user["id"], today_weekday)).fetchone()
+            gym_today = dict(gym_row) if gym_row else None
+            gym_supps = gym_today.get("supplements") if gym_today else ""
+            med_rows = c2.execute("SELECT * FROM health_medications WHERE user_id = ? AND is_active = 1 AND category = 'spor_takviyesi'", (user["id"],)).fetchall()
+            supp_meds = [dict(m) for m in med_rows]
+            items = []
+            if supp_meds:
+                for m in supp_meds:
+                    items.append(f"{m['name']} ({m.get('dosage', '')} - {m.get('time_of_day', '')})")
+            if gym_supps and gym_supps not in [m['name'] for m in supp_meds]:
+                items.append(f"Günün Antrenman Takviyesi: {gym_supps}")
+            if items:
+                return {"reply": f"Bugün spor için kullanmanız gereken takviyeler: {', '.join(items)}. Bol su tüketmeyi unutmayın!", "configured": True}
+            else:
+                return {"reply": "Bugün için özel bir spor takviyesi kaydınız görünmüyor. Sağlık & Spor menüsünden Creatin veya Protein Tozu tanımlayabilirsiniz.", "configured": True}
+
+        # 4. Optimus KIA EV6 Şarj & Batarya Durumu Sorusu
+        if any(w in msg for w in ["şarj", "sarj", "batarya", "menzil", "arabanın şarjı", "aracın şarjı"]):
+            c2 = conn.cursor() if 'conn' in locals() and conn else get_db().cursor()
+            t_row = c2.execute("SELECT * FROM vehicle_telemetry WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user["id"],)).fetchone()
+            if t_row:
+                t = dict(t_row)
+                soc = t.get("battery_soc", 84)
+                rng = t.get("range_km", 438)
+                st = t.get("charging_status", "Beklemede")
+                return {"reply": f"KIA EV6 aracınızın bataryası %{soc} dolu. Tahmini menziliniz {rng} km. Şarj durumu: {st}.", "configured": True}
+            else:
+                return {"reply": "KIA EV6 bataryanız %84 dolu ve yaklaşık 438 km menziliniz bulunuyor.", "configured": True}
+
     conn = get_db()
     cursor = conn.cursor()
     row = cursor.execute("SELECT value FROM admin_settings WHERE key = 'gemini_api_key'").fetchone()
@@ -799,6 +1169,19 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
     v_row = cursor.execute("SELECT * FROM vehicle_profile WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user["id"],)).fetchone()
     v_info = dict(v_row) if v_row else {}
     
+    # Telemetri, Sağlık ve Spor Özeti
+    t_row = cursor.execute("SELECT * FROM vehicle_telemetry WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user["id"],)).fetchone()
+    telemetry = dict(t_row) if t_row else {}
+    
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    today_weekday = datetime.now().isoweekday()
+    med_rows = cursor.execute("SELECT * FROM health_medications WHERE user_id = ? AND is_active = 1", (user["id"],)).fetchall()
+    med_list = [f"{m['name']} ({m['item_type']}, {m['time_of_day']}, {m['meal_condition']}, Alındı: {'Evet' if m['last_taken_date'] == today_str else 'Hayır'})" for m in med_rows]
+    
+    gym_row = cursor.execute("SELECT * FROM gym_schedule WHERE user_id = ? AND day_of_week = ?", (user["id"], today_weekday)).fetchone()
+    gym_today = dict(gym_row) if gym_row else {}
+    gym_summary = f"Bugün: {gym_today.get('day_name')}, Antrenman: {gym_today.get('workout_title', 'Dinlenme')}, Saat: {gym_today.get('workout_time')}, Takviyeler: {gym_today.get('supplements', 'Yok')}, Tamamlandı: {'Evet' if gym_today.get('last_completed_date') == today_str else 'Hayır'}" if gym_today else "Program girilmedi"
+
     # Bekleyen & Ödenen Özetleri
     payments = [f"{r['title']}: {r['amount']} TL (Son Ödeme: {r['due_date']}, Durum: {r['status']})" for r in cursor.execute("SELECT title, amount, due_date, status FROM payments WHERE user_id = ?", (user["id"],)).fetchall()]
     conn.close()
@@ -823,23 +1206,31 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
 
     # Model için net, şeffaf ve kesin araç bilgileri
     vehicle_summary = f"""
-    KULLANICININ ARAÇ BİLGİLERİ:
+    KULLANICININ ARAÇ BİLGİLERİ (KIA EV6):
     - Marka ve Model: {v_info.get('brand_model', 'KIA EV6')}
     - Plaka: {v_info.get('plate', 'Belirtilmedi')}
     - Model Yılı: {v_info.get('year', '2024')}
     - Güncel Kilometre: {v_info.get('current_km', '30.800')} km
+    - Canlı Batarya SoC: %{telemetry.get('battery_soc', 84)}
+    - Kalan Menzil: {telemetry.get('range_km', 438)} km
+    - Şarj Durumu: {telemetry.get('charging_status', 'Beklemede')}
     - TÜVTÜRK Araç Muayene Bitiş Tarihi: {v_info.get('tuvturk_date', '2027-04-29')}
     - Trafik Sigortası Bitiş Tarihi: {v_info.get('insurance_date', '2027-04-29')}
     - Kasko Bitiş Tarihi: {v_info.get('kasko_date', '2027-04-29')}
-    - Bakım Periyodu: {v_info.get('interval_year', 2)} Yıl veya {v_info.get('interval_km', 30000)} KM
     """
 
     system_instruction = f"""
-    Sen kullanıcının kişisel, çok zeki, yardımsever ve samimi yapay zeka asistanı 'ASİSTAN'sın.
+    Sen kullanıcının kişisel, çok zeki, yardımsever yapay zeka asistanı 'Optimus'sun.
     Bugünün Tarihi ve Saati: {datetime.now().strftime('%d %B %Y, %H:%M')}
     Kullanıcının Şehri/Konumu: Kocaeli / Türkiye
 
     {vehicle_summary}
+
+    SAĞLIK & İLAÇ TAKİBİ:
+    {', '.join(med_list) if med_list else 'Kayıtlı ilaç/takviye yok.'}
+
+    HAFTALIK SPOR PROGRAMI:
+    {gym_summary}
 
     ÖDEMELER & FATURALAR:
     {', '.join(payments[:15]) if payments else 'Kayıtlı ödeme bulunmuyor.'}
@@ -847,8 +1238,8 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
     {weather_section}
 
     ÖNEMLİ YANIT KURALLARI (HIZLI, KOTA DOSTU VE ÖZ CEVAPLAR):
-    1. GÜNLÜK VE BASİT SORULAR (Hava durumu, fatura, araç durumu, selam vb.):
-       - ASLA lafı uzatma! Giriş veya kapanış kalıpları ("Merhaba ben asistan", "Başka sorunuz var mı" vb.) kullanma.
+    1. GÜNLÜK VE BASİT SORULAR (Hava durumu, fatura, ilaç, spor, takviye, araç şarjı vb.):
+       - ASLA lafı uzatma! Giriş veya kapanış kalıpları ("Merhaba ben Optimus", "Başka sorunuz var mı" vb.) kullanma.
        - Doğrudan, net, 1 veya en fazla 2-3 cümlelik öz ve kısa bir cevap ver.
        - Örnek hava yanıtı: "Kocaeli'de şu an hava hafif yağmurlu ve 19°C. Gün içinde en yüksek 21°C olacak; dışarı çıkarken şemsiyenizi almayı unutmayın."
     2. BİLGİ VE ÖZET SORULARI:

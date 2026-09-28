@@ -369,12 +369,24 @@ body {
   display: none;
 }
 
+/* Settings Panel Cards Fix: Ensure full-width block display, avoid flex child issues */
+#section-settings .stat-card,
+#settings-panel .stat-card,
+.settings-card {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: auto !important;
+  padding: 16px 20px !important;
+  margin-bottom: 20px !important;
+}
+
 /* Category Filter Tabs */
 /* Category Filter Tabs - Full Width Aligned Grid */
 .tabs-bar {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
   width: 100%;
   margin-bottom: 14px;
   padding: 4px 2px;
@@ -522,6 +534,36 @@ body {
   .tab-btn:active {
     transform: scale(0.96) !important;
   }
+  .tab-btn-health {
+    grid-column: 1 / -1 !important;
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.16), rgba(168, 85, 247, 0.16)) !important;
+    border: 1px solid rgba(236, 72, 153, 0.35) !important;
+    color: #f472b6 !important;
+    font-weight: 800 !important;
+  }
+  .tab-btn-health.active,
+  .tab-btn-health:active {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
+    border-color: #f472b6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 16px rgba(236, 72, 153, 0.5) !important;
+  }
+}
+
+.tab-btn-health {
+  border-color: rgba(236, 72, 153, 0.3);
+  color: #f472b6;
+}
+.tab-btn-health:hover {
+  border-color: #ec4899;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.5);
+}
+.tab-btn-health.active {
+  background: linear-gradient(135deg, #ec4899, #a855f7) !important;
+  border-color: #f472b6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.55), 0 0 25px rgba(168, 85, 247, 0.6) !important;
 }
 
 /* Payment List Cards - Şık, Okunaklı ve Dengeli Kompakt Tasarım */
@@ -2190,6 +2232,196 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
   .stat-card {
     padding: 12px 14px !important;
   }
+}
+
+/* ========================================================
+   🏥 SAĞLIK & SPOR MODÜLÜ VE OBD-II CANLI TELEMETRİ STİLLERİ
+   ======================================================== */
+
+/* OBD-II Canlı Telemetri Kartı */
+.obd-telemetry-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85));
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-top: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(56, 189, 248, 0.08);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.obd-battery-bar-container {
+  width: 100%;
+  height: 12px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 10px 0 14px 0;
+  position: relative;
+}
+
+.obd-battery-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #06b6d4, #38bdf8);
+  border-radius: 6px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+}
+
+.obd-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .obd-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+.obd-metric-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+}
+
+/* Sağlık & Spor Bölümü */
+#section-health {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+  #section-health {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    padding: 0 4px 90px 4px !important;
+  }
+}
+
+/* Optimus Hızlı Soru Hapları */
+.optimus-questions-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 2px 12px 2px;
+  -webkit-overflow-scrolling: touch;
+}
+.optimus-questions-bar::-webkit-scrollbar { display: none; }
+
+.optimus-ask-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #e2e8f0;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.optimus-ask-pill:hover,
+.optimus-ask-pill:active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3));
+  border-color: #ec4899;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 14px rgba(236, 72, 153, 0.4);
+}
+
+/* Sağlık Alt Sekmeleri */
+.health-subtabs {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.health-subtab-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.health-subtab-btn.active {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3));
+  color: #ffffff;
+  border: 1px solid rgba(236, 72, 153, 0.5);
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.3);
+}
+
+/* İlaç & Takviye Kartları */
+.medication-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.medication-card.taken {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+/* Haftalık Spor Programı Kartları */
+.gym-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.gym-day-card {
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.gym-day-card.is-today {
+  border-color: #38bdf8;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+}
+
+.gym-day-card.completed {
+  border-color: #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(30, 41, 59, 0.8));
 }
 
 

@@ -127,16 +127,103 @@ def init_db():
     )
     """)
 
-    try:
-        cursor.execute("ALTER TABLE contracts_warranties ADD COLUMN purchase_date TEXT")
-    except Exception:
-        pass
-    try:
-        cursor.execute("ALTER TABLE contracts_warranties ADD COLUMN warranty_duration TEXT")
-    except Exception:
-        pass
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS health_medications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER DEFAULT 1,
+        name TEXT NOT NULL,
+        item_type TEXT DEFAULT 'hap', -- 'hap', 'surup', 'toz', 'damla', 'igne'
+        category TEXT DEFAULT 'ilac', -- 'ilac', 'spor_takviyesi'
+        dosage TEXT,                  -- '1 Tablet', '5 gr', '1 Ölçek'
+        time_of_day TEXT,             -- 'Sabah 09:00', 'Akşam 20:00', 'Spordan Önce'
+        meal_condition TEXT,          -- 'Tok Karnına', 'Aç Karnına', 'Antrenman Öncesi'
+        notes TEXT,
+        last_taken_date TEXT,
+        is_active INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS gym_schedule (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER DEFAULT 1,
+        day_of_week INTEGER NOT NULL, -- 1: Pazartesi ... 7: Pazar
+        day_name TEXT NOT NULL,
+        is_workout_day INTEGER DEFAULT 1,
+        workout_title TEXT,
+        workout_time TEXT DEFAULT '19:30',
+        supplements TEXT,             -- 'Creatin, Protein Tozu'
+        notes TEXT,
+        last_completed_date TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS vehicle_telemetry (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER DEFAULT 1,
+        vehicle_id INTEGER DEFAULT 1,
+        battery_percentage REAL DEFAULT 78.0, -- SoC %
+        battery_soh REAL DEFAULT 100.0,       -- SoH %
+        range_km INTEGER DEFAULT 395,
+        charging_status TEXT DEFAULT 'disconnected', -- disconnected, charging_ac, charging_dc, completed
+        charging_power_kw REAL DEFAULT 0.0,
+        remaining_charging_minutes INTEGER DEFAULT 0,
+        battery_kwh_remaining REAL DEFAULT 60.4,
+        battery_kwh_total REAL DEFAULT 77.4,
+        battery_temp_c REAL DEFAULT 24.0,
+        aux_battery_voltage REAL DEFAULT 13.8,
+        odometer_km INTEGER DEFAULT 30800,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
 
     conn.commit()
+
+    # Seed default telemetry record if empty
+    cursor.execute("SELECT COUNT(*) as cnt FROM vehicle_telemetry")
+    if cursor.fetchone()["cnt"] == 0:
+        cursor.execute("""
+        INSERT INTO vehicle_telemetry 
+        (user_id, vehicle_id, battery_percentage, battery_soh, range_km, charging_status, charging_power_kw, remaining_charging_minutes, battery_kwh_remaining, battery_kwh_total, battery_temp_c, aux_battery_voltage, odometer_km)
+        VALUES 
+        (1, 1, 78.0, 100.0, 395, 'disconnected', 0.0, 0, 60.4, 77.4, 24.0, 13.8, 30800)
+        """)
+        conn.commit()
+
+    # Seed default gym schedule if empty
+    cursor.execute("SELECT COUNT(*) as cnt FROM gym_schedule")
+    if cursor.fetchone()["cnt"] == 0:
+        seed_gym = [
+            (1, 1, 'Pazartesi', 1, 'Göğüs & Ön Kol (Biceps)', '19:30', 'Creatin (Spordan 30 dk önce 5g), Protein Tozu (Sonrası 1 ölçek)', 'Ağır pres ve serbest ağırlık hareketleri'),
+            (1, 2, 'Salı', 0, 'Dinlenme & İyileşme (Off Day)', '', 'Bol su ve dengeli beslenme', 'Kas gelişimi ve dinlenme günü'),
+            (1, 3, 'Çarşamba', 1, 'Sırt & Arka Kol (Triceps)', '19:30', 'Creatin (Antrenman öncesi), Protein Tozu (Antrenman sonrası)', 'Lat pulldown, row ve pushdown serileri'),
+            (1, 4, 'Perşembe', 0, 'Dinlenme (Off Day)', '', 'Hafif esneme ve yürüyüş', 'Toparlanma ve kas dinlendirme'),
+            (1, 5, 'Cuma', 1, 'Bacak & Omuz', '19:30', 'Creatin (Antrenman öncesi), Protein Tozu (Antrenman sonrası)', 'Squat, leg press ve omuz pres'),
+            (1, 6, 'Cumartesi', 1, 'Kardiyo & Karın (Core)', '14:00', 'BCAA veya Protein Tozu', '30 dk tempolu kardiyo ve karın egzersizleri'),
+            (1, 7, 'Pazar', 0, 'Dinlenme (Hafta Sonu Off)', '', 'Dinlenme', 'Haftalık tam yenilenme günü')
+        ]
+        cursor.executemany("""
+            INSERT INTO gym_schedule (user_id, day_of_week, day_name, is_workout_day, workout_title, workout_time, supplements, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, seed_gym)
+        conn.commit()
+
+    # Seed default sample medications/supplements if empty
+    cursor.execute("SELECT COUNT(*) as cnt FROM health_medications")
+    if cursor.fetchone()["cnt"] == 0:
+        seed_meds = [
+            (1, 'D Vitamini', 'damla', 'ilac', '1 Kapsül / Damla', 'Sabah 09:00', 'Tok Karnına', 'Kahvaltı sonrası'),
+            (1, 'Creatin Monohidrat', 'toz', 'spor_takviyesi', '5 gr (1 Ölçek)', 'Spordan 30 dk Önce', 'Bol Su ile', 'Antrenman öncesi güç ve patlayıcı enerji için'),
+            (1, 'Whey Protein Tozu', 'toz', 'spor_takviyesi', '30 gr (1 Ölçek)', 'Spordan Sonra', 'Antrenman Sonrası', 'Antrenman sonrası hızlı kas onarımı için')
+        ]
+        cursor.executemany("""
+            INSERT INTO health_medications (user_id, name, item_type, category, dosage, time_of_day, meal_condition, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, seed_meds)
+        conn.commit()
 
     # Seed default sample contract / warranty if empty
     cursor.execute("SELECT COUNT(*) as cnt FROM contracts_warranties")

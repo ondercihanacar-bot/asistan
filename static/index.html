@@ -9,7 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="/style.css?v=13">
+  <link rel="stylesheet" href="/style.css?v=15">
   <!-- Chart.js for beautiful analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -902,6 +902,12 @@
           </svg>
           <span>Vergiler</span>
         </button>
+        <button class="tab-btn tab-btn-health" data-category="saglik" onclick="switchTab('health')">
+          <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Sağlık &amp; Spor</span>
+        </button>
       </div>
 
       <!-- Payment Cards Grid -->
@@ -1166,6 +1172,71 @@
         </div>
         
         <button class="btn btn-outline" style="width:100%" onclick="openVehicleModal()">✏️ Araç Bilgilerini Düzenle</button>
+
+        <!-- ⚡ KIA EV6 OBD-II Canlı Telemetri & Batarya Durumu -->
+        <div class="obd-telemetry-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.25rem;">⚡</span>
+              <div>
+                <div style="font-weight: 800; font-size: 0.95rem; color: #f8fafc; display: flex; align-items: center; gap: 6px;">
+                  <span>KIA EV6 OBD-II Canlı Telemetri</span>
+                  <span id="obd-status-pill" style="font-size: 0.65rem; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 1px 6px; border-radius: 6px; font-weight: 700;">CANLI</span>
+                </div>
+                <div style="font-size: 0.72rem; color: #94a3b8;" id="obd-last-sync-text">Son Veri: Az önce senkronize edildi</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;" onclick="simulateObdTelemetry()" title="Bluetooth OBD-II Test Simülasyonu">
+                ⚡ Test Simülasyonu
+              </button>
+              <button type="button" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; border-color: rgba(255, 255, 255, 0.2); color: #cbd5e1;" onclick="openModal('modal-obd-guide')" title="OBD-II Bluetooth Kurulum Rehberi">
+                📖 Rehber
+              </button>
+            </div>
+          </div>
+
+          <!-- Batarya Şarj Seviyesi & Menzil Başlığı -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px;">
+            <div>
+              <div style="font-size: 0.74rem; color: #94a3b8; font-weight: 600;">BATARYA DOLULUK SEVİYESİ (%SoC)</div>
+              <div style="font-size: 1.8rem; font-weight: 900; color: #38bdf8; line-height: 1; margin-top: 2px;" id="obd-battery-soc-text">%84</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.74rem; color: #94a3b8; font-weight: 600;">TAHMİNİ KALAN MENZİL</div>
+              <div style="font-size: 1.4rem; font-weight: 800; color: #34d399; line-height: 1; margin-top: 2px;" id="obd-range-km-text">438 km</div>
+            </div>
+          </div>
+
+          <!-- Canlı Neon Batarya Gösterge Çubuğu -->
+          <div class="obd-battery-bar-container">
+            <div class="obd-battery-fill" id="obd-battery-bar-fill" style="width: 84%;"></div>
+          </div>
+
+          <!-- 4'lü Telemetri Metrikleri -->
+          <div class="obd-metrics-grid">
+            <div class="obd-metric-box">
+              <div style="font-size: 0.7rem; color: #94a3b8;">🔌 Şarj Durumu</div>
+              <div style="font-size: 0.88rem; font-weight: 700; color: #38bdf8; margin-top: 3px;" id="obd-charge-status">Beklemede</div>
+              <div style="font-size: 0.68rem; color: #64748b;" id="obd-charge-kw">0 kW</div>
+            </div>
+            <div class="obd-metric-box">
+              <div style="font-size: 0.7rem; color: #94a3b8;">🔋 Batarya Sağlığı</div>
+              <div style="font-size: 0.88rem; font-weight: 700; color: #34d399; margin-top: 3px;" id="obd-soh">%100 SoH</div>
+              <div style="font-size: 0.68rem; color: #64748b;">Mükemmel Durum</div>
+            </div>
+            <div class="obd-metric-box">
+              <div style="font-size: 0.7rem; color: #94a3b8;">⚡ 12V Araç Aküsü</div>
+              <div style="font-size: 0.88rem; font-weight: 700; color: #f59e0b; margin-top: 3px;" id="obd-12v-volt">13.2 V</div>
+              <div style="font-size: 0.68rem; color: #64748b;">Sağlıklı</div>
+            </div>
+            <div class="obd-metric-box">
+              <div style="font-size: 0.7rem; color: #94a3b8;">🌡️ Batarya Isısı</div>
+              <div style="font-size: 0.88rem; font-weight: 700; color: #a78bfa; margin-top: 3px;" id="obd-batt-temp">22.4 °C</div>
+              <div style="font-size: 0.68rem; color: #64748b;">İdeal Sıcaklık</div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1243,8 +1314,104 @@
     </section>
 
   
+    <!-- SECTION: Sağlık & Spor (İlaç, Takviye & Haftalık Spor Spliti) -->
+    <section id="section-health" style="display: none; padding-bottom: 80px;">
+      <!-- Başlık & Yeni Ekle Butonları -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px; color: #f8fafc;">
+            <span>🏥</span> <span>Sağlık &amp; Spor Asistanı</span>
+          </h2>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 0 0;">Kullandığınız ilaçlar, spor takviyeleri ve haftalık antrenman splitiniz tek ekranda.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary" onclick="openAddMedicationModal()" style="font-size: 0.84rem; padding: 7px 14px; gap: 6px; box-shadow: 0 0 14px rgba(236,72,153,0.4); background: linear-gradient(135deg, #ec4899, #8b5cf6); border: none;">
+            <span>➕</span> <span>İlaç / Takviye Ekle</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Optimus Hızlı Soru Hapları (Optimus'a Tek Tıkla Sor) -->
+      <div style="margin-bottom: 12px;">
+        <div style="font-size: 0.72rem; color: #a78bfa; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+          <span>🤖</span> <span>OPTIMUS'A DOĞRUDAN SOR (SESLİ YANITLAR):</span>
+        </div>
+        <div class="optimus-questions-bar">
+          <button type="button" class="optimus-ask-pill" onclick="askOptimusQuick('Bugün kullanacağım ilaçlarım var mıydı?')">
+            <span>💊</span> <span>Bugün ilaçlarım var mıydı?</span>
+          </button>
+          <button type="button" class="optimus-ask-pill" onclick="askOptimusQuick('Bugün spor günüm mü?')">
+            <span>🏋️</span> <span>Bugün spor günüm mü?</span>
+          </button>
+          <button type="button" class="optimus-ask-pill" onclick="askOptimusQuick('Spor için kullanmam gereken ürün var mı? (Creatin, Protein Tozu gibi)')">
+            <span>⚡</span> <span>Hangi takviyeleri almalıyım?</span>
+          </button>
+          <button type="button" class="optimus-ask-pill" onclick="askOptimusQuick('Optimus, arabanın şarjı ne kadar?')">
+            <span>🔋</span> <span>Arabanın şarjı ne kadar?</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sağlık & Spor Alt Sekmeler -->
+      <div class="health-subtabs">
+        <button type="button" class="health-subtab-btn active" id="btn-subtab-meds" onclick="switchHealthSubtab('meds')">
+          <span>💊</span> <span>İlaçlar &amp; Takviyeler</span>
+          <span id="badge-meds-count" style="font-size: 0.7rem; background: rgba(255,255,255,0.15); padding: 2px 7px; border-radius: 10px; margin-left: 4px;">0</span>
+        </button>
+        <button type="button" class="health-subtab-btn" id="btn-subtab-gym" onclick="switchHealthSubtab('gym')">
+          <span>🏋️</span> <span>Haftalık Spor Programı</span>
+          <span id="badge-gym-today-pill" style="font-size: 0.7rem; background: rgba(56,189,248,0.2); color: #38bdf8; padding: 2px 7px; border-radius: 10px; margin-left: 4px;">Bugün</span>
+        </button>
+      </div>
+
+      <!-- ALT SEKME 1: İlaçlar & Takviyeler Listesi -->
+      <div id="subtab-content-meds">
+        <!-- Günlük Özet Çubuğu -->
+        <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #f8fafc;">Bugünkü İlaç &amp; Takviye Durumu</div>
+            <div style="font-size: 0.74rem; color: #94a3b8;" id="health-today-status-text">Yükleniyor...</div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <div style="text-align: center; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); padding: 4px 10px; border-radius: 8px;">
+              <div style="font-size: 0.95rem; font-weight: 800; color: #34d399;" id="stat-meds-taken">0</div>
+              <div style="font-size: 0.65rem; color: #94a3b8;">Alındı ✓</div>
+            </div>
+            <div style="text-align: center; background: rgba(236,72,153,0.12); border: 1px solid rgba(236,72,153,0.3); padding: 4px 10px; border-radius: 8px;">
+              <div style="font-size: 0.95rem; font-weight: 800; color: #f472b6;" id="stat-meds-remaining">0</div>
+              <div style="font-size: 0.65rem; color: #94a3b8;">Kalan</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- İlaç Kartları Konteyneri -->
+        <div id="medications-container">
+          <div style="text-align: center; color: #94a3b8; padding: 30px; font-size: 0.85rem;">
+            ⏳ İlaç ve takviyeler yükleniyor...
+          </div>
+        </div>
+      </div>
+
+      <!-- ALT SEKME 2: Haftalık Spor Programı -->
+      <div id="subtab-content-gym" style="display: none;">
+        <!-- Bugünün Spor Kartı Özeti -->
+        <div id="gym-today-hero-box" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(56,189,248,0.4); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+          <!-- Rendered by app.js -->
+        </div>
+
+        <h4 style="font-size: 0.92rem; font-weight: 700; color: #f8fafc; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>📅</span> <span>Haftalık Antrenman &amp; Takviye Planı (7 Gün)</span>
+        </h4>
+
+        <!-- 7 Günlük Kartlar -->
+        <div class="gym-schedule-grid" id="gym-schedule-container">
+          <!-- Rendered by app.js -->
+        </div>
+      </div>
+    </section>
+
     <!-- SECTION: Ayarlar (Yönetici Paneli) -->
-    <section id="section-settings" style="display: none; padding-bottom: 80px; max-width: 650px; margin: 0 auto;">
+    <section id="section-settings" style="display: none; padding-bottom: 80px; max-width: 820px; width: 100%; margin: 0 auto; box-sizing: border-box;">
       <h2 style="font-size: 1.3rem; margin-bottom: 16px; font-weight: 800;">⚙️ Sistem Ayarları & Yönetici Paneli</h2>
       
       <div id="settings-auth-box" class="stat-card" style="margin-bottom: 20px;">
@@ -1294,6 +1461,8 @@
               🎙️ Klon Ses Ayarlarını Kaydet
             </button>
           </div>
+        </div>
+
         <!-- Gmail Otomatik Kredi Kartı Ekstresi & Fatura Tarama Paneli -->
         <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #ea4335;">
           <h4 style="margin-bottom: 8px; color: #f87171;">📬 Gmail: Kredi Kartı Ekstreleri & Faturaları Otomatik Oku</h4>
@@ -1737,6 +1906,15 @@
             </div>
           </div>
 
+          <!-- SAĞLIK & SPOR MODÜLÜ -->
+          <div class="mobile-menu-card" style="border-color: rgba(236, 72, 153, 0.4); background: rgba(236, 72, 153, 0.1);" onclick="switchTab('health'); closeModal('modal-mobile-menu');">
+            <div class="mmenu-icon" style="background: rgba(236, 72, 153, 0.25); color: #f472b6;">🏥</div>
+            <div class="mmenu-info">
+              <div class="mmenu-title" style="color: #f472b6;">Sağlık &amp; Spor</div>
+              <div class="mmenu-sub">İlaç &amp; Spor Programı</div>
+            </div>
+          </div>
+
           <!-- 2. 7 GÜNLÜK NAKİT PLANI -->
           <div class="mobile-menu-card" onclick="openMobileWeeklyCashflow();">
             <div class="mmenu-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">📅</div>
@@ -2080,7 +2258,7 @@
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="/app.js?v=338"></script>
+  <script src="/app.js?v=340"></script>
 
   <div id="ai-chat-modal" style="display: none; position: fixed; bottom: 150px; right: 20px; width: 380px; max-width: calc(100vw - 40px); height: 500px; max-height: calc(100vh - 180px); background: #0f172a; border: 1.5px solid #38bdf8; border-radius: 18px; box-shadow: 0 10px 35px rgba(0,0,0,0.8), 0 0 25px rgba(56, 189, 248, 0.35); z-index: 1001; flex-direction: column; overflow: hidden;">
     <!-- Chat Header -->
@@ -2235,6 +2413,172 @@
             💾 Ürün Garantisini Kaydet
           </button>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Yeni İlaç / Takviye Ekle & Düzenle -->
+  <div class="modal-overlay" id="modal-medication" onclick="if(event.target === this) closeModal('modal-medication')">
+    <div class="modal-box mobile-bottom-sheet" style="max-width: 500px;">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title" id="modal-med-title">💊 Yeni İlaç / Takviye Ekle</div>
+        <button class="btn-close" onclick="closeModal('modal-medication')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="medicationForm" onsubmit="handleSaveMedication(event)">
+          <input type="hidden" id="med-id">
+
+          <div class="form-group">
+            <label>İlaç veya Takviye Adı *</label>
+            <input type="text" id="med-name" class="form-control" placeholder="Örn: Parol, Creatin Monohidrat, Omega 3, Şurup..." required>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+              <label>Kategori *</label>
+              <select id="med-category" class="form-control">
+                <option value="ilac">💊 Reçeteli / Genel İlaç</option>
+                <option value="spor_takviyesi">⚡ Spor Takviyesi (Supplement)</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label>Form / Tür *</label>
+              <select id="med-item-type" class="form-control">
+                <option value="hap">💊 Hap / Kapsül</option>
+                <option value="surup">🧪 Şurup / Likit</option>
+                <option value="toz">🥛 Toz (Örn: Creatin/Protein)</option>
+                <option value="damla">💧 Damla</option>
+                <option value="igne">💉 Enjeksiyon</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+              <label>Kullanım Saati *</label>
+              <input type="text" id="med-time-of-day" class="form-control" placeholder="Örn: Sabah 09:00, Akşam 21:00..." value="Sabah 09:00" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label>Dozaj Miktarı</label>
+              <input type="text" id="med-dosage" class="form-control" placeholder="Örn: 1 Adet, 1 Ölçek, 10 ml" value="1 Adet">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Açlık / Tokluk Durumu</label>
+            <select id="med-meal-condition" class="form-control">
+              <option value="Tok Karnına">🍽️ Tok Karnına</option>
+              <option value="Aç Karnına">☕ Aç Karnına</option>
+              <option value="Antrenman Öncesi (Pre-Workout)">🏋️ Antrenman Öncesi</option>
+              <option value="Antrenman Sonrası (Post-Workout)">💪 Antrenman Sonrası</option>
+              <option value="Yatmadan Önce">🌙 Yatmadan Önce</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Özel Notlar &amp; Hatırlatmalar</label>
+            <textarea id="med-notes" class="form-control" rows="2" placeholder="Örn: Bol su ile için, buzdolabında saklayın..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 6px; background: linear-gradient(135deg, #ec4899, #8b5cf6); border: none; font-weight: 700;">
+            💾 İlacı / Takviyeyi Kaydet
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Haftalık Spor Günü Düzenleme -->
+  <div class="modal-overlay" id="modal-edit-gym-day" onclick="if(event.target === this) closeModal('modal-edit-gym-day')">
+    <div class="modal-box mobile-bottom-sheet" style="max-width: 480px;">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title" id="gym-modal-title">🏋️ Spor Günü Düzenle</div>
+        <button class="btn-close" onclick="closeModal('modal-edit-gym-day')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="gymDayForm" onsubmit="handleSaveGymDay(event)">
+          <input type="hidden" id="gym-day-id">
+
+          <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 700; color: #f8fafc;" id="gym-modal-day-name">Pazartesi</div>
+              <div style="font-size: 0.74rem; color: #94a3b8;">Bu gün antrenman yapılacak mı?</div>
+            </div>
+            <label style="position: relative; display: inline-block; width: 48px; height: 26px; cursor: pointer; margin: 0;">
+              <input type="checkbox" id="gym-is-workout-day" onchange="toggleGymDayInputs(this.checked)" style="opacity: 0; width: 0; height: 0;">
+              <span id="gym-switch-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 26px;"></span>
+            </label>
+          </div>
+
+          <div id="gym-workout-fields">
+            <div class="form-group">
+              <label>Antrenman Bölgesi / Program Adı *</label>
+              <input type="text" id="gym-workout-title" class="form-control" placeholder="Örn: Göğüs & Ön Kol, Bacak & Omuz, Kardiyo...">
+            </div>
+
+            <div class="form-group">
+              <label>Planlanan Antrenman Saati</label>
+              <input type="time" id="gym-workout-time" class="form-control" value="19:30">
+            </div>
+
+            <div class="form-group">
+              <label>Kullanılacak Takviyeler (Creatin, Protein vb.)</label>
+              <input type="text" id="gym-supplements" class="form-control" placeholder="Örn: 5g Creatin, 1 Ölçek Whey Protein...">
+            </div>
+
+            <div class="form-group">
+              <label>Antrenman Notları</label>
+              <textarea id="gym-notes" class="form-control" rows="2" placeholder="Örn: 4 set Bench Press, 15 dk kardiyo..."></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px; font-weight: 700;">
+            💾 Spor Programını Güncelle
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KIA EV6 OBD-II Bluetooth Kurulum Rehberi -->
+  <div class="modal-overlay" id="modal-obd-guide" onclick="if(event.target === this) closeModal('modal-obd-guide')">
+    <div class="modal-box mobile-bottom-sheet" style="max-width: 540px; max-height: 85vh; overflow-y: auto;">
+      <div class="bottom-sheet-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+          <span>⚡</span>
+          <span>KIA EV6 OBD-II Bluetooth Entegrasyon Rehberi</span>
+        </div>
+        <button class="btn-close" onclick="closeModal('modal-obd-guide')">&times;</button>
+      </div>
+      <div class="modal-body" style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.6;">
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+          <strong style="color: #34d399;">🛡️ Garanti &amp; Güvenlik Güvencesi (%100 Güvenli):</strong><br>
+          OBD-II Bluetooth adaptörü aracınızın beynine <u>sadece okuma (Read-Only)</u> modunda bağlanır. Aracın yazılımına müdahale etmez, kod değiştirmez ve <strong>garantiyi kesinlikle bozmaz</strong>.
+        </div>
+
+        <h4 style="color: #38bdf8; margin: 12px 0 6px 0; font-size: 0.95rem;">1. Hangi Cihaz Alınmalı?</h4>
+        <p>KIA EV6 batarya yönetim sistemi (BMS) için en hızlı ve güvenli adaptör <strong>vLinker MC+ Bluetooth BLE</strong> veya <strong>OBDLink CX / LX</strong> cihazlarıdır (Trendyol veya Hepsiburada'da mevcuttur).</p>
+
+        <h4 style="color: #38bdf8; margin: 12px 0 6px 0; font-size: 0.95rem;">2. Cihaz Nereye Takılır?</h4>
+        <p>Direksiyonun sol alt tarafındaki sigorta kapağının altında standart 16-pin OBD-II soketi bulunur. Cihazı bu yuvaya takmanız yeterlidir (Tak-Çalıştır).</p>
+
+        <h4 style="color: #38bdf8; margin: 12px 0 6px 0; font-size: 0.95rem;">3. Veriler Programa Nasıl Aktarılır?</h4>
+        <p>Telefonunuza ücretsiz <strong>Car Scanner ELM OBD2</strong> uygulamasını indirin:</p>
+        <ul style="padding-left: 18px; margin: 6px 0;">
+          <li>Profil olarak <strong>KIA EV6 / Ioniq 5 E-GMP</strong> seçin.</li>
+          <li>Ayarlar &rarr; Veri İletimi (Webhooks / HTTP Push) sekmesine programınızın telemetri adresini yapıştırın:</li>
+        </ul>
+        <code style="display: block; background: #0f172a; padding: 6px 10px; border-radius: 8px; color: #38bdf8; margin: 8px 0; font-family: monospace; font-size: 0.78rem; word-break: break-all;">
+          POST /api/vehicle/telemetry/push
+        </code>
+        <p style="margin-top: 8px;">Böylece her araca bindiğinizde batarya % (SoC), menzil, 12V akü ve şarj bilgileri telefon üzerinden doğrudan Asistan Pro'nuza canlı olarak akar!</p>
+
+        <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 14px;" onclick="closeModal('modal-obd-guide')">
+          Anladım, Kapat ✓
+        </button>
       </div>
     </div>
   </div>

@@ -1670,6 +1670,9 @@ function switchTab(tabName) {
   const secGarage = document.getElementById('section-garage');
   if (secGarage) secGarage.style.display = (tabName === 'garage') ? 'block' : 'none';
 
+  const secHealth = document.getElementById('section-health');
+  if (secHealth) secHealth.style.display = (tabName === 'health') ? 'block' : 'none';
+
   const secContracts = document.getElementById('section-contracts');
   if (secContracts) secContracts.style.display = (tabName === 'contracts') ? 'block' : 'none';
 
@@ -1682,11 +1685,19 @@ function switchTab(tabName) {
   const secSettings = document.getElementById('section-settings');
   if (secSettings) secSettings.style.display = (tabName === 'settings') ? 'block' : 'none';
 
+  // Sekme butonlarını güncelle (Sağlık sekmesi dahil)
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', (tabName === 'health' && btn.dataset.category === 'saglik') || (tabName === 'dashboard' && btn.dataset.category === currentCategory));
+  });
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (tabName === 'garage') {
     loadVehicleData();
     loadEvCharges();
+    loadVehicleTelemetry();
+  } else if (tabName === 'health') {
+    loadHealthData();
   } else if (tabName === 'contracts') {
     loadContracts();
   } else if (tabName === 'tasks') {
@@ -1712,12 +1723,20 @@ function switchTab(tabName) {
 
 // Category filter
 function filterCategory(cat) {
+  if (cat === 'saglik') {
+    switchTab('health');
+    return;
+  }
+  // Eğer başka bir sekmedeyken kategoriye tıklanırsa dashboard'a dön
+  if (currentTab !== 'dashboard') {
+    switchTab('dashboard');
+  }
   currentCategory = cat;
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.category === cat);
   });
   renderPayments();
-    startRhythmicAlarmIfCritical();
+  startRhythmicAlarmIfCritical();
 }
 
 // Modal Helpers
@@ -3087,4 +3106,479 @@ async function deleteTask(id) {
       loadTasks();
     }
   } catch(e) {}
+}
+
+// ========================================================
+// ⚡ KIA EV6 OBD-II BLUETOOTH CANLI TELEMETRİ SİSTEMİ
+// ========================================================
+
+async function loadVehicleTelemetry() {
+  try {
+    const res = await fetch('/api/vehicle/telemetry/live');
+    if (!res.ok) return;
+    const data = await res.json();
+    
+    const soc = Math.round(data.battery_soc || 84);
+    const range = Math.round(data.range_km || 438);
+    const status = data.charging_status || 'Beklemede';
+    const kw = (data.charge_power_kw || 0).toFixed(1);
+    const soh = Math.round(data.battery_soh || 100);
+    const auxV = (data.aux_battery_voltage || 13.2).toFixed(1);
+    const tempC = (data.battery_temp_c || 22.4).toFixed(1);
+    const lastSync = data.last_sync || 'Az önce';
+
+    const elSoc = document.getElementById('obd-battery-soc-text');
+    const elRange = document.getElementById('obd-range-km-text');
+    const elBar = document.getElementById('obd-battery-bar-fill');
+    const elStatus = document.getElementById('obd-charge-status');
+    const elKw = document.getElementById('obd-charge-kw');
+    const elSoh = document.getElementById('obd-soh');
+    const el12v = document.getElementById('obd-12v-volt');
+    const elTemp = document.getElementById('obd-batt-temp');
+    const elSync = document.getElementById('obd-last-sync-text');
+
+    if (elSoc) elSoc.textContent = `%${soc}`;
+    if (elRange) elRange.textContent = `${range} km`;
+    if (elBar) elBar.style.width = `${Math.min(100, Math.max(0, soc))}%`;
+    if (elStatus) elStatus.textContent = status;
+    if (elKw) elKw.textContent = `${kw} kW`;
+    if (elSoh) elSoh.textContent = `%${soh} SoH`;
+    if (el12v) el12v.textContent = `${auxV} V`;
+    if (elTemp) elTemp.textContent = `${tempC} °C`;
+    if (elSync) elSync.textContent = `Son Veri: ${lastSync}`;
+  } catch (e) {
+    console.warn('OBD Telemetri okunamadı:', e);
+  }
+}
+
+async function simulateObdTelemetry() {
+  playHaptic(18);
+  showToast('⚡ OBD-II Bluetooth verisi simüle ediliyor...');
+  try {
+    const res = await fetch('/api/vehicle/telemetry/simulate', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      showToast(data.message || '✅ Telemetri güncellendi!');
+      await loadVehicleTelemetry();
+    }
+  } catch (e) {
+    showToast('❌ Simülasyon hatası');
+  }
+}
+
+// ========================================================
+// 🏥 SAĞLIK & HAFTALIK SPOR ASİSTANI SİSTEMİ
+// ========================================================
+
+let cachedMedications = [];
+let cachedGymSchedule = [];
+
+function switchHealthSubtab(subtab) {
+  playHaptic(12);
+  const btnMeds = document.getElementById('btn-subtab-meds');
+  const btnGym = document.getElementById('btn-subtab-gym');
+  const secMeds = document.getElementById('subtab-content-meds');
+  const secGym = document.getElementById('subtab-content-gym');
+
+  if (btnMeds) btnMeds.classList.toggle('active', subtab === 'meds');
+  if (btnGym) btnGym.classList.toggle('active', subtab === 'gym');
+  if (secMeds) secMeds.style.display = (subtab === 'meds') ? 'block' : 'none';
+  if (secGym) secGym.style.display = (subtab === 'gym') ? 'block' : 'none';
+}
+
+async function loadHealthData() {
+  await Promise.all([
+    loadMedications(),
+    loadGymSchedule(),
+    loadHealthTodaySummary()
+  ]);
+}
+
+async function loadHealthTodaySummary() {
+  try {
+    const res = await fetch('/api/health/today-summary');
+    if (!res.ok) return;
+    const data = await res.json();
+    
+    const elTaken = document.getElementById('stat-meds-taken');
+    const elRem = document.getElementById('stat-meds-remaining');
+    const elStatus = document.getElementById('health-today-status-text');
+    const elBadge = document.getElementById('badge-meds-count');
+
+    if (elTaken) elTaken.textContent = data.taken_meds;
+    if (elRem) elRem.textContent = data.remaining_meds;
+    if (elBadge) elBadge.textContent = data.total_meds;
+
+    if (elStatus) {
+      if (data.total_meds === 0) {
+        elStatus.textContent = 'Kayıtlı ilaç veya takviyeniz bulunmuyor.';
+      } else if (data.remaining_meds === 0) {
+        elStatus.innerHTML = '<span style="color:#34d399; font-weight:700;">Tüm ilaçlarınızı aldınız! Harika gidiyorsunuz. ✓</span>';
+      } else {
+        elStatus.textContent = `Bugün henüz alınmamış ${data.remaining_meds} adet ilaç/takviyeniz var.`;
+      }
+    }
+  } catch (e) {
+    console.warn('Sağlık özeti hatası:', e);
+  }
+}
+
+async function loadMedications() {
+  try {
+    const res = await fetch('/api/health/medications');
+    if (!res.ok) return;
+    cachedMedications = await res.json();
+    renderMedications(cachedMedications);
+  } catch (e) {
+    console.warn('İlaçlar listelenemedi:', e);
+  }
+}
+
+function renderMedications(meds) {
+  const container = document.getElementById('medications-container');
+  if (!container) return;
+
+  if (!meds || meds.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; color: #94a3b8; padding: 36px 16px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 14px;">
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">💊</div>
+        <div style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">Henüz İlaç veya Spor Takviyesi Eklenmedi</div>
+        <div style="font-size: 0.8rem; margin: 4px 0 14px 0;">Kullandığınız vitaminleri, tansiyon/kalp ilaçlarını veya Creatin/Protein Tozunu ekleyin.</div>
+        <button class="btn btn-primary" onclick="openAddMedicationModal()" style="font-size: 0.82rem; padding: 6px 16px;">
+          ➕ İlk İlacı / Takviyeyi Ekle
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  const iconMap = {
+    hap: '💊',
+    surup: '🧪',
+    toz: '🥛',
+    damla: '💧',
+    igne: '💉'
+  };
+
+  const html = meds.map(m => {
+    const isTaken = (m.is_taken_today === 1);
+    const itemIcon = iconMap[m.item_type] || '💊';
+    const isSupplement = (m.category === 'spor_takviyesi');
+    const badgeColor = isSupplement ? '#f472b6' : '#38bdf8';
+    const badgeBg = isSupplement ? 'rgba(236,72,153,0.15)' : 'rgba(56,189,248,0.15)';
+    const badgeBorder = isSupplement ? 'rgba(236,72,153,0.3)' : 'rgba(56,189,248,0.3)';
+    const catLabel = isSupplement ? '⚡ Spor Takviyesi' : '💊 İlaç';
+
+    return `
+      <div class="medication-card ${isTaken ? 'taken' : ''}" id="med-card-${m.id}">
+        <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: ${badgeBg}; border: 1px solid ${badgeBorder}; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+            ${itemIcon}
+          </div>
+          <div style="min-width: 0; flex: 1;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span style="font-weight: 800; font-size: 0.95rem; color: #f8fafc; text-decoration: ${isTaken ? 'line-through' : 'none'}; opacity: ${isTaken ? '0.75' : '1'};">
+                ${escapeHtml(m.name)}
+              </span>
+              <span style="font-size: 0.65rem; background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeBorder}; padding: 1px 6px; border-radius: 6px; font-weight: 700;">
+                ${catLabel}
+              </span>
+            </div>
+            <div style="display: flex; gap: 8px; font-size: 0.76rem; color: #94a3b8; margin-top: 3px; flex-wrap: wrap;">
+              <span>⏰ <strong>${escapeHtml(m.time_of_day || 'Belirtilmedi')}</strong></span>
+              <span>•</span>
+              <span>🥄 ${escapeHtml(m.dosage || '1 Adet')}</span>
+              <span>•</span>
+              <span style="color: #cbd5e1;">${escapeHtml(m.meal_condition || 'Tok Karnına')}</span>
+            </div>
+            ${m.notes ? `<div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">📝 ${escapeHtml(m.notes)}</div>` : ''}
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+          <button type="button" class="btn ${isTaken ? 'btn-outline' : 'btn-primary'}" 
+                  style="${isTaken ? 'border-color: #10b981; color: #34d399; background: rgba(16,185,129,0.15);' : 'background: linear-gradient(135deg, #10b981, #059669); border: none;'} padding: 6px 12px; font-size: 0.78rem; font-weight: 700; gap: 4px;"
+                  onclick="toggleMedicationTaken(${m.id})">
+            <span>${isTaken ? '✓ Alındı' : 'Alındı ✓'}</span>
+          </button>
+          <button type="button" onclick="deleteMedication(${m.id})" style="background: transparent; border: none; color: #ef4444; opacity: 0.6; cursor: pointer; padding: 4px; font-size: 0.9rem;" title="Sil">
+            🗑️
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = html;
+}
+
+async function toggleMedicationTaken(id) {
+  playHaptic(18);
+  try {
+    const res = await fetch(`/api/health/medications/${id}/toggle-take`, { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      showToast(data.message || 'İlaç durumu güncellendi.');
+      await loadMedications();
+      await loadHealthTodaySummary();
+    }
+  } catch (e) {
+    showToast('❌ Güncellenemedi.');
+  }
+}
+
+function openAddMedicationModal() {
+  playHaptic(16);
+  document.getElementById('medicationForm').reset();
+  document.getElementById('med-id').value = '';
+  document.getElementById('modal-med-title').textContent = '💊 Yeni İlaç / Takviye Ekle';
+  openModal('modal-medication');
+}
+
+async function handleSaveMedication(e) {
+  e.preventDefault();
+  playHaptic(14);
+  const id = document.getElementById('med-id').value;
+  const payload = {
+    name: document.getElementById('med-name').value.trim(),
+    category: document.getElementById('med-category').value,
+    item_type: document.getElementById('med-item-type').value,
+    time_of_day: document.getElementById('med-time-of-day').value.trim(),
+    dosage: document.getElementById('med-dosage').value.trim(),
+    meal_condition: document.getElementById('med-meal-condition').value,
+    notes: document.getElementById('med-notes').value.trim()
+  };
+
+  try {
+    const url = id ? `/api/health/medications/${id}` : '/api/health/medications';
+    const method = id ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      closeModal('modal-medication');
+      showToast(id ? '✅ İlaç güncellendi.' : '✅ İlaç / Takviye eklendi.');
+      await loadMedications();
+      await loadHealthTodaySummary();
+    } else {
+      showToast('❌ Kayıt başarısız oldu.');
+    }
+  } catch (err) {
+    showToast('❌ Bağlantı hatası.');
+  }
+}
+
+async function deleteMedication(id) {
+  if (!confirm('Bu ilacı veya takviyeyi silmek istediğinize emin misiniz?')) return;
+  playHaptic(12);
+  try {
+    const res = await fetch(`/api/health/medications/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast('🗑️ İlaç silindi.');
+      await loadMedications();
+      await loadHealthTodaySummary();
+    }
+  } catch (e) {
+    showToast('❌ Silinemedi.');
+  }
+}
+
+async function loadGymSchedule() {
+  try {
+    const res = await fetch('/api/health/gym-schedule');
+    if (!res.ok) return;
+    cachedGymSchedule = await res.json();
+    renderGymSchedule(cachedGymSchedule);
+  } catch (e) {
+    console.warn('Spor programı yüklenemedi:', e);
+  }
+}
+
+function renderGymSchedule(days) {
+  const container = document.getElementById('gym-schedule-container');
+  const heroBox = document.getElementById('gym-today-hero-box');
+  if (!container || !days) return;
+
+  const todayItem = days.find(d => d.is_today === 1);
+  if (heroBox && todayItem) {
+    const isWorkout = (todayItem.is_workout_day === 1);
+    const isCompleted = (todayItem.is_completed_today === 1);
+
+    heroBox.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: ${isWorkout ? 'rgba(56,189,248,0.2)' : 'rgba(148,163,184,0.15)'}; border: 1px solid ${isWorkout ? 'rgba(56,189,248,0.4)' : 'rgba(255,255,255,0.1)'}; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            ${isWorkout ? '🏋️' : '🛋️'}
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 0.72rem; background: #38bdf8; color: #0f172a; padding: 1px 7px; border-radius: 6px; font-weight: 800; text-transform: uppercase;">BUGÜNÜN PROGRAMI (${todayItem.day_name})</span>
+              ${isCompleted ? '<span style="font-size: 0.72rem; color: #34d399; font-weight: 700;">🔥 TAMAMLANDI</span>' : ''}
+            </div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; margin-top: 2px;">
+              ${isWorkout ? escapeHtml(todayItem.workout_title || 'Antrenman Günü') : 'Dinlenme Günü (Off-Day)'}
+            </div>
+          </div>
+        </div>
+
+        ${isWorkout ? `
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn ${isCompleted ? 'btn-outline' : 'btn-primary'}" 
+                    style="${isCompleted ? 'border-color: #10b981; color: #34d399; background: rgba(16,185,129,0.15);' : 'background: linear-gradient(135deg, #f59e0b, #ef4444); border: none; box-shadow: 0 0 14px rgba(245,158,11,0.4);'} font-weight: 800; font-size: 0.82rem; padding: 7px 14px;"
+                    onclick="toggleGymCompleted(${todayItem.id})">
+              <span>${isCompleted ? '✓ Antrenman Yapıldı' : 'Bugün Spor Yapıldı 🔥'}</span>
+            </button>
+          </div>
+        ` : ''}
+      </div>
+
+      ${isWorkout ? `
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 14px; font-size: 0.78rem; color: #cbd5e1; flex-wrap: wrap;">
+          <div>⏰ <strong>Antrenman Saati:</strong> ${escapeHtml(todayItem.workout_time || '19:30')}</div>
+          ${todayItem.supplements ? `<div>⚡ <strong>Takviyeler:</strong> <span style="color:#f472b6;">${escapeHtml(todayItem.supplements)}</span></div>` : ''}
+          ${todayItem.notes ? `<div>📝 <strong>Not:</strong> ${escapeHtml(todayItem.notes)}</div>` : ''}
+        </div>
+      ` : `
+        <div style="margin-top: 8px; font-size: 0.78rem; color: #94a3b8;">
+          Bugün kaslarınızı dinlendirin ve beslenmenize dikkat edin.
+        </div>
+      `}
+    `;
+  }
+
+  const html = days.map(d => {
+    const isToday = (d.is_today === 1);
+    const isWorkout = (d.is_workout_day === 1);
+    const isCompleted = (d.is_completed_today === 1);
+
+    return `
+      <div class="gym-day-card ${isToday ? 'is-today' : ''} ${isCompleted ? 'completed' : ''}">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 800; font-size: 0.95rem; color: #f8fafc;">${d.day_name}</span>
+            ${isToday ? '<span style="font-size: 0.62rem; background: #38bdf8; color: #0f172a; padding: 1px 5px; border-radius: 4px; font-weight: 800;">BUGÜN</span>' : ''}
+          </div>
+          <button type="button" onclick="openEditGymDayModal(${d.id})" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 0.85rem;" title="Günü Düzenle">
+            ✏️
+          </button>
+        </div>
+
+        <div style="font-size: 0.88rem; font-weight: 700; color: ${isWorkout ? '#38bdf8' : '#64748b'}; margin-bottom: 6px;">
+          ${isWorkout ? (escapeHtml(d.workout_title) || 'Antrenman') : 'Dinlenme (Off-Day)'}
+        </div>
+
+        ${isWorkout ? `
+          <div style="font-size: 0.75rem; color: #94a3b8; line-height: 1.4;">
+            <div>⏰ Saat: <strong style="color:#f8fafc;">${escapeHtml(d.workout_time || '19:30')}</strong></div>
+            ${d.supplements ? `<div style="margin-top: 2px;">⚡ Takviye: <span style="color:#f472b6;">${escapeHtml(d.supplements)}</span></div>` : ''}
+          </div>
+        ` : ''}
+
+        ${isToday && isWorkout ? `
+          <div style="margin-top: 10px;">
+            <button type="button" class="btn ${isCompleted ? 'btn-outline' : 'btn-primary'}" 
+                    style="${isCompleted ? 'border-color:#10b981; color:#34d399;' : 'background:#10b981; border:none;'} width: 100%; font-size: 0.75rem; padding: 5px 8px; font-weight: 700;"
+                    onclick="toggleGymCompleted(${d.id})">
+              ${isCompleted ? '✓ Tamamlandı' : 'Tamamlandı Olarak İşaretle 🔥'}
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = html;
+}
+
+async function toggleGymCompleted(id) {
+  playHaptic(18);
+  try {
+    const res = await fetch(`/api/health/gym-schedule/${id}/complete`, { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      showToast(data.message || 'Antrenman durumu güncellendi!');
+      await loadGymSchedule();
+    }
+  } catch (e) {
+    showToast('❌ Güncellenemedi.');
+  }
+}
+
+function openEditGymDayModal(id) {
+  playHaptic(14);
+  const dayObj = cachedGymSchedule.find(d => d.id === id);
+  if (!dayObj) return;
+
+  document.getElementById('gym-day-id').value = dayObj.id;
+  document.getElementById('gym-modal-day-name').textContent = dayObj.day_name;
+  
+  const isWorkout = (dayObj.is_workout_day === 1);
+  const checkEl = document.getElementById('gym-is-workout-day');
+  if (checkEl) checkEl.checked = isWorkout;
+  toggleGymDayInputs(isWorkout);
+
+  document.getElementById('gym-workout-title').value = dayObj.workout_title || '';
+  document.getElementById('gym-workout-time').value = dayObj.workout_time || '19:30';
+  document.getElementById('gym-supplements').value = dayObj.supplements || '';
+  document.getElementById('gym-notes').value = dayObj.notes || '';
+
+  openModal('modal-edit-gym-day');
+}
+
+function toggleGymDayInputs(checked) {
+  const fields = document.getElementById('gym-workout-fields');
+  const slider = document.getElementById('gym-switch-slider');
+  if (fields) fields.style.display = checked ? 'block' : 'none';
+  if (slider) slider.style.backgroundColor = checked ? '#38bdf8' : '#334155';
+}
+
+async function handleSaveGymDay(e) {
+  e.preventDefault();
+  playHaptic(14);
+  const id = document.getElementById('gym-day-id').value;
+  const isWorkout = document.getElementById('gym-is-workout-day').checked ? 1 : 0;
+  
+  const payload = {
+    id: parseInt(id),
+    is_workout_day: isWorkout,
+    workout_title: document.getElementById('gym-workout-title').value.trim(),
+    workout_time: document.getElementById('gym-workout-time').value,
+    supplements: document.getElementById('gym-supplements').value.trim(),
+    notes: document.getElementById('gym-notes').value.trim()
+  };
+
+  try {
+    const res = await fetch(`/api/health/gym-schedule/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      closeModal('modal-edit-gym-day');
+      showToast('✅ Spor programı güncellendi.');
+      await loadGymSchedule();
+    } else {
+      showToast('❌ Güncelleme başarısız oldu.');
+    }
+  } catch (err) {
+    showToast('❌ Bağlantı hatası.');
+  }
+}
+
+// Optimus'a tek tıkla soru sorma ve sesli cevap alma
+function askOptimusQuick(question) {
+  playHaptic(16);
+  const input = document.getElementById('ai-chat-input');
+  if (input) {
+    input.value = question;
+  }
+  const modal = document.getElementById('modal-ai-chat');
+  if (modal && !modal.classList.contains('active')) {
+    toggleAiChatModal();
+  }
+  setTimeout(() => {
+    handleAiChatSubmit(new Event('submit'));
+  }, 250);
 }
