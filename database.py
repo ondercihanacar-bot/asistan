@@ -53,6 +53,16 @@ def init_db():
         except Exception:
             pass
 
+    # 2FA columns for users table
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN two_factor_secret TEXT")
+    except Exception:
+        pass
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN two_factor_enabled INTEGER DEFAULT 0")
+    except Exception:
+        pass
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS payments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

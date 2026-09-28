@@ -1708,6 +1708,29 @@
           </div>
         </div>
 
+        <!-- 🛡️ İki Adımlı Doğrulama (Google Authenticator) -->
+        <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #38bdf8; background: rgba(56, 189, 248, 0.04);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h4 style="margin: 0; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+              🛡️ Google Authenticator (2FA)
+            </h4>
+            <span id="badge-2fa-status" style="font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; font-weight: 700; background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3);">
+              Kontrol ediliyor...
+            </span>
+          </div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 14px; line-height: 1.45;">
+            Hesabınızı Google Authenticator veya Microsoft Authenticator ile koruyun. Giriş yaparken şifrenize ek olarak telefonunuzdaki 6 haneli güvenlik kodu istenir.
+          </p>
+          <div id="container-2fa-actions">
+            <button id="btn-2fa-setup" class="btn btn-outline" style="border-color: #38bdf8; color: #38bdf8; display: inline-flex; align-items: center; gap: 6px;" onclick="open2FaSetupModal()">
+              📲 Google Authenticator'ı Etkinleştir
+            </button>
+            <button id="btn-2fa-disable" class="btn btn-outline" style="display: none; border-color: #ef4444; color: #ef4444; align-items: center; gap: 6px;" onclick="open2FaDisableModal()">
+              ❌ İki Adımlı Doğrulamayı Kapat
+            </button>
+          </div>
+        </div>
+
         <!-- Parola Değiştirme Paneli -->
         <div class="stat-card" style="margin-bottom: 20px; border-left: 4px solid #10b981;">
           <h4 style="margin-bottom: 8px; color: #10b981;">🔑 Yönetici Parolasını Değiştir</h4>
@@ -2256,7 +2279,7 @@
       </div>
 
       <!-- Auth Tabs -->
-      <div style="display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.25);">
+      <div id="auth-tab-bar" style="display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.25);">
         <button type="button" id="tab-btn-login" class="auth-tab-btn active" onclick="switchAuthTab('login')" style="flex: 1; padding: 12px; font-weight: 700; font-size: 0.9rem; border: none; background: transparent; cursor: pointer; color: #38bdf8; border-bottom: 2px solid #38bdf8; transition: all 0.2s;">Giriş Yap</button>
         <button type="button" id="tab-btn-register" class="auth-tab-btn" onclick="switchAuthTab('register')" style="flex: 1; padding: 12px; font-weight: 700; font-size: 0.9rem; border: none; background: transparent; cursor: pointer; color: #94a3b8; border-bottom: 2px solid transparent; transition: all 0.2s;">Yeni Hesap Oluştur</button>
       </div>
@@ -2265,39 +2288,58 @@
       <form id="auth-form" onsubmit="event.preventDefault(); handleAuthSubmit();" style="padding: 22px 28px 26px;">
         <div id="auth-alert" style="display: none; padding: 10px 14px; border-radius: 10px; margin-bottom: 16px; font-size: 0.82rem; line-height: 1.4;"></div>
 
-        <!-- Full Name (Only on Register) -->
-        <div id="auth-group-fullname" style="display: none; margin-bottom: 15px;">
-          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">Ad Soyad</label>
-          <input type="text" id="auth-fullname" class="form-control" placeholder="Örn: Caner Selim" style="width: 100%; box-sizing: border-box;" autocomplete="name">
-        </div>
+        <div id="auth-credentials-section">
+          <!-- Full Name (Only on Register) -->
+          <div id="auth-group-fullname" style="display: none; margin-bottom: 15px;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">Ad Soyad</label>
+            <input type="text" id="auth-fullname" class="form-control" placeholder="Örn: Caner Selim" style="width: 100%; box-sizing: border-box;" autocomplete="name">
+          </div>
 
-        <!-- Email -->
-        <div style="margin-bottom: 15px;">
-          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">E-posta Adresi (veya Gmail)</label>
-          <div style="position: relative;">
-            <input type="email" id="auth-email" class="form-control" placeholder="ornek@gmail.com" required style="width: 100%; box-sizing: border-box; padding-left: 38px;" autocomplete="email" onkeydown="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('auth-password').focus(); }">
-            <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
+          <!-- Email -->
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">E-posta Adresi (veya Gmail)</label>
+            <div style="position: relative;">
+              <input type="email" id="auth-email" class="form-control" placeholder="ornek@gmail.com" required style="width: 100%; box-sizing: border-box; padding-left: 38px;" autocomplete="email" onkeydown="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('auth-password').focus(); }">
+              <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">Parola</label>
+            <div style="position: relative;">
+              <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required style="width: 100%; box-sizing: border-box; padding-left: 38px; padding-right: 38px;" autocomplete="current-password" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleAuthSubmit(); }">
+              <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              <button type="button" onclick="togglePasswordVisibility('auth-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember Me Checkbox -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: #cbd5e1; cursor: pointer;">
+              <input type="checkbox" id="auth-remember-me" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;">
+              <span>Beni Hatırla (Oturumu Açık Tut)</span>
+            </label>
           </div>
         </div>
 
-        <!-- Password -->
-        <div style="margin-bottom: 15px;">
-          <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">Parola</label>
-          <div style="position: relative;">
-            <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required style="width: 100%; box-sizing: border-box; padding-left: 38px; padding-right: 38px;" autocomplete="current-password" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleAuthSubmit(); }">
-            <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-            <button type="button" onclick="togglePasswordVisibility('auth-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px;">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-            </button>
+        <!-- 2FA Authenticator Challenge Section -->
+        <div id="auth-2fa-section" style="display: none; text-align: center; margin-bottom: 20px;">
+          <div style="width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); border: 2px solid #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);">
+            🛡️
           </div>
-        </div>
-
-        <!-- Remember Me Checkbox -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: #cbd5e1; cursor: pointer;">
-            <input type="checkbox" id="auth-remember-me" checked style="width: 16px; height: 16px; accent-color: #38bdf8; cursor: pointer;">
-            <span>Beni Hatırla (Oturumu Açık Tut)</span>
-          </label>
+          <h4 style="color: #f8fafc; margin-bottom: 6px; font-size: 1.1rem; font-weight: 700;">Google Authenticator</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 18px; line-height: 1.45;">
+            Hesabınız iki adımlı doğrulama ile korunuyor.<br>Telefonunuzdaki uygulamayı açıp 6 haneli kodu giriniz.
+          </p>
+          <div style="margin-bottom: 16px;">
+            <input type="text" id="auth-2fa-code" class="form-control" placeholder="000 000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="text-align: center; font-size: 1.7rem; font-weight: 800; letter-spacing: 8px; color: #38bdf8; padding: 12px; background: rgba(15, 23, 42, 0.85); border: 2px solid #38bdf8; box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);" onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleAuthSubmit(); }">
+          </div>
+          <button type="button" onclick="cancel2FaLogin()" style="background: transparent; border: none; color: #38bdf8; font-size: 0.82rem; cursor: pointer; text-decoration: underline;">
+            ← Farklı bir hesapla giriş yap
+          </button>
         </div>
 
         <!-- Submit Button -->
@@ -2714,6 +2756,67 @@
         </button>
       </form>
 
+    </div>
+  </div>
+
+  <!-- 🛡️ 2FA Kurulum Modalı -->
+  <div id="modal-2fa-setup" class="modal-overlay" style="display: none;" onclick="if(event.target === this) closeModal('modal-2fa-setup')">
+    <div class="modal-box" style="max-width: 440px; text-align: center; border: 1.5px solid #38bdf8; box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 25px rgba(56, 189, 248, 0.35);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0; color: #38bdf8; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+          🛡️ Google Authenticator Kurulumu
+        </h3>
+        <button onclick="closeModal('modal-2fa-setup')" style="background: transparent; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <p style="font-size: 0.84rem; color: #cbd5e1; margin-bottom: 14px; text-align: left; line-height: 1.45;">
+        1. Telefonunuzdaki <strong>Google Authenticator</strong> uygulamasını açın.<br>
+        2. <strong>"+"</strong> butonuna dokunup aşağıdaki QR kodu tarayın:
+      </p>
+
+      <div style="background: white; padding: 12px; border-radius: 14px; display: inline-block; margin-bottom: 14px; box-shadow: 0 4px 18px rgba(0,0,0,0.4);">
+        <img id="img-2fa-qr" src="" alt="2FA QR Code" style="width: 190px; height: 190px; display: block;">
+      </div>
+
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px dashed rgba(56, 189, 248, 0.4); border-radius: 8px; padding: 8px 12px; margin-bottom: 16px; font-size: 0.78rem; color: #94a3b8;">
+        <div>Kameranız okumuyorsa bu anahtarı el ile girin:</div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px;">
+          <code id="text-2fa-secret" style="color: #38bdf8; font-weight: 700; letter-spacing: 1px; font-size: 0.88rem;"></code>
+          <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('text-2fa-secret').textContent); showToast('📋 Anahtar kopyalandı');" style="background: rgba(56,189,248,0.2); border: none; color: #38bdf8; border-radius: 4px; padding: 2px 6px; font-size: 0.72rem; cursor: pointer;">Kopyala</button>
+        </div>
+      </div>
+
+      <div style="text-align: left; margin-bottom: 18px;">
+        <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">
+          3. Uygulamada beliren 6 haneli kodu girin:
+        </label>
+        <input type="text" id="input-2fa-verify-code" class="form-control" maxlength="6" inputmode="numeric" placeholder="000 000" style="text-align: center; font-size: 1.5rem; letter-spacing: 6px; font-weight: 800; color: #38bdf8;" onkeydown="if(event.key === 'Enter') confirm2FaSetup()">
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn btn-outline" onclick="closeModal('modal-2fa-setup')">İptal</button>
+        <button class="btn btn-primary" onclick="confirm2FaSetup()">Doğrula ve Etkinleştir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ❌ 2FA Devre Dışı Bırakma Modalı -->
+  <div id="modal-2fa-disable" class="modal-overlay" style="display: none;" onclick="if(event.target === this) closeModal('modal-2fa-disable')">
+    <div class="modal-box" style="max-width: 400px; border: 1.5px solid #ef4444;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="margin: 0; color: #ef4444; font-size: 1.15rem;">
+          ❌ İki Adımlı Doğrulamayı Kapat
+        </h3>
+        <button onclick="closeModal('modal-2fa-disable')" style="background: transparent; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer;">&times;</button>
+      </div>
+      <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 14px; line-height: 1.45;">
+        İki adımlı doğrulamayı kapatmak hesabınızın güvenliğini düşürür. Onaylamak için Google Authenticator kodunuzu veya hesap şifrenizi girin.
+      </p>
+      <input type="password" id="input-2fa-disable-val" class="form-control" placeholder="6 haneli kod veya hesap şifresi" style="width: 100%; box-sizing: border-box; margin-bottom: 16px;" onkeydown="if(event.key === 'Enter') confirm2FaDisable()">
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn btn-outline" onclick="closeModal('modal-2fa-disable')">Vazgeç</button>
+        <button class="btn btn-primary" style="background: #ef4444; border-color: #ef4444;" onclick="confirm2FaDisable()">Devre Dışı Bırak</button>
+      </div>
     </div>
   </div>
 

@@ -123,13 +123,92 @@ function togglePasswordVisibility(inputId, btn) {
   }
 }
 
+let _pending2FaTicket = null;
+let _pending2FaRememberMe = true;
+
+function cancel2FaLogin() {
+  _pending2FaTicket = null;
+  const credSec = document.getElementById('auth-credentials-section');
+  const twoFaSec = document.getElementById('auth-2fa-section');
+  const tabBar = document.getElementById('auth-tab-bar');
+  const submitText = document.getElementById('auth-submit-text');
+  const alertEl = document.getElementById('auth-alert');
+
+  if (credSec) credSec.style.display = 'block';
+  if (twoFaSec) twoFaSec.style.display = 'none';
+  if (tabBar) tabBar.style.display = 'flex';
+  if (submitText) submitText.textContent = (currentAuthTab === 'register') ? 'Yeni Hesap Oluştur' : 'Giriş Yap';
+  if (alertEl) alertEl.style.display = 'none';
+}
+
 async function handleAuthSubmit() {
+  const alertEl = document.getElementById('auth-alert');
+  const submitBtn = document.getElementById('auth-submit-btn');
+
+  // CASE 1: 2FA Google Authenticator Kod Doğrulama
+  if (_pending2FaTicket) {
+    const codeInput = document.getElementById('auth-2fa-code');
+    const code = codeInput ? codeInput.value.trim() : '';
+    if (!code || code.length < 6) {
+      if (alertEl) {
+        alertEl.style.display = 'block';
+        alertEl.style.background = 'rgba(239, 68, 68, 0.15)';
+        alertEl.style.border = '1px solid rgba(239, 68, 68, 0.35)';
+        alertEl.style.color = '#f87171';
+        alertEl.textContent = 'Lütfen Google Authenticator uygulamasındaki 6 haneli kodu giriniz.';
+      }
+      return;
+    }
+
+    try {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.7';
+
+      const res = await _nativeFetch('/api/auth/2fa/login-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ temp_token: _pending2FaTicket, code: code })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        const rem = _pending2FaRememberMe;
+        cancel2FaLogin();
+        setAuthToken(data.token, rem);
+        currentUser = data.user;
+        hideAuthModal();
+        updateUserProfileUI(currentUser);
+        showToast(`👋 Hoş geldiniz, ${currentUser.full_name || currentUser.email}!`);
+        loadAllUserData();
+      } else {
+        if (alertEl) {
+          alertEl.style.display = 'block';
+          alertEl.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertEl.style.border = '1px solid rgba(239, 68, 68, 0.35)';
+          alertEl.style.color = '#f87171';
+          alertEl.textContent = data.detail || 'Hatalı veya süresi dolmuş kod. Lütfen güncel 6 haneli kodu girin.';
+        }
+      }
+    } catch(err) {
+      if (alertEl) {
+        alertEl.style.display = 'block';
+        alertEl.style.background = 'rgba(239, 68, 68, 0.15)';
+        alertEl.style.border = '1px solid rgba(239, 68, 68, 0.35)';
+        alertEl.style.color = '#f87171';
+        alertEl.textContent = 'Doğrulama sırasında bir hata oluştu.';
+      }
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+    }
+    return;
+  }
+
+  // CASE 2: Normal E-posta & Parola Doğrulama
   const emailInput = document.getElementById('auth-email');
   const passInput = document.getElementById('auth-password');
   const nameInput = document.getElementById('auth-fullname');
   const remCheckbox = document.getElementById('auth-remember-me');
-  const alertEl = document.getElementById('auth-alert');
-  const submitBtn = document.getElementById('auth-submit-btn');
 
   const email = emailInput ? emailInput.value.trim() : '';
   const password = passInput ? passInput.value : '';
@@ -164,14 +243,36 @@ async function handleAuthSubmit() {
 
     const data = await res.json();
 
+    // 2FA Gerekli mi?
+    if (res.ok && data.two_factor_required) {
+      _pending2FaTicket = data.temp_token;
+      _pending2FaRememberMe = rememberMe;
+
+      const credSec = document.getElementById('auth-credentials-section');
+      const twoFaSec = document.getElementById('auth-2fa-section');
+      const tabBar = document.getElementById('auth-tab-bar');
+      const submitText = document.getElementById('auth-submit-text');
+      const codeInput = document.getElementById('auth-2fa-code');
+
+      if (credSec) credSec.style.display = 'none';
+      if (twoFaSec) twoFaSec.style.display = 'block';
+      if (tabBar) tabBar.style.display = 'none';
+      if (submitText) submitText.textContent = 'Doğrula ve Giriş Yap';
+      if (alertEl) alertEl.style.display = 'none';
+
+      if (codeInput) {
+        codeInput.value = '';
+        setTimeout(() => codeInput.focus(), 100);
+      }
+      return;
+    }
+
     if (res.ok && data.success) {
       setAuthToken(data.token, rememberMe);
       currentUser = data.user;
       hideAuthModal();
       updateUserProfileUI(currentUser);
       showToast(`👋 Hoş geldiniz, ${currentUser.full_name || currentUser.email}!`);
-      
-      // Kullanıcının kendi verilerini yükle
       loadAllUserData();
     } else {
       if (alertEl) {
@@ -193,6 +294,127 @@ async function handleAuthSubmit() {
   } finally {
     submitBtn.disabled = false;
     submitBtn.style.opacity = '1';
+  }
+}
+
+// ==========================================
+// 🛡️ GOOGLE AUTHENTICATOR (2FA) YÖNETİMİ
+// ==========================================
+async function check2FaStatus() {
+  const badge = document.getElementById('badge-2fa-status');
+  const btnSetup = document.getElementById('btn-2fa-setup');
+  const btnDisable = document.getElementById('btn-2fa-disable');
+  if (!badge) return;
+
+  try {
+    const res = await authFetch('/api/auth/2fa/status');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.enabled) {
+        badge.textContent = '🟢 Aktif (Güvende)';
+        badge.style.background = 'rgba(16, 185, 129, 0.15)';
+        badge.style.color = '#10b981';
+        badge.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+        if (btnSetup) btnSetup.style.display = 'none';
+        if (btnDisable) btnDisable.style.display = 'inline-flex';
+      } else {
+        badge.textContent = '⚪ Devre Dışı';
+        badge.style.background = 'rgba(239, 68, 68, 0.15)';
+        badge.style.color = '#f87171';
+        badge.style.borderColor = 'rgba(239, 68, 68, 0.35)';
+        if (btnSetup) btnSetup.style.display = 'inline-flex';
+        if (btnDisable) btnDisable.style.display = 'none';
+      }
+    }
+  } catch(e) {
+    console.error('2FA durum kontrol hatası:', e);
+  }
+}
+
+async function open2FaSetupModal() {
+  try {
+    const res = await authFetch('/api/auth/2fa/setup', { method: 'POST' });
+    if (!res.ok) {
+      showToast('⚠️ 2FA kurulumu başlatılamadı.');
+      return;
+    }
+    const data = await res.json();
+    const qrImg = document.getElementById('img-2fa-qr');
+    const secretText = document.getElementById('text-2fa-secret');
+    const codeInput = document.getElementById('input-2fa-verify-code');
+
+    if (qrImg) qrImg.src = data.qr_code;
+    if (secretText) secretText.textContent = data.secret;
+    if (codeInput) {
+      codeInput.value = '';
+      setTimeout(() => codeInput.focus(), 200);
+    }
+    openModal('modal-2fa-setup');
+  } catch(e) {
+    showToast('⚠️ Sunucu hatası');
+  }
+}
+
+async function confirm2FaSetup() {
+  const codeInput = document.getElementById('input-2fa-verify-code');
+  const code = codeInput ? codeInput.value.trim() : '';
+  if (!code || code.length < 6) {
+    showToast('⚠️ Lütfen Google Authenticator\'daki 6 haneli kodu giriniz.');
+    return;
+  }
+
+  try {
+    const res = await authFetch('/api/auth/2fa/verify-setup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      closeModal('modal-2fa-setup');
+      showToast('🎉 Google Authenticator başarıyla etkinleştirildi!');
+      check2FaStatus();
+    } else {
+      showToast(`❌ ${data.detail || 'Kod doğrulanamadı'}`);
+    }
+  } catch(e) {
+    showToast('⚠️ Doğrulama sırasında hata oluştu');
+  }
+}
+
+function open2FaDisableModal() {
+  const input = document.getElementById('input-2fa-disable-val');
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 200);
+  }
+  openModal('modal-2fa-disable');
+}
+
+async function confirm2FaDisable() {
+  const input = document.getElementById('input-2fa-disable-val');
+  const val = input ? input.value.trim() : '';
+  if (!val) {
+    showToast('⚠️ Lütfen kod veya parolanızı giriniz.');
+    return;
+  }
+
+  try {
+    const res = await authFetch('/api/auth/2fa/disable', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code_or_password: val })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      closeModal('modal-2fa-disable');
+      showToast('🛡️ İki adımlı doğrulama kapatıldı.');
+      check2FaStatus();
+    } else {
+      showToast(`❌ ${data.detail || 'İşlem başarısız'}`);
+    }
+  } catch(e) {
+    showToast('⚠️ Sunucu hatası');
   }
 }
 
@@ -1720,6 +1942,7 @@ function switchTab(tabName) {
   } else if (tabName === 'history') {
     loadHistory();
   } else if (tabName === 'settings') {
+    check2FaStatus();
     loadBackupSettings();
     loadBackupList();
     setTimeout(() => {

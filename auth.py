@@ -1,11 +1,20 @@
 import hashlib
 import secrets
 import re
+import time
+import io
+import base64
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from typing import Optional
 from fastapi import Request, HTTPException, status
+import pyotp
+import qrcode
 from database import get_db
+
+# 2FA in-memory pending storage
+pending_2fa_setups: dict[int, str] = {}
+pending_2fa_logins: dict[str, dict] = {}
 
 def hash_password(password: str, salt: Optional[str] = None) -> tuple[str, str]:
     if not salt:
@@ -30,7 +39,7 @@ def get_user_by_email(email: str) -> Optional[dict]:
     cursor = conn.cursor()
     clean = email.strip().lower()
     cursor.execute("""
-        SELECT id, email, full_name, password_hash, salt, is_active 
+        SELECT id, email, full_name, password_hash, salt, is_active, two_factor_secret, two_factor_enabled 
         FROM users 
         WHERE LOWER(email) = ? OR LOWER(email) = ? OR LOWER(email) LIKE ? OR LOWER(email) LIKE ?
     """, (clean, clean + "@gmail.com", f"{clean}@%", f"{clean}%@%"))
@@ -43,7 +52,7 @@ def get_user_by_email(email: str) -> Optional[dict]:
 def get_user_by_id(user_id: int) -> Optional[dict]:
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, email, full_name, is_active FROM users WHERE id = ?", (user_id,))
+    cursor.execute("SELECT id, email, full_name, is_active, two_factor_secret, two_factor_enabled FROM users WHERE id = ?", (user_id,))
     row = cursor.fetchone()
     conn.close()
     if row:
@@ -100,7 +109,13 @@ def authenticate_user(email: str, password: str) -> tuple[bool, str, Optional[di
     if not verify_password(password, user["password_hash"], user["salt"]):
         return False, "E-posta veya parola hatalı.", None
 
-    return True, "Giriş başarılı.", {"id": user["id"], "email": user["email"], "full_name": user["full_name"]}
+    return True, "Giriş başarılı.", {
+        "id": user["id"],
+        "email": user["email"],
+        "full_name": user["full_name"],
+        "two_factor_enabled": bool(user.get("two_factor_enabled", 0)),
+        "two_factor_secret": user.get("two_factor_secret")
+    }
 
 def create_session(user_id: int, remember_me: bool = True) -> str:
     token = secrets.token_urlsafe(32)
@@ -130,7 +145,7 @@ def get_current_user_from_token(token: str) -> Optional[dict]:
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT u.id, u.email, u.full_name, u.is_active, s.expires_at
+        SELECT u.id, u.email, u.full_name, u.is_active, u.two_factor_enabled, s.expires_at
         FROM user_sessions s
         JOIN users u ON s.user_id = u.id
         WHERE s.token = ? AND u.is_active = 1
@@ -148,7 +163,46 @@ def get_current_user_from_token(token: str) -> Optional[dict]:
     except Exception:
         pass
 
-    return {"id": row["id"], "email": row["email"], "full_name": row["full_name"]}
+    return {
+        "id": row["id"],
+        "email": row["email"],
+        "full_name": row["full_name"],
+        "two_factor_enabled": bool(row["two_factor_enabled"])
+    }
+
+def generate_2fa_secret() -> str:
+    return pyotp.random_base32()
+
+def get_2fa_qr_base64(secret: str, email: str) -> tuple[str, str]:
+    totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(name=email, issuer_name="Akıllı Asistan")
+    qr = qrcode.QRCode(box_size=6, border=2)
+    qr.add_data(totp_uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    qr_b64 = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+    return qr_b64, totp_uri
+
+def verify_2fa_code(secret: str, code: str) -> bool:
+    if not secret or not code:
+        return False
+    clean_code = str(code).strip().replace(" ", "").replace("-", "")
+    return bool(pyotp.TOTP(secret).verify(clean_code, valid_window=1))
+
+def enable_2fa_for_user(user_id: int, secret: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET two_factor_secret = ?, two_factor_enabled = 1 WHERE id = ?", (secret, user_id))
+    conn.commit()
+    conn.close()
+
+def disable_2fa_for_user(user_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET two_factor_secret = NULL, two_factor_enabled = 0 WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
 
 def get_token_from_request(request: Request) -> Optional[str]:
     auth_header = request.headers.get("Authorization") or request.headers.get("X-Auth-Token")

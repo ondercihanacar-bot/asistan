@@ -5,6 +5,8 @@ import socket
 import asyncio
 import sqlite3
 import shutil
+import secrets
+import time
 from datetime import datetime, date, timedelta
 from typing import Optional, List
 from contextlib import asynccontextmanager
@@ -23,7 +25,17 @@ from auth import (
     get_current_user,
     get_current_user_optional,
     get_token_from_request,
-    has_any_users
+    has_any_users,
+    get_user_by_id,
+    get_user_by_email,
+    verify_password,
+    pending_2fa_setups,
+    pending_2fa_logins,
+    generate_2fa_secret,
+    get_2fa_qr_base64,
+    verify_2fa_code,
+    enable_2fa_for_user,
+    disable_2fa_for_user
 )
 from database import get_db, init_db, next_cycle_date, DB_PATH
 
@@ -305,6 +317,16 @@ class LoginRequest(BaseModel):
     password: str
     remember_me: Optional[bool] = True
 
+class TwoFactorLoginRequest(BaseModel):
+    temp_token: str
+    code: str
+
+class TwoFactorVerifySetupRequest(BaseModel):
+    code: str
+
+class TwoFactorDisableRequest(BaseModel):
+    code_or_password: str
+
 @app.get("/api/auth/status")
 def auth_status(request: Request):
     user = get_current_user_optional(request)
@@ -327,8 +349,109 @@ def auth_login(payload: LoginRequest):
     success, msg, user = authenticate_user(payload.email, payload.password)
     if not success:
         raise HTTPException(status_code=401, detail=msg)
+    
+    # 2FA (Google Authenticator) Kontrolü
+    if user.get("two_factor_enabled"):
+        temp_ticket = secrets.token_urlsafe(32)
+        pending_2fa_logins[temp_ticket] = {
+            "user_id": user["id"],
+            "remember_me": bool(payload.remember_me),
+            "expires_at": time.time() + 300,
+            "secret": user.get("two_factor_secret")
+        }
+        return {
+            "success": True,
+            "two_factor_required": True,
+            "temp_token": temp_ticket,
+            "message": "Google Authenticator kodunu giriniz."
+        }
+
     token = create_session(user["id"], remember_me=bool(payload.remember_me))
     return {"success": True, "token": token, "user": user, "message": msg}
+
+@app.post("/api/auth/2fa/login-verify")
+def auth_2fa_login_verify(payload: TwoFactorLoginRequest):
+    ticket = pending_2fa_logins.get(payload.temp_token)
+    if not ticket:
+        raise HTTPException(status_code=400, detail="Doğrulama oturumu bulunamadı veya süresi doldu. Lütfen tekrar giriş yapın.")
+    if time.time() > ticket["expires_at"]:
+        pending_2fa_logins.pop(payload.temp_token, None)
+        raise HTTPException(status_code=400, detail="Doğrulama süresi doldu. Lütfen tekrar giriş yapın.")
+    
+    secret = ticket.get("secret")
+    if not secret:
+        user_db = get_user_by_id(ticket["user_id"])
+        secret = user_db.get("two_factor_secret") if user_db else None
+
+    if not secret or not verify_2fa_code(secret, payload.code):
+        raise HTTPException(status_code=400, detail="Hatalı veya süresi dolmuş kod. Lütfen Google Authenticator'daki güncel 6 haneli kodu girin.")
+    
+    user_id = ticket["user_id"]
+    remember_me = ticket["remember_me"]
+    pending_2fa_logins.pop(payload.temp_token, None)
+
+    user = get_user_by_id(user_id)
+    token = create_session(user_id, remember_me=remember_me)
+    return {"success": True, "token": token, "user": user, "message": "Giriş başarılı."}
+
+@app.get("/api/auth/2fa/status")
+def auth_2fa_status(user: dict = Depends(get_current_user)):
+    user_db = get_user_by_id(user["id"])
+    return {
+        "enabled": bool(user_db.get("two_factor_enabled", 0)) if user_db else False
+    }
+
+@app.post("/api/auth/2fa/setup")
+def auth_2fa_setup(user: dict = Depends(get_current_user)):
+    user_db = get_user_by_id(user["id"])
+    if not user_db:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı.")
+    
+    secret = generate_2fa_secret()
+    qr_b64, otpauth_uri = get_2fa_qr_base64(secret, user_db["email"])
+    pending_2fa_setups[user["id"]] = secret
+
+    return {
+        "success": True,
+        "secret": secret,
+        "qr_code": qr_b64,
+        "otpauth_uri": otpauth_uri
+    }
+
+@app.post("/api/auth/2fa/verify-setup")
+def auth_2fa_verify_setup(payload: TwoFactorVerifySetupRequest, user: dict = Depends(get_current_user)):
+    pending_secret = pending_2fa_setups.get(user["id"])
+    if not pending_secret:
+        raise HTTPException(status_code=400, detail="Bekleyen 2FA kurulumu bulunamadı. Lütfen QR kodu yeniden oluşturun.")
+    
+    if not verify_2fa_code(pending_secret, payload.code):
+        raise HTTPException(status_code=400, detail="Hatalı kod! Lütfen Authenticator uygulamanızdaki 6 haneli kodu kontrol edin.")
+    
+    enable_2fa_for_user(user["id"], pending_secret)
+    pending_2fa_setups.pop(user["id"], None)
+    return {"success": True, "message": "Google Authenticator başarıyla etkinleştirildi! Artık her girişte bu kod istenecek."}
+
+@app.post("/api/auth/2fa/disable")
+def auth_2fa_disable(payload: TwoFactorDisableRequest, user: dict = Depends(get_current_user)):
+    user_db = get_user_by_id(user["id"])
+    if not user_db:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı.")
+    
+    val = payload.code_or_password.strip()
+    is_valid_code = False
+    if user_db.get("two_factor_secret"):
+        is_valid_code = verify_2fa_code(user_db["two_factor_secret"], val)
+    
+    user_full = get_user_by_email(user_db["email"])
+    is_valid_pwd = False
+    if user_full and user_full.get("password_hash") and user_full.get("salt"):
+        is_valid_pwd = verify_password(val, user_full["password_hash"], user_full["salt"])
+    
+    if not (is_valid_code or is_valid_pwd):
+        raise HTTPException(status_code=400, detail="Devre dışı bırakmak için geçerli 2FA kodu veya hesap şifrenizi girmelisiniz.")
+    
+    disable_2fa_for_user(user["id"])
+    return {"success": True, "message": "İki adımlı doğrulama devre dışı bırakıldı."}
 
 @app.post("/api/auth/logout")
 def auth_logout(request: Request):
