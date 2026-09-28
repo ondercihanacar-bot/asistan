@@ -300,6 +300,8 @@ async function handleAuthSubmit() {
 // ==========================================
 // 🛡️ GOOGLE AUTHENTICATOR (2FA) YÖNETİMİ
 // ==========================================
+const authFetch = (url, opts) => window.fetch(url, opts);
+
 async function check2FaStatus() {
   const badge = document.getElementById('badge-2fa-status');
   const btnSetup = document.getElementById('btn-2fa-setup');
@@ -307,7 +309,7 @@ async function check2FaStatus() {
   if (!badge) return;
 
   try {
-    const res = await authFetch('/api/auth/2fa/status');
+    const res = await window.fetch('/api/auth/2fa/status');
     if (res.ok) {
       const data = await res.json();
       if (data.enabled) {
@@ -333,9 +335,15 @@ async function check2FaStatus() {
 
 async function open2FaSetupModal() {
   try {
-    const res = await authFetch('/api/auth/2fa/setup', { method: 'POST' });
+    const res = await window.fetch('/api/auth/2fa/setup', { method: 'POST' });
+    if (res.status === 401) {
+      showToast('⚠️ Lütfen önce oturum açınız.');
+      showAuthModal('login');
+      return;
+    }
     if (!res.ok) {
-      showToast('⚠️ 2FA kurulumu başlatılamadı.');
+      const errData = await res.json().catch(() => ({}));
+      showToast('⚠️ ' + (errData.detail || '2FA kurulumu başlatılamadı.'));
       return;
     }
     const data = await res.json();
@@ -351,7 +359,8 @@ async function open2FaSetupModal() {
     }
     openModal('modal-2fa-setup');
   } catch(e) {
-    showToast('⚠️ Sunucu hatası');
+    console.error('2FA setup error:', e);
+    showToast('⚠️ Bağlantı hatası: ' + e.message);
   }
 }
 
@@ -364,7 +373,7 @@ async function confirm2FaSetup() {
   }
 
   try {
-    const res = await authFetch('/api/auth/2fa/verify-setup', {
+    const res = await window.fetch('/api/auth/2fa/verify-setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: code })
@@ -378,7 +387,7 @@ async function confirm2FaSetup() {
       showToast(`❌ ${data.detail || 'Kod doğrulanamadı'}`);
     }
   } catch(e) {
-    showToast('⚠️ Doğrulama sırasında hata oluştu');
+    showToast('⚠️ Doğrulama sırasında hata: ' + e.message);
   }
 }
 
@@ -400,7 +409,7 @@ async function confirm2FaDisable() {
   }
 
   try {
-    const res = await authFetch('/api/auth/2fa/disable', {
+    const res = await window.fetch('/api/auth/2fa/disable', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code_or_password: val })
@@ -414,7 +423,7 @@ async function confirm2FaDisable() {
       showToast(`❌ ${data.detail || 'İşlem başarısız'}`);
     }
   } catch(e) {
-    showToast('⚠️ Sunucu hatası');
+    showToast('⚠️ Hata: ' + e.message);
   }
 }
 
