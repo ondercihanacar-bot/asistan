@@ -382,6 +382,20 @@
       if (path === '/api/ev/charges') {
         return jsonResponse([]);
       }
+
+      // 9. Gemini AI Chat (Bulut sunucusu köprüsü)
+      if (path === '/api/gemini/chat' || path === '/api/gemini/status' || path === '/api/gemini/set-key') {
+        const cloudBase = "https://asistan-cl3h.onrender.com";
+        try {
+          return await realFetch(cloudBase + path, init);
+        } catch(err) {
+          console.warn("AI chat cloud request failed:", err);
+          return jsonResponse({
+            reply: "Bulut sunucusuna bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.",
+            configured: false
+          });
+        }
+      }
     }
 
     // Default fallback to native fetch for images, fonts etc.

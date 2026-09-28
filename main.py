@@ -672,6 +672,58 @@ def set_gemini_key(payload: GeminiApiKeyPayload):
     conn.close()
     return {"success": True, "message": "Gemini API Anahtarı başarıyla kaydedildi!"}
 
+def get_live_weather(query: str = "kocaeli") -> str:
+    """Open-Meteo API üzerinden tamamen ücretsiz, hızlı ve anlık hava durumu verisi çeker"""
+    try:
+        import urllib.request
+        import json
+
+        # Koordinat haritası (Kocaeli / İzmit varsayılan)
+        city_coords = {
+            "kocaeli": (40.76, 29.92, "Kocaeli"),
+            "izmit": (40.76, 29.92, "İzmit"),
+            "istanbul": (41.01, 28.97, "İstanbul"),
+            "ankara": (39.93, 32.85, "Ankara"),
+            "izmir": (38.42, 27.14, "İzmir"),
+            "bursa": (40.18, 29.06, "Bursa"),
+            "sakarya": (40.77, 30.40, "Sakarya"),
+            "antalya": (36.89, 30.70, "Antalya")
+        }
+
+        lat, lon, city_name = 40.76, 29.92, "Kocaeli"
+        q_lower = query.lower()
+        for k, v in city_coords.items():
+            if k in q_lower:
+                lat, lon, city_name = v
+                break
+
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto"
+        req = urllib.request.Request(url, headers={"User-Agent": "AsistanAI/1.0"})
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            curr = data.get("current", {})
+            daily = data.get("daily", {})
+
+            w_codes = {
+                0: "Açık ve güneşli", 1: "Çoğunlukla açık", 2: "Parçalı bulutlu", 3: "Bulutlu",
+                45: "Sisli", 51: "Hafif çisenti", 61: "Hafif yağmurlu", 63: "Orta kuvvette yağmurlu",
+                65: "Kuvvetli sağanak yağmurlu", 71: "Kar yağışlı", 80: "Sağanak yağışlı", 95: "Gök gürültülü fırtına"
+            }
+            desc = w_codes.get(curr.get("weather_code", 0), "Değişken")
+            t_max_list = daily.get("temperature_2m_max", [])
+            t_min_list = daily.get("temperature_2m_min", [])
+            t_max = t_max_list[0] if t_max_list else curr.get("temperature_2m", "--")
+            t_min = t_min_list[0] if t_min_list else curr.get("temperature_2m", "--")
+
+            return (
+                f"CANLI METEOROLOJİ VERİSİ ({city_name}): "
+                f"Şu anki sıcaklık: {curr.get('temperature_2m')}°C, Gökyüzü: {desc}, "
+                f"Havadaki nem oranı: %{curr.get('relative_humidity_2m')}, Rüzgar: {curr.get('wind_speed_10m')} km/s. "
+                f"Bugün beklenen en yüksek sıcaklık: {t_max}°C, en düşük sıcaklık: {t_min}°C."
+            )
+    except Exception as e:
+        return f"Hava durumu servisi geçici olarak yanıt vermedi: {str(e)}"
+
 @app.post("/api/gemini/chat")
 async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_current_user)):
     msg = payload.message.lower().strip()
@@ -682,107 +734,96 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
     v_info = dict(v_row) if v_row else {}
     conn.close()
 
-    # 1. HIZLI YANIT MOTORU (0.01 Saniyede anında yanıt verir)
     tr_months = ["", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
     
-    if any(w in msg for w in ["muayene", "tüvtürk", "tuvturk"]):
-        tuv_date = v_info.get("tuvturk_date")
-        if tuv_date:
-            from datetime import datetime
-            dt = datetime.strptime(tuv_date, "%Y-%m-%d").date()
-            diff = (dt - datetime.now().date()).days
-            month_tr = tr_months[dt.month] if dt.month <= 12 else ""
-            date_spoken = f"{dt.day} {month_tr} {dt.year}"
-            text = f"KIA EV6 aracınızın TÜVTÜRK muayene tarihi {date_spoken}. Muayenenize yaklaşık {diff} gün var."
-            return {"reply": text, "configured": True}
-        else:
-            return {"reply": "Araç profilinizde henüz muayene tarihi tanımlanmamış. Araç menüsünden ekleyebilirsiniz.", "configured": True}
+    # Bilgi alma, özetleme veya genel soru olup olmadığını anla
+    is_general_query = any(w in msg for w in [
+        "nasıl", "neden", "ne zaman", "özet", "özetle", "bilgi", "nedir", "kimdir", 
+        "tarih", "açıkla", "tavsiye", "öneri", "tarif", "öğrenmek", "hava", "yağmur", 
+        "sıcaklık", "fırtına", "kar", "derece"
+    ])
 
-    if any(w in msg for w in ["sigorta", "trafik sigortası"]):
-        ins_date = v_info.get("insurance_date")
-        if ins_date:
-            try:
+    # Sadece doğrudan kısa sistem durumu soruluyorsa hızlı yanıt ver, aksi halde zeki yapay zekaya devret
+    if not is_general_query:
+        if any(w in msg for w in ["muayene", "tüvtürk", "tuvturk"]):
+            tuv_date = v_info.get("tuvturk_date")
+            if tuv_date:
                 from datetime import datetime
-                dt = datetime.strptime(ins_date, "%Y-%m-%d").date()
-                date_spoken = f"{dt.day} {tr_months[dt.month]} {dt.year}"
-            except Exception:
-                date_spoken = ins_date
-            return {"reply": f"Aracınızın Trafik Sigortası bitiş tarihi {date_spoken}.", "configured": True}
+                dt = datetime.strptime(tuv_date, "%Y-%m-%d").date()
+                diff = (dt - datetime.now().date()).days
+                month_tr = tr_months[dt.month] if dt.month <= 12 else ""
+                date_spoken = f"{dt.day} {month_tr} {dt.year}"
+                text = f"KIA EV6 aracınızın TÜVTÜRK muayene tarihi {date_spoken}. Muayenenize yaklaşık {diff} gün var."
+                return {"reply": text, "configured": True}
+            else:
+                return {"reply": "Araç profilinizde henüz muayene tarihi tanımlanmamış. Araç menüsünden ekleyebilirsiniz.", "configured": True}
 
-    if "kasko" in msg:
-        kasko_date = v_info.get("kasko_date")
-        if kasko_date:
-            try:
-                from datetime import datetime
-                dt = datetime.strptime(kasko_date, "%Y-%m-%d").date()
-                date_spoken = f"{dt.day} {tr_months[dt.month]} {dt.year}"
-            except Exception:
-                date_spoken = kasko_date
-            return {"reply": f"Aracınızın Kasko poliçesi bitiş tarihi {date_spoken}.", "configured": True}
+        if any(w in msg for w in ["sigorta", "trafik sigortası"]):
+            ins_date = v_info.get("insurance_date")
+            if ins_date:
+                try:
+                    from datetime import datetime
+                    dt = datetime.strptime(ins_date, "%Y-%m-%d").date()
+                    date_spoken = f"{dt.day} {tr_months[dt.month]} {dt.year}"
+                except Exception:
+                    date_spoken = ins_date
+                return {"reply": f"Aracınızın Trafik Sigortası bitiş tarihi {date_spoken}.", "configured": True}
 
-    if any(w in msg for w in ["brifing", "günün özeti", "durum raporu", "rapor ver"]):
-        briefing_data = get_daily_briefing(user=user)
-        return {"reply": briefing_data["briefing"], "configured": True}
+        if "kasko" in msg:
+            kasko_date = v_info.get("kasko_date")
+            if kasko_date:
+                try:
+                    from datetime import datetime
+                    dt = datetime.strptime(kasko_date, "%Y-%m-%d").date()
+                    date_spoken = f"{dt.day} {tr_months[dt.month]} {dt.year}"
+                except Exception:
+                    date_spoken = kasko_date
+                return {"reply": f"Aracınızın Kasko poliçesi bitiş tarihi {date_spoken}.", "configured": True}
 
-    if any(w in msg for w in ["optimus prime", "optimus", "otobot"]):
-        return {"reply": "Ben Optimus Prime. Tüm otobotlara ve yol arkadaşıma sesleniyorum: Sistemler aktif, görev için hazırım.", "configured": True}
+        if any(w in msg for w in ["brifing", "günün özeti", "durum raporu", "rapor ver"]):
+            briefing_data = get_daily_briefing(user=user)
+            return {"reply": briefing_data["briefing"], "configured": True}
 
-    if any(w in msg for w in ["araba", "aracım", "araç", "model"]):
-        return {"reply": f"Aracınız {v_info.get('brand_model', 'KIA EV6')}, plakanız {v_info.get('plate', '41 ACR 610')} ve güncel kilometreniz {v_info.get('current_km', 30800)} km'dir.", "configured": True}
+        if any(w in msg for w in ["optimus prime", "optimus", "otobot"]):
+            return {"reply": "Ben Optimus Prime. Tüm otobotlara ve yol arkadaşıma sesleniyorum: Sistemler aktif, görev için hazırım.", "configured": True}
 
-    # Fatura / Ödeme hızlı yanıt motoru
-    if any(w in msg for w in ["fatura", "ödeme", "borç", "zamanı gelen", "vadesi", "yaklaşan"]):
-        conn = get_db()
-        cursor = conn.cursor()
-        pending_bills = cursor.execute("SELECT title, amount, due_date FROM payments WHERE status = 'pending' AND user_id = ? ORDER BY due_date ASC LIMIT 3", (user["id"],)).fetchall()
-        conn.close()
-        
-        if pending_bills:
-            first_bill = pending_bills[0]
-            try:
-                from datetime import datetime
-                dt = datetime.strptime(first_bill["due_date"], "%Y-%m-%d").date()
-                days_left = (dt - datetime.now().date()).days
-                date_txt = f"{dt.day} {tr_months[dt.month]}"
-                if days_left == 0:
-                    time_txt = "bugün son günüdür"
-                elif days_left < 0:
-                    time_txt = f"{abs(days_left)} gün önce gecikmiştir"
-                else:
-                    time_txt = f"{days_left} gün kaldı"
-            except Exception:
-                time_txt = first_bill["due_date"]
-                date_txt = first_bill["due_date"]
-
-            reply_str = f"En yakın ödemeniz {date_txt} tarihli {first_bill['title']}, tutarı {int(first_bill['amount'])} TL ve {time_txt}."
-            if len(pending_bills) > 1:
-                reply_str += f" Ayrıca {pending_bills[1]['title']} için {int(pending_bills[1]['amount'])} TL ödemeniz bulunuyor."
-            return {"reply": reply_str, "configured": True}
-        else:
-            return {"reply": "Harika haber! Şu an bekleyen veya zamanı gelen herhangi bir ödemeniz ya da faturanız bulunmuyor.", "configured": True}
+        if any(w in msg for w in ["araba", "aracım", "araç", "model"]):
+            return {"reply": f"Aracınız {v_info.get('brand_model', 'KIA EV6')}, plakanız {v_info.get('plate', '41 ACR 610')} ve güncel kilometreniz {v_info.get('current_km', 30800)} km'dir.", "configured": True}
 
     conn = get_db()
     cursor = conn.cursor()
     row = cursor.execute("SELECT value FROM admin_settings WHERE key = 'gemini_api_key'").fetchone()
     api_key = row["value"] if row else os.environ.get("GEMINI_API_KEY", "")
 
-    if not api_key:
-        return {
-            "reply": "Lütfen önce Ayarlar menüsünden Gemini API anahtarınızı girin.",
-            "configured": False
-        }
-
     # Araç Bilgilerini Net Çek
-    v_row = cursor.execute("SELECT * FROM vehicle_profile ORDER BY id DESC LIMIT 1").fetchone()
+    v_row = cursor.execute("SELECT * FROM vehicle_profile WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user["id"],)).fetchone()
     v_info = dict(v_row) if v_row else {}
     
     # Bekleyen & Ödenen Özetleri
-    payments = [f"{r['title']}: {r['amount']} TL (Son Ödeme: {r['due_date']}, Durum: {r['status']})" for r in cursor.execute("SELECT title, amount, due_date, status FROM payments").fetchall()]
+    payments = [f"{r['title']}: {r['amount']} TL (Son Ödeme: {r['due_date']}, Durum: {r['status']})" for r in cursor.execute("SELECT title, amount, due_date, status FROM payments WHERE user_id = ?", (user["id"],)).fetchall()]
     conn.close()
+
+    # Canlı Hava Durumu Enjeksiyonu
+    is_weather_question = any(w in msg for w in ["hava", "yağmur", "sıcaklık", "kar", "derece", "rüzgar", "fırtına", "güneş"])
+    weather_section = ""
+    if is_weather_question:
+        weather_section = "\n" + get_live_weather(msg) + "\n"
+    elif "kocaeli" in msg:
+        weather_section = "\n" + get_live_weather("kocaeli") + "\n"
+
+    # API anahtarı girilmemişse bile hava durumu sorulmuşsa canlı yanıt verelim
+    if not api_key:
+        if is_weather_question:
+            live_w = get_live_weather(msg)
+            return {"reply": f"☀️ {live_w}\n\nDaha kapsamlı sohbet ve genel sorular için Ayarlar menüsünden Gemini API anahtarınızı tanımlayabilirsiniz.", "configured": False}
+        return {
+            "reply": "Lütfen önce Ayarlar menüsünden ücretsiz Gemini API anahtarınızı girin.",
+            "configured": False
+        }
 
     # Model için net, şeffaf ve kesin araç bilgileri
     vehicle_summary = f"""
-    KULLANICININ ARAC BİLGİLERİ:
+    KULLANICININ ARAÇ BİLGİLERİ:
     - Marka ve Model: {v_info.get('brand_model', 'KIA EV6')}
     - Plaka: {v_info.get('plate', 'Belirtilmedi')}
     - Model Yılı: {v_info.get('year', '2024')}
@@ -794,35 +835,55 @@ async def gemini_chat(payload: GeminiChatPayload, user: dict = Depends(get_curre
     """
 
     system_instruction = f"""
-    Sen kullanıcının kişisel akıllı asistanı 'ASİSTAN'sın.
-    Bugünün Tarihi: {datetime.now().strftime('%Y-%m-%d')}
+    Sen kullanıcının kişisel, çok zeki, yardımsever ve samimi yapay zeka asistanı 'ASİSTAN'sın.
+    Bugünün Tarihi ve Saati: {datetime.now().strftime('%d %B %Y, %H:%M')}
+    Kullanıcının Şehri/Konumu: Kocaeli / Türkiye
 
     {vehicle_summary}
 
     ÖDEMELER & FATURALAR:
-    {', '.join(payments[:15])}
+    {', '.join(payments[:15]) if payments else 'Kayıtlı ödeme bulunmuyor.'}
 
-    KURALLAR:
-    1. Kullanıcı araç muayenesi, kasko, sigorta veya faturaları sorduğunda yukarıdaki gerçek verileri kullanarak KESİN, NET VE DOĞRUDAN cevap ver.
-    2. Cevapların EN FAZLA 1 veya 2 cümle olsun. Sohbet havasında, canlı ve çok samimi konuş.
-    3. Sesli okumaya uygun, akıcı Türkçe cümleler kur.
+    {weather_section}
+
+    YETENEKLERİN VE YANIT KURALLARIN:
+    1. HER TÜRLÜ SORUYA KAPSAMLI CEVAP: Kullanıcı sana dilediği her konuda (genel kültür, bilim, teknoloji, tarih, gündem, sağlık, eğitim, felsefe, matematik, yemek tarifleri vb.) soru sorabilir. Her soruya bilgili, doğru ve anlaşılır cevaplar ver.
+    2. ÖZETLEME VE DERLİ TOPLU BİLGİ: Kullanıcı bir konu hakkında bilgi almak istediğinde ya da özet istediğinde, gereksiz laf kalabalığı yapmadan, konunun temel ve önemli noktalarını derli toplu, akıcı ve bilgilendirici bir özet olarak sun.
+    3. CANLI HAVA DURUMU: Kullanıcı hava durumu sorduğunda (özellikle Kocaeli veya belirttiği şehir için), yukarıda sağlanan güncel canlı meteoroloji verilerini temel alarak dostane, günlük hayata uygun ve pratik tavsiyeli (örn. şemsiye, giyim) doğal bir dille aktar.
+    4. KİŞİSEL VERİ VE FİNANS: Kullanıcı araç muayenesi, kasko, sigorta veya bekleyen fatura/ödemelerini sorduğunda yukarıda verilen gerçek sistem kayıtlarına dayanarak kesin ve net bilgi ver.
+    5. ÜSLUP VE DİL: Samimi, saygılı, enerjik ve konuşma diline uygun, pürüzsüz bir Türkçe kullan.
     """
+
+    MODELS_TO_TRY = [
+        'gemini-flash-lite-latest',
+        'gemini-3.1-flash-lite',
+        'gemini-3.5-flash-lite',
+        'gemini-flash-latest',
+        'gemini-3.8-flash'
+    ]
 
     try:
         client = get_gemini_client(api_key)
-        
-        # En güncel ve hızlı Google AI stüdyo modeli
-        response = client.models.generate_content(
-            model='gemini-3.8-flash',
-            contents=payload.message,
-            config={
-                'system_instruction': system_instruction,
-                'max_output_tokens': 100,
-                'temperature': 0.3 # Kesin ve net bilgi vermesi için düşük sıcaklık
-            }
-        )
-        reply_text = response.text if (response and response.text) else "Sizi tam anlayamadım, tekrar söyler misiniz?"
-        return {"reply": reply_text.strip(), "configured": True}
+        last_err = None
+
+        for model_name in MODELS_TO_TRY:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=payload.message,
+                    config={
+                        'system_instruction': system_instruction,
+                        'max_output_tokens': 800,
+                        'temperature': 0.7
+                    }
+                )
+                if response and response.text:
+                    return {"reply": response.text.strip(), "configured": True}
+            except Exception as m_err:
+                last_err = m_err
+                continue
+
+        return {"reply": f"Yapay zeka yanıt oluşturamadı: {str(last_err)}", "configured": True}
     except Exception as e:
         return {"reply": f"Hata oluştu: {str(e)}", "configured": True}
 
