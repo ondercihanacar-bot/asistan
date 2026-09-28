@@ -358,14 +358,14 @@
         return turkishVoices[0];
       }
 
-      // Mazlum Kiper Stüdyo Nöral Ses Motoru (Gerçek, Tok, Tane Tane ve Eksiksiz)
+      // Optimus Prime / Mazlum Kiper Stüdyo Nöral Ses Motoru (Tok, Derin, Robotik Rezonanslı)
       window._currentAudioPlayer = null;
       window._activeSpeechUtterances = [];
 
       async function speakAssistantText(fullText) {
         if (!fullText) return;
         
-        // 1. Önceki konuşmaları anında durdur
+        // 1. Önceki konuşmaları ve sesleri anında durdur
         if (window._currentAudioPlayer) {
           try {
             window._currentAudioPlayer.pause();
@@ -423,18 +423,18 @@
                 }
                 const source = audioCtx.createMediaElementSource(audio);
                 
-                // 1. Derin Bas Güçlendirici (Sub-bass booster)
+                // 1. Derin Bas Güçlendirici (Sub-bass booster for commander tone)
                 const bassFilter = audioCtx.createBiquadFilter();
                 bassFilter.type = 'lowshelf';
-                bassFilter.frequency.value = 220;
-                bassFilter.gain.value = 6.0;
+                bassFilter.frequency.value = 180;
+                bassFilter.gain.value = 8.5;
 
                 // 2. Netlik ve Metalik Tını Filtresi (Presence EQ)
                 const midFilter = audioCtx.createBiquadFilter();
                 midFilter.type = 'peaking';
-                midFilter.frequency.value = 2800;
-                midFilter.Q.value = 1.2;
-                midFilter.gain.value = 2.0;
+                midFilter.frequency.value = 2400;
+                midFilter.Q.value = 1.4;
+                midFilter.gain.value = 3.0;
 
                 source.connect(bassFilter);
                 bassFilter.connect(midFilter);
@@ -455,7 +455,7 @@
           console.warn('Nöral ses sunucusu yanıt vermedi, yerel ses motoru devreye alınıyor:', e);
         }
 
-        // 4. Yedek (Fallback): Web Speech API ile Mazlum Kiper profilini seslendir
+        // 4. Yedek (Fallback): Web Speech API ile Optimus Prime Tok Bariton Ses Profili
         if ('speechSynthesis' in window) {
           try {
             const sentences = cleanedText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 0);
@@ -465,8 +465,8 @@
             sentences.forEach((sentence, idx) => {
               const utter = new SpeechSynthesisUtterance(sentence);
               utter.lang = 'tr-TR';
-              utter.rate = 0.88;
-              utter.pitch = 0.80;
+              utter.rate = 0.85;
+              utter.pitch = 0.70;
               if (bestVoice) utter.voice = bestVoice;
               window._activeSpeechUtterances.push(utter);
               if (idx === sentences.length - 1) {
