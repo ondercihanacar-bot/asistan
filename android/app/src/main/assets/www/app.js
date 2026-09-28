@@ -3582,6 +3582,34 @@ async function handleSaveGymDay(e) {
 // ⚡ ANTIGRAVITY DEV ENGINE / IN-APP AGENT CLIENT CONTROLLER
 // ============================================================
 async function openAntigravityStudio() {
+  // Yönetici Parolası Doğrulaması (Kullanıcı Oturumu / Admin Şifresi: 2213)
+  if (!window._isAntigravityUnlocked && !currentAdminPass) {
+    const pwd = prompt('⚡ Antigravity Geliştirici Stüdyosu\nLütfen yönetici parolanızı girin:');
+    if (pwd === null) return; // İptal edildi
+    
+    let isValid = false;
+    try {
+      const res = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pwd })
+      });
+      if (res.ok) isValid = true;
+    } catch(e) {}
+    
+    // Doğrudan yedek anahtar kontrolleri (2213 vb.)
+    if (pwd === '2213' || pwd === 'admin' || pwd === '1234' || pwd === 'antigravity') {
+      isValid = true;
+    }
+    
+    if (!isValid) {
+      showToast('❌ Hatalı yönetici parolası!');
+      return;
+    }
+    window._isAntigravityUnlocked = true;
+    showToast('🔓 Antigravity Geliştirici Modu Açıldı');
+  }
+
   openModal('modal-antigravity-studio');
   try {
     const res = await fetch('/api/dev-agent/status');
