@@ -1424,21 +1424,27 @@ body {
 
 .mobile-menu-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .mobile-menu-card {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  padding: 12px 10px;
+  padding: 10px 8px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-tap-highlight-color: transparent;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .mobile-menu-card:active {
@@ -1663,7 +1669,13 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     touch-action: pan-y;
   }
 
-  #section-dashboard {
+  #section-dashboard,
+  #section-garage,
+  #section-contracts,
+  #section-tasks,
+  #section-analytics,
+  #section-history,
+  #section-settings {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -2034,23 +2046,132 @@ button:active, .btn:active, .bnav-item:active, .tab-btn:active {
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.85) !important;
   }
 
-  /* Android Native Bottom Sheet Modal System */
+  /* Android Native Bottom Sheet Modal System (Telefon Ekranına %100 Oturan, Yatay Kaymayan Modallar) */
   .modal-overlay {
     align-items: flex-end !important;
     padding: 0 !important;
     z-index: 1100 !important;
-  }
-  .modal-box {
     width: 100% !important;
-    max-width: 100% !important;
-    border-radius: 24px 24px 0 0 !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    touch-action: pan-y;
+  }
+  .modal-box,
+  .mobile-bottom-sheet {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    border-radius: 22px 22px 0 0 !important;
     border-bottom: none !important;
     border-left: none !important;
     border-right: none !important;
-    max-height: 90vh !important;
+    max-height: 86vh !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     animation: androidSheetSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.75) !important;
+    touch-action: pan-y;
+  }
+  .modal-header {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    padding: 12px 14px 6px 14px !important;
+  }
+  .modal-body {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    padding: 8px 12px 18px 12px !important;
+  }
+  .bottom-sheet-handle {
+    width: 38px !important;
+    height: 4px !important;
+    border-radius: 2px !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+    margin: 6px auto 10px auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Android / Mobile "Tüm Modüller & Menü" Izgara ve Kartları */
+  .mobile-menu-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    touch-action: pan-y;
+  }
+  .mobile-menu-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    padding: 9px 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+    touch-action: pan-y;
+  }
+  .mobile-menu-card:active {
+    transform: scale(0.97) !important;
+    background: rgba(56, 189, 248, 0.12) !important;
+    border-color: rgba(56, 189, 248, 0.4) !important;
+  }
+  .mmenu-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 9px !important;
+    font-size: 1.15rem !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .mmenu-info {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+    overflow: hidden !important;
+    text-align: left !important;
+  }
+  .mmenu-title {
+    font-size: 0.77rem !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .mmenu-sub {
+    font-size: 0.62rem !important;
+    color: #94a3b8 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.1 !important;
+    margin-top: 1px !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
   @keyframes androidSheetSlide {
     from { transform: translateY(100%); opacity: 0.8; }
