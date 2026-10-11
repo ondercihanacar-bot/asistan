@@ -1,5 +1,5 @@
 Option Explicit
-Dim WshShell, fso, strPath, i, cmd, chromeProxy, chromeExe, pwaAppId
+Dim WshShell, fso, strPath, i, cmd, chromeExe
 
 Set WshShell = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
@@ -12,7 +12,7 @@ Function IsServerOnline()
     Dim http
     Set http = CreateObject("MSXML2.ServerXMLHTTP.6.0")
     http.Open "GET", "http://127.0.0.1:8000/api/auth/status", False
-    http.setTimeouts 600, 600, 600, 600
+    http.setTimeouts 800, 800, 800, 800
     http.Send
     If Err.Number = 0 Then
         If http.Status = 200 Then
@@ -36,14 +36,16 @@ If Not IsServerOnline() Then
     Next
 End If
 
-' 2. Uygulama arayuzunu ac (PWA veya Chrome App modu)
-chromeProxy = "C:\Program Files\Google\Chrome\Application\chrome_proxy.exe"
+' 2. Chrome Uygulama Modunda veya varsayilan tarayicida ac
 chromeExe = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-pwaAppId = "fkjkjjjmlkjnchecijnlhmphnfkpohfc"
+If Not fso.FileExists(chromeExe) Then
+    chromeExe = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+End If
+If Not fso.FileExists(chromeExe) Then
+    chromeExe = WshShell.ExpandEnvironmentStrings("%LocalAppData%\Google\Chrome\Application\chrome.exe")
+End If
 
-If fso.FileExists(chromeProxy) Then
-    WshShell.Run Chr(34) & chromeProxy & Chr(34) & " --profile-directory=Default --app-id=" & pwaAppId, 1, False
-ElseIf fso.FileExists(chromeExe) Then
+If fso.FileExists(chromeExe) Then
     WshShell.Run Chr(34) & chromeExe & Chr(34) & " --app=http://localhost:8000", 1, False
 Else
     WshShell.Run "http://localhost:8000", 1, False
