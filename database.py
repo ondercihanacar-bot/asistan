@@ -309,15 +309,23 @@ def next_cycle_date(current_date_str: str, repeat_type: str) -> str:
     except Exception:
         cur_date = date.today()
 
+    today = date.today()
+
     if repeat_type == "monthly":
-        new_date = cur_date + relativedelta(months=1)
+        step = relativedelta(months=1)
     elif repeat_type == "yearly":
-        new_date = cur_date + relativedelta(years=1)
+        step = relativedelta(years=1)
     elif repeat_type == "2_yearly":
-        new_date = cur_date + relativedelta(years=2)
+        step = relativedelta(years=2)
     elif repeat_type == "6_monthly":
-        new_date = cur_date + relativedelta(months=6)
+        step = relativedelta(months=6)
     else:
-        new_date = cur_date
+        return cur_date.strftime("%Y-%m-%d")
+
+    new_date = cur_date + step
+    # Eğer eski/gecikmiş bir ödemeyse ve 1 adım eklemek hala geçmişte kalıyorsa bir sonraki döngüye ilerlet
+    while new_date < today:
+        new_date += step
 
     return new_date.strftime("%Y-%m-%d")
+

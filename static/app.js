@@ -1322,8 +1322,9 @@ function renderPayments() {
   if (currentCategory === 'all') {
     filtered = filtered.filter(p => p.status !== 'paid' && p.days_remaining <= 7);
   } else {
-    // Özel bir kategoriye (Faturalar, Abonelikler vb.) tıklandığında hem ödenenler hem tüm bekleyenler listelenir.
-    filtered = filtered.filter(p => p.category === currentCategory);
+    // Özel bir kategoriye (Faturalar, Abonelikler, Kartlar vb.) tıklandığında sadece bekleyen/ödenmemişler gösterilir.
+    // Ödenenler 'Ödeme Geçmişi' sekmesinde arşivde tutulur.
+    filtered = filtered.filter(p => p.category === currentCategory && p.status !== 'paid');
   }
 
   if (filtered.length === 0) {
@@ -1551,14 +1552,14 @@ async function markPaid(id, title, amount) {
     if (data.success) {
       showToast(`🎉 ${data.message}`);
       
-      // Eğer ana ekrandaysak (all), mavi neon yandıktan 600ms sonra yumuşakça kaybolsun
-      if (currentCategory === 'all' && cardEl) {
+      // Mavi neon yandıktan sonra kart ekrandan yumuşakça kaybolsun
+      if (cardEl) {
         setTimeout(() => {
-          cardEl.style.transition = 'all 0.5s ease';
+          cardEl.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
           cardEl.style.opacity = '0';
-          cardEl.style.transform = 'scale(0.95)';
-          setTimeout(() => loadData(false), 500);
-        }, 600);
+          cardEl.style.transform = 'scale(0.9) translateY(-10px)';
+          setTimeout(() => loadData(false), 450);
+        }, 500);
       } else {
         loadData(false);
       }
@@ -1927,9 +1928,9 @@ function switchTab(tabName) {
   const secSettings = document.getElementById('section-settings');
   if (secSettings) secSettings.style.display = (tabName === 'settings') ? 'block' : 'none';
 
-  // Sekme butonlarını güncelle (Sağlık sekmesi dahil)
+  // Sekme butonlarını güncelle (Sağlık ve Geçmiş sekmesi dahil)
   document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.classList.toggle('active', (tabName === 'health' && btn.dataset.category === 'saglik') || (tabName === 'dashboard' && btn.dataset.category === currentCategory));
+    btn.classList.toggle('active', (tabName === 'health' && btn.dataset.category === 'saglik') || (tabName === 'history' && btn.dataset.category === 'history') || (tabName === 'dashboard' && btn.dataset.category === currentCategory));
   });
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1968,6 +1969,10 @@ function switchTab(tabName) {
 function filterCategory(cat) {
   if (cat === 'saglik') {
     switchTab('health');
+    return;
+  }
+  if (cat === 'history') {
+    switchTab('history');
     return;
   }
   // Eğer başka bir sekmedeyken kategoriye tıklanırsa dashboard'a dön

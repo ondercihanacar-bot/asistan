@@ -814,11 +814,21 @@
         <span class="desktop-only-btn-label">Günün Brifingi</span>
       </button>
 
-      <button class="top-nav-btn" id="btn-chat-history" onclick="toggleAiChatModal()" title="Geçmiş Yazışmaları Gör">
+      <button class="top-nav-btn" id="btn-payment-history" onclick="switchTab('history')" title="Ödenen Faturalar ve Ödeme Geçmişi">
+        <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="14 2 14 8 20 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="16" y1="13" x2="8" y2="13" stroke-width="2" stroke-linecap="round"/>
+          <line x1="16" y1="17" x2="8" y2="17" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="desktop-only-btn-label">Ödeme Geçmişi</span>
+      </button>
+
+      <button class="top-nav-btn" id="btn-chat-history" onclick="toggleAiChatModal()" title="Optimus Asistan ile Sohbet">
         <svg class="top-nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="desktop-only-btn-label">Geçmiş</span>
+        <span class="desktop-only-btn-label">Sohbet</span>
       </button>
 
       <button class="top-nav-btn" id="btn-clear-chat-history" onclick="if(confirm('Geçmiş yazışmaları temizlemek istediğinize emin misiniz?')){document.getElementById('ai-chat-messages').innerHTML=''; showToast('🧹 Geçmiş yazışmalar temizlendi.');}" title="Geçmiş Yazışmaları Temizle" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1);">
@@ -969,6 +979,15 @@
             <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span>Sağlık &amp; Spor</span>
+        </button>
+        <button class="tab-btn" data-category="history" onclick="switchTab('history')" title="Ödenmiş Faturalar ve Arşiv">
+          <svg class="tab-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="14 2 14 8 20 8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="16" y1="13" x2="8" y2="13" stroke-width="2" stroke-linecap="round"/>
+            <line x1="16" y1="17" x2="8" y2="17" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>📜 Ödenenler (Geçmiş)</span>
         </button>
       </div>
 
@@ -1356,7 +1375,17 @@
 
     <!-- SECTION: Payment History -->
     <section id="section-history" class="history-section">
-      <h2 style="font-size: 1.3rem; margin-bottom: 16px; font-weight: 800;">📜 Ödenen Faturalar & Ödeme Geçmişi</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h2 style="font-size: 1.35rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+            <span>📜</span> <span>Ödenen Faturalar & Ödeme Geçmişi</span>
+          </h2>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 4px 0 0 0;">Daha önce "Ödendi" olarak işaretlediğiniz tüm faturaların kayıt ve dekont arşivi.</p>
+        </div>
+        <button class="btn btn-outline" onclick="switchTab('dashboard')" style="font-size: 0.85rem; padding: 7px 16px; gap: 6px; display: inline-flex; align-items: center;">
+          <span>⬅️</span> <span>Ana Ekrana Dön</span>
+        </button>
+      </div>
       <div class="history-card">
         <table class="history-table">
           <thead>
@@ -2359,7 +2388,7 @@
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="/app.js?v=345"></script>
+  <script src="/app.js?v=346"></script>
 
   <div id="ai-chat-modal" style="display: none; position: fixed; bottom: 150px; right: 20px; width: 380px; max-width: calc(100vw - 40px); height: 500px; max-height: calc(100vh - 180px); background: #0f172a; border: 1.5px solid #38bdf8; border-radius: 18px; box-shadow: 0 10px 35px rgba(0,0,0,0.8), 0 0 25px rgba(56, 189, 248, 0.35); z-index: 1001; flex-direction: column; overflow: hidden;">
     <!-- Chat Header -->

@@ -623,9 +623,9 @@ async def mark_payment_paid(item_id: int, payload: PayAction = None):
     
     # 1. Log to History
     cursor.execute("""
-    INSERT INTO payment_history (payment_id, title, category, paid_amount, paid_date, cycle_date, receipt_note, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (item["id"], item["title"], item["category"], paid_amt, today_str, item["due_date"], note, now_str))
+    INSERT INTO payment_history (payment_id, title, category, paid_amount, paid_date, cycle_date, receipt_note, created_at, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (item["id"], item["title"], item["category"], paid_amt, today_str, item["due_date"], note, now_str, item.get("user_id", 1)))
     
     # 2. Handle Recurrence
     repeat = item.get("repeat_type", "none")
