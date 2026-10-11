@@ -2,10 +2,13 @@ import sys
 import os
 import time
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(BASE_DIR)
+
 if sys.stdout is None:
-    sys.stdout = open("app_stdout.log", "a", encoding="utf-8", buffering=1)
+    sys.stdout = open(os.path.join(BASE_DIR, "app_stdout.log"), "a", encoding="utf-8", buffering=1)
 if sys.stderr is None:
-    sys.stderr = open("app_stderr.log", "a", encoding="utf-8", buffering=1)
+    sys.stderr = open(os.path.join(BASE_DIR, "app_stderr.log"), "a", encoding="utf-8", buffering=1)
 
 import uvicorn
 
